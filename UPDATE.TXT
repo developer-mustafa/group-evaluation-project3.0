@@ -1,0 +1,17 @@
+EvaluationOptions
+PUBLIC_PAGES
+PRIVET_PAGES
+policy_Sections
+
+শীর্ষ শিক্ষার্থী র‌্যাঙ্কিং: (laptop screen 2 column mobile screen 1 column) দেখাতে হবে।
+গ্রুপ সদস্য ব্যবস্থাপনা বাদ দিতে হবে
+
+
+টাস্ক পরিসংখ্যান মান উন্নয়ন করতে হবে
+মূল্যায়ন অবস্থা মান উন্নয়ন করতে হবে
+
+Mustafa Rahman (sir)
+Software Engineer, Turkey
+(ডিজাইন চ্যান্জ করতে হবে)
+
+টোস্ট ম্যাসেজের ডিজাইন চ্যান্জ করতে হবে।
