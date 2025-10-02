@@ -1,4 +1,4 @@
-/* style.css - COMPLETE FIXED VERSION FOR SMART GROUP EVALUATOR */
+/* style2.css - COMPLETE FIXED VERSION FOR SMART GROUP EVALUATOR */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
@@ -1077,6 +1077,8 @@ header {
   padding: var(--space-6);
   margin-bottom: var(--space-4);
   background: var(--card);
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .policy-header {
@@ -1098,6 +1100,14 @@ header {
   margin-top: var(--space-4);
   padding-top: var(--space-4);
   border-top: 1px solid var(--border);
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.policy-content.open {
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .policy-content.hidden {
@@ -1405,20 +1415,60 @@ textarea:focus-visible {
 /* ===== TOAST NOTIFICATIONS ===== */
 .toast {
   position: fixed;
-  top: var(--space-6);
-  right: var(--space-6);
-  padding: var(--space-4) var(--space-6);
-  border-radius: var(--radius-xl);
-  color: white;
-  font-weight: var(--font-weight-semibold);
-  box-shadow: var(--shadow-2xl);
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  color: #fff;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
   z-index: 1001;
-  animation: toastSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  max-width: 400px;
-  display: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 380px;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
 }
+
+.toast.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.toast.success {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.toast.error {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+
+.toast.warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.toast.info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.toast .close-btn {
+  margin-left: auto;
+  cursor: pointer;
+  font-size: 1.1rem;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.toast .close-btn:hover {
+  opacity: 1;
+}
+
 
 .toast:not(.hidden) {
   display: flex;
@@ -1453,6 +1503,15 @@ textarea:focus-visible {
     transform: translateX(100%);
     opacity: 0;
   }
+}
+
+/* ===== PRIVATE TAB STYLES ===== */
+.private-tab {
+  display: none;
+}
+
+.user-logged-in .private-tab {
+  display: flex;
 }
 
 /* ===== HIDDEN UTILITY ===== */
@@ -1527,4 +1586,64 @@ textarea:focus-visible {
     box-shadow: none;
     border: 1px solid #000;
   }
+}
+
+/* ===== STUDENT CARD BACKGROUNDS ===== */
+.student-card-bg-1 {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.student-card-bg-2 {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.student-card-bg-3 {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.student-card-bg-4 {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+}
+
+.student-card-bg-5 {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+}
+
+.student-card-bg-6 {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  color: #333;
+}
+
+.student-card-bg-7 {
+  background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+  color: #333;
+}
+
+.student-card-bg-8 {
+  background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+  color: white;
+}
+
+.dark .student-card-bg-6,
+.dark .student-card-bg-7 {
+  color: white;
+}
+
+/* শেষ */
+
+/* style2.css - এই classes যোগ করুন */
+.disabled-nav {
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+}
+
+.nav-btn.disabled-nav:hover {
+  background-color: transparent !important;
+  color: inherit !important;
 }

@@ -1,4 +1,4 @@
-<!-- index.html -->
+<!-- index2.html -->
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -36,7 +36,10 @@
         };
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="style.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+    <link rel="stylesheet" href="style2.css">
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -44,26 +47,28 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-darkBg text-gray-800 dark:text-gray-200 transition-colors duration-300">
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-4 right-4 z-50 hidden">
-        <div class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2">
-            <i class="fas fa-check-circle"></i>
-            <span id="toastMessage">Operation successful</span>
-        </div>
+ <!-- Toast Notification -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden transition-all duration-500 transform translate-y-4 opacity-0">
+    <div id="toastBox" class="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center space-x-3 min-w-[280px] max-w-[380px]">
+        <i id="toastIcon" class="fas fa-check-circle text-xl"></i>
+        <span id="toastMessage" class="font-medium">Operation successful</span>
+        <button onclick="hideToast()" class="ml-auto text-white hover:text-gray-200 focus:outline-none">✖</button>
     </div>
+  </div>
+  
 
     <!-- Authentication Modal -->
     <div id="authModal" class="modal">
         <div class="modal-content">
             <h3 class="text-lg font-semibold mb-4 text-center">লগইন করুন</h3>
-            <div id="loginForm">
+            <form id="loginForm" onsubmit="return false">
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">ইমেইল</label>
-                    <input id="loginEmail" type="email" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="আপনার ইমেইল লিখুন" />
+                    <input id="loginEmail" type="email" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="আপনার ইমেইল লিখুন" autocomplete="username"/>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">পাসওয়ার্ড</label>
-                    <input id="loginPassword" type="password" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="আপনার পাসওয়ার্ড লিখুন" />
+                    <input id="loginPassword" type="password" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="আপনার পাসওয়ার্ড লিখুন" autocomplete="current-password"/>
                 </div>
                 <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors">লগইন</button>
                 <div class="my-4 text-center relative">
@@ -77,16 +82,16 @@
                     অ্যাডমিন অ্যাকাউন্ট নেই?
                     <button id="showRegister" class="text-blue-600 hover:underline">রেজিস্টার করুন</button>
                 </p>
-            </div>
+            </form>
 
-            <div id="registerForm" class="hidden">
+            <form id="registerForm" class="hidden">
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">ইমেইল</label>
-                    <input id="registerEmail" type="email" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="আপনার ইমেইল লিখুন" />
+                    <input id="registerEmail" type="email" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="আপনার ইমেইল লিখুন"   autocomplete="username"/>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">পাসওয়ার্ড</label>
-                    <input id="registerPassword" type="password" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="পাসওয়ার্ড লিখুন (ন্যূনতম ৬ অক্ষর)" />
+                    <input id="registerPassword" type="password" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="পাসওয়ার্ড লিখুন (ন্যূনতম ৬ অক্ষর)" autocomplete="current-password"/>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">অ্যাডমিন টাইপ</label>
@@ -100,7 +105,7 @@
                     ইতিমধ্যে অ্যাকাউন্ট আছে?
                     <button id="showLogin" class="text-blue-600 hover:underline">লগইন করুন</button>
                 </p>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -143,15 +148,16 @@
     <div id="adminModal" class="modal hidden">
         <div class="modal-content max-w-md">
             <h3 id="adminModalTitle" class="text-lg font-semibold mb-4">নতুন অ্যাডমিন</h3>
-            <div id="adminModalContent">
+
+            <form id="adminModalContent" onsubmit="return false">
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">ইমেইল</label>
-                        <input id="adminEmail" type="email" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700" placeholder="অ্যাডমিনের ইমেইল">
+                        <input id="adminEmail" type="email" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700" placeholder="অ্যাডমিনের ইমেইল" autocomplete="username">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">পাসওয়ার্ড</label>
-                        <input id="adminPassword" type="password" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700" placeholder="পাসওয়ার্ড (ন্যূনতম ৬ অক্ষর)">
+                        <input id="adminPassword" type="password" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700" placeholder="পাসওয়ার্ড (ন্যূনতম ৬ অক্ষর)" autocomplete="current-password">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">অ্যাডমিন টাইপ</label>
@@ -178,7 +184,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
             <div class="modal-footer">
                 <button id="cancelAdmin" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded-lg">বাতিল</button>
                 <button id="saveAdmin" class="px-4 py-2 bg-blue-600 text-white rounded-lg">সংরক্ষণ করুন</button>
@@ -209,28 +215,33 @@
     <!-- App Container -->
     <div id="appContainer" class="hidden">
         <!-- Header -->
-        <header class="bg-white dark:bg-darkCard shadow-sm border-b border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between p-4">
-                <div class="flex items-center space-x-4">
-                    <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1 id="pageTitle" class="text-xl font-bold">ড্যাশবোর্ড</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <i class="fas fa-moon text-gray-800 dark:text-yellow-400"></i>
-                    </button>
-                    <div id="userInfo" class="text-right">
-                        <div class="text-xs text-gray-500">সাধারণ ব্যবহারকারী</div>
-                    </div>
-                    <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
-                        লগআউট
-                    </button>
-                </div>
-            </div>
-        </header>
+      <!-- Header section এ যোগ করুন -->
+<header class="bg-white dark:bg-gray-800 shadow-sm">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+            <h1 class="text-xl font-bold text-gray-800 dark:text-white">Smart Group Evaluator</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <!-- User info will be shown when logged in -->
+            <div id="userInfo" class="text-sm text-gray-600 dark:text-gray-300"></div>
+            
+            <!-- Login button for public users -->
+            <button id="headerLoginBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors hidden">
+                লগইন
+            </button>
+            
+            <!-- Logout button for logged in users -->
+            <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors hidden">
+                লগআউট
+            </button>
+        </div>
+    </div>
 
+ 
+<button id="loginHeaderBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors hidden">
+    লগইন
+</button>
+</header>
         <!-- Main Layout -->
         <div class="app-container">
             <!-- Sidebar -->
@@ -239,13 +250,13 @@
                     <button class="nav-btn active" data-page="dashboard">
                         <i class="fas fa-tachometer-alt mr-3"></i>ড্যাশবোর্ড
                     </button>
-                    <button class="nav-btn" data-page="groups">
+                    <button class="nav-btn private-tab" data-page="groups">
                         <i class="fas fa-layer-group mr-3"></i>গ্রুপ ব্যবস্থাপনা
                     </button>
-                    <button class="nav-btn" data-page="members">
-                        <i class="fas fa-user-plus mr-3"></i>সদস্য যোগ করুন
+                    <button class="nav-btn private-tab" data-page="members">
+                        <i class="fas fa-user-plus mr-3 privet-only"></i>সদস্য যোগ করুন
                     </button>
-                    <button class="nav-btn" data-page="group-members">
+                    <button class="nav-btn private-tab" data-page="group-members">
                         <i class="fas fa-users mr-3"></i>গ্রুপ সদস্য
                     </button>
                     <button class="nav-btn" data-page="all-students">
@@ -257,10 +268,10 @@
                     <button class="nav-btn" data-page="group-analysis">
                         <i class="fas fa-chart-bar mr-3"></i>গ্রুপ বিশ্লেষণ
                     </button>
-                    <button class="nav-btn" data-page="tasks">
+                    <button class="nav-btn private-tab" data-page="tasks">
                         <i class="fas fa-tasks mr-3"></i>টাস্ক ব্যবস্থাপনা
                     </button>
-                    <button class="nav-btn" data-page="evaluation">
+                    <button class="nav-btn private-tab" data-page="evaluation">
                         <i class="fas fa-clipboard-check mr-3"></i>মূল্যায়ন
                     </button>
                     <button class="nav-btn" data-page="group-policy">
@@ -269,8 +280,8 @@
                     <button class="nav-btn" data-page="export">
                         <i class="fas fa-file-export mr-3"></i>এক্সপোর্ট
                     </button>
-                    <div id="adminManagementSection" class="hidden">
-                        <button class="nav-btn" data-page="admin-management">
+                    <div id="adminManagementSection" >
+                        <button class="nav-btn private-tab" data-page="admin-management">
                             <i class="fas fa-user-shield mr-3"></i>অ্যাডমিন ব্যবস্থাপনা
                         </button>
                     </div>
@@ -323,11 +334,9 @@
                           </div>
                         </div>
                       </div>
-                      
-                </div>
 
                     <!-- Groups Management -->
-                    <div id="page-groups" class="page hidden">
+                    <div id="page-groups" class="page hidden privet-only">
                         <div class="mb-6">
                             <h3 class="text-lg font-semibold mb-4">গ্রুপ তৈরি করুন</h3>
                             <div class="flex gap-2">
@@ -447,7 +456,7 @@
                     </div>
 
                     <!-- All Students -->
-                    <div id="page-all-students" class="page hidden">
+                    <div id="page-all-students" class="page  hidden">
                         <div class="mb-6">
                             <h3 class="text-lg font-semibold mb-4">সকল শিক্ষার্থী</h3>
                             <div class="flex flex-col md:flex-row gap-4 mb-4">
@@ -523,7 +532,7 @@
                     </div>
 
                     <!-- Evaluation -->
-                    <div id="page-evaluation" class="page hidden">
+                    <div id="page-evaluation" class="page hidden ">
                         <div class="mb-6">
                             <h3 class="text-lg font-semibold mb-4">মূল্যায়ন শুরু করুন</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -570,7 +579,7 @@
                     <div id="page-export" class="page hidden">
                         <div class="max-w-2xl mx-auto">
                             <h3 class="text-lg font-semibold mb-6">ডেটা এক্সপোর্ট</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                                 <button id="exportAllData" class="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg transition-colors flex flex-col items-center">
                                     <i class="fas fa-file-archive text-2xl mb-2"></i>
                                     <span>সমস্ত ডেটা (ZIP)</span>
@@ -588,13 +597,22 @@
                                     <span>মূল্যায়ন CSV</span>
                                 </button>
                             </div>
-                            <div class="mt-8">
+                            <div class="mb-8">
                                 <h4 class="text-lg font-semibold mb-4">শিক্ষার্থী ইম্পোর্ট (CSV)</h4>
-                                <div class="flex gap-4">
+                                <div class="flex flex-col md:flex-row gap-4 items-center">
                                     <input id="csvFileInput" type="file" accept=".csv" class="hidden" />
                                     <button id="importStudentsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors">CSV ফাইল নির্বাচন করুন</button>
-                                    <button id="exportStudentsBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">শিক্ষার্থী CSV এক্সপোর্ট</button>
+                                    <span id="csvFileName" class="text-sm text-gray-600 dark:text-gray-400">কোন ফাইল নির্বাচন করা হয়নি</span>
                                 </div>
+                                <div class="mt-4">
+                                    <button id="processImportBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors hidden">ইম্পোর্ট প্রসেস করুন</button>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-4">এক্সপোর্ট টেমপ্লেট</h4>
+                                <button id="downloadTemplateBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-download mr-2"></i>CSV টেমপ্লেট ডাউনলোড
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -614,8 +632,7 @@
                             <div id="adminManagementContent"></div>
                         </div>
                     </div>
-            </div>
-            
+                </div>
             </div>
         </div>
     </div>
@@ -643,7 +660,18 @@
     <!-- JSZip for export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     
+    <!-- Papa Parse for CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
     <!-- Main Application -->
-    <script src="./app.js"></script>
+    <!-- <script src="app.js"></script> -->
+    <!-- <script src="./OPT2.JS"></script> -->
+
+
+    <!-- <script src="./optimiseMain2.js"></script> -->
+    <!-- <script src="./OPT3.JS"></script> -->
+    <script src="./opt4.js"></script>
+  
+
 </body>
 </html>
