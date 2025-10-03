@@ -1,4 +1,4 @@
-<!-- index2.html -->
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -36,8 +36,7 @@
         };
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <link rel="stylesheet" href="style.css">
 
@@ -47,15 +46,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-darkBg text-gray-800 dark:text-gray-200 transition-colors duration-300">
- <!-- Toast Notification -->
-<div id="toast" class="fixed bottom-0 right-6 z-50 hidden transition-all duration-500 transform translate-y-4 opacity-0">
-    <div id="toastBox" class=">
-        <i id="toastIcon" class="fas fa-check-circle text-xl"></i>
-        <span id="toastMessage" class="font-medium">Operation successful</span>
-        <button onclick="hideToast()" class="ml-auto text-white hover:text-gray-200 focus:outline-none">✖</button>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-0 right-6 z-50 hidden transition-all duration-500 transform translate-y-4 opacity-0">
+        <div id="toastBox" class=">
+            <i id="toastIcon" class="fas fa-check-circle text-xl"></i>
+            <span id="toastMessage" class="font-medium">Operation successful</span>
+            <button onclick="hideToast()" class="ml-auto text-white hover:text-gray-200 focus:outline-none">✖</button>
+        </div>
     </div>
-  </div>
-  
 
     <!-- Authentication Modal -->
     <div id="authModal" class="modal">
@@ -137,7 +135,7 @@
     <div id="groupDetailsModal" class="modal hidden">
         <div class="modal-content max-w-4xl max-h-[90vh]">
             <h3 id="groupDetailsTitle" class="text-lg font-semibold mb-4 text-center">গ্রুপ বিস্তারিত ফলাফল</h3>
-            <div id="groupDetailsContent" class="overflow-y-auto text-center"></div>
+            <div id="groupDetailsContent" class="overflow-auto text-center"></div>
             <div class="modal-footer">
                 <button id="closeGroupDetails" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded-lg">বন্ধ করুন</button>
             </div>
@@ -215,50 +213,50 @@
     <!-- App Container -->
     <div id="appContainer" class="hidden">
         <!-- Header -->
-      <!-- Header section এ যোগ করুন -->
-<header class="bg-white dark:bg-gray-800 shadow-sm">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center space-x-4">
-            <h1 class="text-xl font-bold text-gray-800 dark:text-white">Smart Group Evaluator</h1>
-        </div>
-        <div class="flex items-center space-x-4">
-            <!-- User info will be shown when logged in -->
-            <div id="userInfo" class="text-sm text-gray-600 dark:text-gray-300"></div>
-            
-            <!-- Login button for public users -->
-            <button id="headerLoginBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors hidden">
-                লগইন
-            </button>
-            
-            <!-- Logout button for logged in users -->
-            <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors hidden">
-                লগআউট
-            </button>
-        </div>
-    </div>
+        <header class="bg-white dark:bg-gray-800 shadow-sm">
+            <div class="container mx-auto px-4 py-2 flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-xl font-bold text-gray-800 dark:text-white">Smart Group Evaluator</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- User info will be shown when logged in -->
+                    <div id="userInfo" class="text-sm text-gray-600 dark:text-gray-300"></div>
+                    
+                    <!-- Login button for public users -->
+                    <button id="headerLoginBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors hidden">
+                        লগইন
+                    </button>
+                    
+                    <!-- Logout button for logged in users -->
+                    <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors hidden">
+                        লগআউট
+                    </button>
+                </div>
+            </div>
+        </header>
 
- 
-<button id="headerLoginBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors hidden">
-    লগইন
-</button>
-</header>
         <!-- Main Layout -->
         <div class="app-container">
             <!-- Sidebar -->
             <div class="sidebar">
                 <nav class="p-3 space-y-2">
+                    <!-- পাবলিক পেজ -->
                     <button class="nav-btn active" data-page="dashboard">
                         <i class="fas fa-tachometer-alt mr-3"></i>ড্যাশবোর্ড
                     </button>
+                    
+                    <!-- প্রাইভেট পেজ -->
                     <button class="nav-btn private-tab" data-page="groups">
                         <i class="fas fa-layer-group mr-3"></i>গ্রুপ ব্যবস্থাপনা
                     </button>
                     <button class="nav-btn private-tab" data-page="members">
-                        <i class="fas fa-user-plus mr-3 privet-only"></i>সদস্য যোগ করুন
+                        <i class="fas fa-user-plus mr-3"></i>সদস্য যোগ করুন
                     </button>
                     <button class="nav-btn private-tab" data-page="group-members">
                         <i class="fas fa-users mr-3"></i>গ্রুপ সদস্য
                     </button>
+                    
+                    <!-- পাবলিক পেজ -->
                     <button class="nav-btn" data-page="all-students">
                         <i class="fas fa-user-graduate mr-3"></i>সকল শিক্ষার্থী
                     </button>
@@ -268,63 +266,56 @@
                     <button class="nav-btn" data-page="group-analysis">
                         <i class="fas fa-chart-bar mr-3"></i>গ্রুপ বিশ্লেষণ
                     </button>
+                    
+                    <!-- প্রাইভেট পেজ -->
                     <button class="nav-btn private-tab" data-page="tasks">
                         <i class="fas fa-tasks mr-3"></i>টাস্ক ব্যবস্থাপনা
                     </button>
                     <button class="nav-btn private-tab" data-page="evaluation">
                         <i class="fas fa-clipboard-check mr-3"></i>মূল্যায়ন
                     </button>
+                    
+                    <!-- পাবলিক পেজ -->
                     <button class="nav-btn" data-page="group-policy">
                         <i class="fas fa-book mr-3"></i>গ্রুপ নীতি
                     </button>
                     <button class="nav-btn" data-page="export">
                         <i class="fas fa-file-export mr-3"></i>এক্সপোর্ট
                     </button>
-                    <div id="adminManagementSection" >
-                        <button class="nav-btn private-tab" data-page="admin-management">
+                    
+                    <!-- সুপার এডমিন প্রাইভেট পেজ -->
+                    <div id="adminManagementSection">
+                        <button class="nav-btn private-tab super-admin-only" data-page="admin-management">
                             <i class="fas fa-user-shield mr-3"></i>অ্যাডমিন কন্ট্রোল
                         </button>
                     </div>
                 </nav>
             </div>
 
-            <div id="page-export" class="page hidden">
-                <!-- Export page content -->
-            </div>
-            
             <!-- Main Content -->
             <div class="main-content">
                 <div class="page-content">
-                    <!-- Dashboard -->
-                    <div id="page-dashboard" class="page space-y-6">
+                    <!-- Dashboard (পাবলিক পেইজ) -->
+                    <div id="page-dashboard" class="page space-y-4">
                         <!-- Stats Summary -->
-                        <div id="statsSummary" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[minmax(100px,auto)]">
+                        <div id="statsSummary" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4  gap-4 auto-rows-[minmax(100px,auto)]">
                           <!-- Summary cards will go here -->
                         </div>
                       
                         <!-- একাডেমিক গ্রুপ -->
-                      
-                          
-                            <div id="academicGroupStatsList" class="card-body shadow-md rounded-xl"></div>
+                        <div id="academicGroupStatsList" class="card-body shadow-lg rounded-xl"></div>
                         
-                      
                         <!-- শীর্ষ গ্রুপসমূহ -->
-                      
                         <div class="top-groups-section max-w-6xl mx-auto px-4 py-2">
-                            <!-- Title -->
                             <div class="text-center mb-8">
                               <h3 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
                                ফলাফলের শীর্ষে ৩ গ্রুপ:
                               </h3>
                             </div>
-                          
-                            <!-- Top Groups Container -->
                             <div id="topGroupsContainer" class="">
                               <!-- Top groups cards will be injected here -->
                             </div>
-                          </div>
-                          
-                          
+                        </div>
                       
                         <!-- গ্রুপ র‌্যাঙ্কিং -->
                         <div class="groups-ranking-section">
@@ -337,10 +328,10 @@
                             </div>
                           </div>
                         </div>
-                      </div>
+                    </div>
 
-                    <!-- Groups Management -->
-                    <div id="page-groups" class="page hidden privet-only">
+                    <!-- Groups Management (প্রাইভেট পেইজ) -->
+                    <div id="page-groups" class="page hidden">
                         <div class="mb-6">
                             <h3 class="text-lg font-semibold mb-4">গ্রুপ তৈরি করুন</h3>
                             <div class="flex gap-2">
@@ -354,7 +345,7 @@
                         </div>
                     </div>
 
-                    <!-- Add Members -->
+                    <!-- Add Members (প্রাইভেট পেইজ) -->
                     <div id="page-members" class="page hidden">
                         <!-- New Student Form -->
                         <div class="mb-6 p-6 rounded-xl shadow-md bg-green-50 dark:bg-gray-800 transition-colors font-sans">
@@ -446,7 +437,7 @@
                         <div id="studentsList" class="space-y-3"></div>
                     </div>
 
-                    <!-- Group Members -->
+                    <!-- Group Members (প্রাইভেট পেইজ) -->
                     <div id="page-group-members" class="page hidden">
                         <div class="mb-6">
                             <h3 class="text-lg font-semibold mb-4">গ্রুপ সদস্য ব্যবস্থাপনা ও ফিল্টার</h3>
@@ -459,8 +450,8 @@
                         </div>
                     </div>
 
-                    <!-- All Students -->
-                    <div id="page-all-students" class="page  hidden">
+                    <!-- All Students (পাবলিক পেইজ) -->
+                    <div id="page-all-students" class="page hidden">
                         <div class="mb-6">
                             <h3 class="text-lg font-semibold mb-4">সকল শিক্ষার্থী (প্রতিটি গ্রুপ ভিন্ন রংয়ে)</h3>
                             <div class="flex flex-col md:flex-row gap-4 mb-4">
@@ -473,6 +464,7 @@
                         </div>
                     </div>
 
+                    <!-- Student Ranking (পাবলিক পেইজ) -->
                     <div id="page-student-ranking" class="page hidden">
                         <div class="mb-6 max-w-4xl mx-auto">
                           <!-- Ranking Rules Card -->
@@ -489,7 +481,6 @@
                             <div class="absolute -top-4 -left-4 w-8 h-8 bg-white/20 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
                             <div class="absolute -bottom-4 -right-4 w-12 h-12 bg-white/15 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
                             
-                        
                             <!-- Ranking Rules Text -->
                             <p class="text-sm sm:text-lg font-medium leading-relaxed tracking-wide
                                        drop-shadow-md">
@@ -510,8 +501,85 @@
                           <!-- Student Ranking List -->
                           <div id="studentRankingList" class="space-y-4"></div>
                         </div>
-                      </div>
-                      
+                    </div>
+
+                    <!-- Group Analysis (পাবলিক পেইজ) -->
+                    <div id="page-group-analysis" class="page hidden">
+                        <div class="container mx-auto px-4 py-8">
+                            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">গ্রুপ বিশ্লেষণ</h2>
+                            
+                            <!-- Group Selection -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                                    গ্রুপ নির্বাচন করুন
+                                </label>
+                                <select id="analysisGroupSelect" class="w-full md:w-auto border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                                    <option value="">সকল গ্রুপ</option>
+                                </select>
+                                <button id="updateAnalysisBtn" class="mt-2 md:mt-0 md:ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                    আপডেট করুন
+                                </button>
+                            </div>
+
+                            <!-- Analysis Results -->
+                            <div id="groupAnalysisDetails" class="mt-6">
+                                <p class="text-center text-gray-500 py-8">গ্রুপ নির্বাচন করুন বিশ্লেষণ দেখতে</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tasks (প্রাইভেট পেইজ) -->
+                    <div id="page-tasks" class="page hidden">
+                        <div class="container mx-auto px-4 py-8">
+                            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">টাস্ক ব্যবস্থাপনা</h2>
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 p-6 rounded-lg">
+                                <p class="text-center text-gray-600 dark:text-gray-300">টাস্ক ব্যবস্থাপনা সেকশন শীঘ্রই আসছে...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evaluation (প্রাইভেট পেইজ) -->
+                    <div id="page-evaluation" class="page hidden">
+                        <div class="container mx-auto px-4 py-8">
+                            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">মূল্যায়ন</h2>
+                            <div class="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg">
+                                <p class="text-center text-gray-600 dark:text-gray-300">মূল্যায়ন সেকশন শীঘ্রই আসছে...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Group Policy (পাবলিক পেইজ) -->
+                    <div id="page-group-policy" class="page hidden">
+                        <div class="container mx-auto px-4 py-8">
+                            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">গ্রুপ পলিসি</h2>
+                            
+                            <!-- Policy Sections -->
+                            <div id="policySections" class="space-y-4">
+                                <!-- Policy sections will be rendered here by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export (পাবলিক পেইজ) -->
+                    <div id="page-export" class="page hidden">
+                        <div class="container mx-auto px-4 py-8">
+                            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">এক্সপোর্ট</h2>
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg">
+                                <p class="text-center text-gray-600 dark:text-gray-300">এক্সপোর্ট সেকশন শীঘ্রই আসছে...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Management (প্রাইভেট পেইজ - শুধু সুপার এডমিন) -->
+                    <div id="page-admin-management" class="page hidden">
+                        <div class="container mx-auto px-4 py-8">
+                            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">অ্যাডমিন কন্ট্রোল</h2>
+                            <div class="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-lg">
+                                <p class="text-center text-gray-600 dark:text-gray-300">অ্যাডমিন ব্যবস্থাপনা সেকশন শুধুমাত্র সুপার এডমিনদের জন্য</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -543,17 +611,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <!-- Main Application -->
-    <!-- <script src="app.js"></script> -->
-    <!-- <script src="./OPT2.JS"></script> -->
-    <!-- <script src="./optimiseMain2.js"></script> -->
-    <!-- <script src="./opt4.js"></script> -->
-
-
-    <!-- <script src="./OPT3.JS"></script> -->
-
-    <!-- <script src="./test2.js"></script> -->
     <script src="test.js"></script>
-  
-
 </body>
 </html>

@@ -187,50 +187,114 @@ class SmartGroupEvaluator {
         };
     }
 
-    async init() {
-        this.setupDOMReferences();
-        await this.initializeFirebase();
-        this.setupEventListeners();
-        this.setupAuthStateListener();
-        this.applySavedTheme();
+// optimiseMain.js - class-এর ভিতরে এই মেথড যোগ করুন
+debugAuthState() {
+    console.log("=== AUTH DEBUG INFO ===");
+    console.log("Current User:", this.currentUser);
+    console.log("Current User Data:", this.currentUserData);
+    console.log("Is Public Mode:", this.isPublicMode);
+    console.log("DOM Elements Status:", {
+        headerLoginBtn: {
+            element: !!this.dom.headerLoginBtn,
+            hidden: this.dom.headerLoginBtn?.classList.contains("hidden")
+        },
+        logoutBtn: {
+            element: !!this.dom.logoutBtn,
+            hidden: this.dom.logoutBtn?.classList.contains("hidden")
+        },
+        userInfo: {
+            element: !!this.dom.userInfo,
+            content: this.dom.userInfo?.innerHTML
+        },
+        appContainer: {
+            element: !!this.dom.appContainer,
+            hidden: this.dom.appContainer?.classList.contains("hidden")
+        },
+        authModal: {
+            element: !!this.dom.authModal,
+            hidden: this.dom.authModal?.classList.contains("hidden")
+        }
+    });
+    
+    // Navigation buttons status
+    const navStatus = {};
+    this.dom.navBtns.forEach(btn => {
+        const pageId = btn.getAttribute("data-page");
+        navStatus[pageId] = {
+            disabled: btn.disabled,
+            opacity: btn.style.opacity,
+            pointerEvents: btn.style.pointerEvents,
+            hasDisabledClass: btn.classList.contains("disabled-nav")
+        };
+    });
+    console.log("Navigation Status:", navStatus);
+}
 
-        // Initially set to public view
-        this.updateUserInterface(null);
-        this.enableAllNavigation(false);
+// init মেথডে call করুন
+async init() {
+    // ... existing code ...
+    
+    // Debug info
+    setTimeout(() => {
+        this.debugAuthState();
+    }, 2000);
+}
+
+async init() {
+    this.setupDOMReferences();
+    await this.initializeFirebase();
+    this.setupEventListeners();
+    this.setupAuthStateListener();
+    this.applySavedTheme();
+
+    // DOM elements check করুন
+    console.log("DOM Elements Check:", {
+        headerLoginBtn: !!this.dom.headerLoginBtn,
+        logoutBtn: !!this.dom.logoutBtn,
+        userInfo: !!this.dom.userInfo,
+        appContainer: !!this.dom.appContainer,
+        authModal: !!this.dom.authModal
+    });
+
+    // Initially set to public view
+    this.updateUserInterface(null);
+    this.enableAllNavigation(false);
+    
+    // Public data load করুন
+    await this.loadPublicData();
+
+    this.isInitialized = true;
+    console.log("Smart Evaluator initialized successfully");
+}
+// optimiseMain.js - setupAuthStateListener মেথডে এই correction করুন
+setupAuthStateListener() {
+    auth.onAuthStateChanged(async (user) => {
+        console.log("Auth State Changed:", user ? "Logged in" : "Logged out");
         
-        // Public data load করুন
-        await this.loadPublicData();
-
-        this.isInitialized = true;
-        console.log("Smart Evaluator initialized successfully");
-    }
-
-    setupAuthStateListener() {
-        auth.onAuthStateChanged(async (user) => {
-            console.log("Auth State Changed:", user ? "Logged in" : "Logged out");
-            
-            if (user) {
-                try {
-                    console.log("User logged in:", user.email);
-                    this.currentUser = user;
-                    
-                    const userData = await this.getUserAdminData(user);
-                    this.currentUserData = userData;
-                    
-                    console.log("User data loaded:", userData);
-                    
-                    await this.handleSuccessfulLogin(user);
-                } catch (error) {
-                    console.error("Error in auth state change:", error);
-                    await this.handleLogout();
-                }
-            } else {
-                console.log("User logged out");
+        if (user) {
+            try {
+                console.log("User logged in:", user.email);
+                this.currentUser = user;
+                
+                // User data fetch করুন
+                const userData = await this.getUserAdminData(user);
+                this.currentUserData = userData;
+                
+                console.log("User data loaded:", userData);
+                
+                // Successful login handle করুন
+                await this.handleSuccessfulLogin(user);
+            } catch (error) {
+                console.error("Error in auth state change:", error);
+                // Error হলে logout handle করুন
                 await this.handleLogout();
             }
-        });
-    }
-
+        } else {
+            console.log("User logged out");
+            await this.handleLogout();
+        }
+    });
+}
     async initializeFirebase() {
         try {
             // Test Firebase connection with public read
@@ -245,7 +309,8 @@ class SmartGroupEvaluator {
     setupDOMReferences() {
         // Core DOM elements
         this.dom = {
-            loginHeaderBtn: document.getElementById("headerLoginBtn"),
+            headerLoginBtn: document.getElementById("headerLoginBtn"),
+            
             exportPage: document.getElementById('page-export'),
             authModal: document.getElementById("authModal"),
             appContainer: document.getElementById("appContainer"),
@@ -262,6 +327,8 @@ class SmartGroupEvaluator {
             sidebar: document.querySelector(".sidebar"),
             pageTitle: document.getElementById("pageTitle"),
             userInfo: document.getElementById("userInfo"),
+
+
             adminManagementSection: document.getElementById("adminManagementSection"),
             pages: document.querySelectorAll(".page"),
             navBtns: document.querySelectorAll(".nav-btn"),
@@ -516,49 +583,50 @@ class SmartGroupEvaluator {
     // ===============================
     // AUTHENTICATION - FIXED
     // ===============================
-    async handleSuccessfulLogin(user) {
-        try {
-            console.log("Handling successful login for:", user.email);
-            
-            this.isPublicMode = false;
-            this.currentUser = user;
 
-            // User data নিশ্চিত করুন
-            if (!this.currentUserData) {
-                this.currentUserData = await this.getUserAdminData(user);
-            }
+// optimiseMain.js - handleSuccessfulLogin মেথডে এই correction করুন
+async handleSuccessfulLogin(user) {
+    try {
+        console.log("Handling successful login for:", user.email);
+        
+        this.isPublicMode = false;
+        this.currentUser = user;
 
-            console.log("User role:", this.currentUserData?.type);
-
-            // UI update করুন
-            this.updateUserInterface(this.currentUserData);
-
-            // Auth modal hide করুন (যদি open থাকে)
-            this.hideAuthModal();
-            
-            // App container show করুন
-            if (this.dom.appContainer) {
-                this.dom.appContainer.classList.remove("hidden");
-                console.log("App container shown");
-            }
-
-            // সকল data load করুন
-            await this.loadInitialData();
-
-            // Navigation enable করুন
-            this.enableAllNavigation(true);
-
-            // Dashboard show করুন
-            this.showPage("dashboard");
-
-            this.showToast(`লগইন সফল! ${user.email}`, "success");
-            
-        } catch (error) {
-            console.error("Login handling error:", error);
-            this.showToast("লগইন সম্পন্ন কিন্তু ডেটা লোড করতে সমস্যা", "warning");
+        // User data নিশ্চিত করুন
+        if (!this.currentUserData) {
+            this.currentUserData = await this.getUserAdminData(user);
         }
-    }
 
+        console.log("User role:", this.currentUserData?.type);
+
+        // UI update করুন
+        this.updateUserInterface(this.currentUserData);
+
+        // Auth modal hide করুন (যদি open থাকে)
+        this.hideAuthModal();
+        
+        // App container show করুন
+        if (this.dom.appContainer) {
+            this.dom.appContainer.classList.remove("hidden");
+            console.log("App container shown");
+        }
+
+        // সকল data load করুন
+        await this.loadInitialData();
+
+        // Navigation enable করুন
+        this.enableAllNavigation(true);
+
+        // Dashboard show করুন
+        this.showPage("dashboard");
+
+        this.showToast(`লগইন সফল! ${user.email}`, "success");
+        
+    } catch (error) {
+        console.error("Login handling error:", error);
+        this.showToast("লগইন সম্পন্ন কিন্তু ডেটা লোড করতে সমস্যা", "warning");
+    }
+}
     async handleLogout() {
         try {
             // Firebase থেকে logout করুন
@@ -910,121 +978,108 @@ class SmartGroupEvaluator {
             this.showToast(`পেজ লোড করতে সমস্যা: ${pageId}`, "error");
         }
     }
-
-    enableAllNavigation(isLoggedIn) {
-        console.log("Enabling navigation for:", isLoggedIn ? "Logged in" : "Logged out");
-        console.log("Current user data:", this.currentUserData);
+// optimiseMain.js - enableAllNavigation মেথডে এই correction করুন
+enableAllNavigation(isLoggedIn) {
+    console.log("Enabling navigation for:", isLoggedIn ? "Logged in" : "Logged out");
+    
+    this.dom.navBtns.forEach((btn) => {
+        const pageId = btn.getAttribute("data-page");
         
-        if (!this.dom.navBtns || this.dom.navBtns.length === 0) {
-            console.error("Navigation buttons not found");
-            return;
-        }
-        
-        this.dom.navBtns.forEach((btn) => {
-            const pageId = btn.getAttribute("data-page");
+        if (isLoggedIn && this.currentUserData) {
+            // User is logged in AND has user data
+            const userRole = this.currentUserData.type;
             
-            if (isLoggedIn && this.currentUserData) {
-                // User is logged in AND has user data
-                const userRole = this.currentUserData.type;
-                
-                console.log(`Checking access for page: ${pageId}, user role: ${userRole}`);
-                
-                if (userRole === "super-admin") {
-                    // Super Admin - সকল page access
+            console.log(`Checking access for page: ${pageId}, user role: ${userRole}`);
+            
+            if (userRole === "super-admin") {
+                // Super Admin - সকল page access
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+                btn.disabled = false;
+                btn.classList.remove("disabled-nav");
+            } else if (userRole === "admin") {
+                // Admin - admin-management বাদে সকল page
+                if (pageId === "admin-management") {
+                    btn.style.opacity = "0.5";
+                    btn.style.pointerEvents = "none";
+                    btn.disabled = true;
+                    btn.classList.add("disabled-nav");
+                } else {
                     btn.style.opacity = "1";
                     btn.style.pointerEvents = "auto";
                     btn.disabled = false;
                     btn.classList.remove("disabled-nav");
-                    console.log(`Super admin access granted for: ${pageId}`);
-                } else if (userRole === "admin") {
-                    // Admin - admin-management বাদে সকল page
-                    if (pageId === "admin-management") {
-                        btn.style.opacity = "0.5";
-                        btn.style.pointerEvents = "none";
-                        btn.disabled = true;
-                        btn.classList.add("disabled-nav");
-                        console.log(`Admin access denied for: ${pageId}`);
-                    } else {
-                        btn.style.opacity = "1";
-                        btn.style.pointerEvents = "auto";
-                        btn.disabled = false;
-                        btn.classList.remove("disabled-nav");
-                        console.log(`Admin access granted for: ${pageId}`);
-                    }
-                } else {
-                    // Regular user - শুধু public pages
-                    if (this.PUBLIC_PAGES.includes(pageId)) {
-                        btn.style.opacity = "1";
-                        btn.style.pointerEvents = "auto";
-                        btn.disabled = false;
-                        btn.classList.remove("disabled-nav");
-                        console.log(`Regular user access granted for: ${pageId}`);
-                    } else {
-                        btn.style.opacity = "0.5";
-                        btn.style.pointerEvents = "none";
-                        btn.disabled = true;
-                        btn.classList.add("disabled-nav");
-                        console.log(`Regular user access denied for: ${pageId}`);
-                    }
                 }
             } else {
-                // Not logged in - শুধু public pages
+                // Regular user - শুধু public pages
                 if (this.PUBLIC_PAGES.includes(pageId)) {
                     btn.style.opacity = "1";
                     btn.style.pointerEvents = "auto";
                     btn.disabled = false;
                     btn.classList.remove("disabled-nav");
-                    console.log(`Public access granted for: ${pageId}`);
                 } else {
                     btn.style.opacity = "0.5";
                     btn.style.pointerEvents = "none";
                     btn.disabled = true;
                     btn.classList.add("disabled-nav");
-                    console.log(`Public access denied for: ${pageId}`);
                 }
             }
-        });
-    }
-
-    updateUserInterface(userData) {
-        if (!this.dom.userInfo || !this.dom.logoutBtn || !this.dom.loginHeaderBtn) {
-            console.error("DOM elements not found for UI update");
-            return;
-        }
-
-        console.log("Updating UI with user data:", userData);
-
-        if (userData && this.currentUser) {
-            // User is logged in
-            const roleText = userData.type === "super-admin" ? "সুপার অ্যাডমিন" : 
-                            userData.type === "admin" ? "অ্যাডমিন" : "সাধারণ ব্যবহারকারী";
-            
-            const roleColor = userData.type === "super-admin" ? "text-purple-600" : 
-                             userData.type === "admin" ? "text-blue-600" : "text-green-600";
-
-            this.dom.userInfo.innerHTML = `
-                <div class="font-medium">${userData.email}</div>
-                <div class="text-xs ${roleColor}">${roleText}</div>
-            `;
-
-            // Show logout button, hide login button
-            this.dom.logoutBtn.classList.remove("hidden");
-            this.dom.loginHeaderBtn.classList.add("hidden");
-            
-            console.log("UI updated for logged in user");
-
         } else {
-            // User is logged out
-            this.dom.userInfo.innerHTML = `<div class="text-xs text-gray-500">সাধারণ ব্যবহারকারী</div>`;
-
-            // Show login button, hide logout button
-            this.dom.logoutBtn.classList.add("hidden");
-            this.dom.loginHeaderBtn.classList.remove("hidden");
-            
-            console.log("UI updated for logged out user");
+            // Not logged in - শুধু public pages
+            if (this.PUBLIC_PAGES.includes(pageId)) {
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+                btn.disabled = false;
+                btn.classList.remove("disabled-nav");
+            } else {
+                btn.style.opacity = "0.5";
+                btn.style.pointerEvents = "none";
+                btn.disabled = true;
+                btn.classList.add("disabled-nav");
+            }
         }
+    });
+}
+
+// optimiseMain.js - updateUserInterface মেথডে এই correction করুন
+updateUserInterface(userData) {
+    if (!this.dom.userInfo || !this.dom.logoutBtn || !this.dom.headerLoginBtn) {
+        console.error("DOM elements not found for UI update");
+        return;
     }
 
+    console.log("Updating UI with user data:", userData);
+
+    if (userData && this.currentUser) {
+        // User is logged in
+        const roleText = userData.type === "super-admin" ? "সুপার অ্যাডমিন" : 
+                        userData.type === "admin" ? "অ্যাডমিন" : "সাধারণ ব্যবহারকারী";
+        
+        const roleColor = userData.type === "super-admin" ? "text-purple-600" : 
+                         userData.type === "admin" ? "text-blue-600" : "text-green-600";
+
+        this.dom.userInfo.innerHTML = `
+            <div class="font-medium">${userData.email}</div>
+            <div class="text-xs ${roleColor}">${roleText}</div>
+        `;
+
+        // Show logout button, hide login button
+        this.dom.logoutBtn.classList.remove("hidden");
+        this.dom.headerLoginBtn.classList.add("hidden");
+        
+        console.log("UI updated for logged in user");
+
+    } else {
+        // User is logged out
+        this.dom.userInfo.innerHTML = `<div class="text-xs text-gray-500">সাধারণ ব্যবহারকারী</div>`;
+
+        // Show login button, hide logout button
+        this.dom.logoutBtn.classList.add("hidden");
+        this.dom.headerLoginBtn.classList.remove("hidden");
+        
+        console.log("UI updated for logged out user");
+    }
+}
     showPage(pageId) {
         console.log(`Showing page: ${pageId}`);
         
@@ -3052,7 +3107,7 @@ class SmartGroupEvaluator {
         let colorIndex = 0;
       
         container.innerHTML = `
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-4">
             ${Object.entries(academicCounts)
               .map(([group, count]) => {
                 const percent = total > 0 ? Math.round((count / total) * 100) : 0;
@@ -3060,8 +3115,8 @@ class SmartGroupEvaluator {
                 colorIndex++;
       
                 return `
-                  <div class="rounded-2xl p-5 transition transform hover:-translate-y-1 hover:shadow-xl 
-                              glass-card border border-white/20 dark:border-white/10">
+                  <div class="rounded-2xl p-3 transition transform hover:-translate-y-1 hover:shadow-xl 
+                              glass-card border border-white/20 dark:border-white/10 ">
                     <div class="flex justify-between items-center mb-3">
                       <div class="font-semibold text-lg text-gray-800 dark:text-gray-100">${group}</div>
                       <div class="text-sm text-gray-600 dark:text-gray-300">${count} (${percent}%)</div>
