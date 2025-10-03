@@ -163,7 +163,7 @@ class SmartGroupEvaluator {
             },
             {
                 title: "সদস্যদের দায়িত্ব",
-                content: "১. নির্দিষ্ট কাজ সময়মতো করা\n২. গ্রুপ মিটিং এ উপস্থিত থাকা\n৩. অন্যান্য সদস্যদের সহযোগিতা করা\n৪. সমস্যা হলে লিডারকে জানানো\n৫. গ্রুপের উন্নতির জন্য পরামর্শ দেওয়া",
+                content: "১. নির্দিষ্ট কাজ সময়মতো করা\n২. গ্রুপ মিটING এ উপস্থিত থাকা\n৩. অন্যান্য সদস্যদের সহযোগিতা করা\n৪. সমস্যা হলে লিডারকে জানানো\n৫. গ্রুপের উন্নতির জন্য পরামর্শ দেওয়া",
             },
         ];
 
@@ -187,12 +187,63 @@ class SmartGroupEvaluator {
         };
     }
 
+    debugAuthState() {
+        console.log("=== AUTH DEBUG INFO ===");
+        console.log("Current User:", this.currentUser);
+        console.log("Current User Data:", this.currentUserData);
+        console.log("Is Public Mode:", this.isPublicMode);
+        console.log("DOM Elements Status:", {
+            headerLoginBtn: {
+                element: !!this.dom.headerLoginBtn,
+                hidden: this.dom.headerLoginBtn?.classList.contains("hidden")
+            },
+            logoutBtn: {
+                element: !!this.dom.logoutBtn,
+                hidden: this.dom.logoutBtn?.classList.contains("hidden")
+            },
+            userInfo: {
+                element: !!this.dom.userInfo,
+                content: this.dom.userInfo?.innerHTML
+            },
+            appContainer: {
+                element: !!this.dom.appContainer,
+                hidden: this.dom.appContainer?.classList.contains("hidden")
+            },
+            authModal: {
+                element: !!this.dom.authModal,
+                hidden: this.dom.authModal?.classList.contains("hidden")
+            }
+        });
+        
+        // Navigation buttons status
+        const navStatus = {};
+        this.dom.navBtns.forEach(btn => {
+            const pageId = btn.getAttribute("data-page");
+            navStatus[pageId] = {
+                disabled: btn.disabled,
+                opacity: btn.style.opacity,
+                pointerEvents: btn.style.pointerEvents,
+                hasDisabledClass: btn.classList.contains("disabled-nav")
+            };
+        });
+        console.log("Navigation Status:", navStatus);
+    }
+
     async init() {
         this.setupDOMReferences();
         await this.initializeFirebase();
         this.setupEventListeners();
         this.setupAuthStateListener();
         this.applySavedTheme();
+
+        // DOM elements check করুন
+        console.log("DOM Elements Check:", {
+            headerLoginBtn: !!this.dom.headerLoginBtn,
+            logoutBtn: !!this.dom.logoutBtn,
+            userInfo: !!this.dom.userInfo,
+            appContainer: !!this.dom.appContainer,
+            authModal: !!this.dom.authModal
+        });
 
         // Initially set to public view
         this.updateUserInterface(null);
@@ -203,6 +254,11 @@ class SmartGroupEvaluator {
 
         this.isInitialized = true;
         console.log("Smart Evaluator initialized successfully");
+        
+        // Debug info
+        setTimeout(() => {
+            this.debugAuthState();
+        }, 2000);
     }
 
     setupAuthStateListener() {
@@ -214,14 +270,17 @@ class SmartGroupEvaluator {
                     console.log("User logged in:", user.email);
                     this.currentUser = user;
                     
+                    // User data fetch করুন
                     const userData = await this.getUserAdminData(user);
                     this.currentUserData = userData;
                     
                     console.log("User data loaded:", userData);
                     
+                    // Successful login handle করুন
                     await this.handleSuccessfulLogin(user);
                 } catch (error) {
                     console.error("Error in auth state change:", error);
+                    // Error হলে logout handle করুন
                     await this.handleLogout();
                 }
             } else {
@@ -245,7 +304,7 @@ class SmartGroupEvaluator {
     setupDOMReferences() {
         // Core DOM elements
         this.dom = {
-            loginHeaderBtn: document.getElementById("headerLoginBtn"),
+            headerLoginBtn: document.getElementById("headerLoginBtn"),
             exportPage: document.getElementById('page-export'),
             authModal: document.getElementById("authModal"),
             appContainer: document.getElementById("appContainer"),
@@ -258,8 +317,6 @@ class SmartGroupEvaluator {
             googleSignInBtn: document.getElementById("googleSignInBtn"),
             logoutBtn: document.getElementById("logoutBtn"),
             themeToggle: document.getElementById("themeToggle"),
-            mobileMenuBtn: document.getElementById("mobileMenuBtn"),
-            sidebar: document.querySelector(".sidebar"),
             pageTitle: document.getElementById("pageTitle"),
             userInfo: document.getElementById("userInfo"),
             adminManagementSection: document.getElementById("adminManagementSection"),
@@ -337,7 +394,7 @@ class SmartGroupEvaluator {
             groupMembersGroupSelect: document.getElementById("groupMembersGroupSelect"),
             groupMembersList: document.getElementById("groupMembersList"),
 
-            // Admin Management - FIXED REFERENCES
+            // Admin Management
             adminManagementContent: document.getElementById("adminManagementContent"),
             addAdminBtn: document.getElementById("addAdminBtn"),
             adminSearchInput: document.getElementById("adminSearchInput"),
@@ -363,7 +420,7 @@ class SmartGroupEvaluator {
 
     setupEventListeners() {
         // Header login button
-        this.addListener(this.dom.loginHeaderBtn, "click", () => this.showAuthModal());
+        this.addListener(this.dom.headerLoginBtn, "click", () => this.showAuthModal());
         
         // Auth events
         this.addListener(this.dom.showRegister, "click", () => this.toggleAuthForms());
@@ -392,7 +449,7 @@ class SmartGroupEvaluator {
         });
         this.addListener(this.dom.closeGroupDetails, "click", () => this.hideGroupDetailsModal());
 
-        // Admin Management events - FIXED
+        // Admin Management events
         this.addListener(this.dom.addAdminBtn, "click", () => this.showAdminModal());
         this.addListener(this.dom.cancelAdmin, "click", () => this.hideAdminModal());
         this.addListener(this.dom.saveAdmin, "click", () => this.saveAdmin());
@@ -403,7 +460,6 @@ class SmartGroupEvaluator {
 
         // Theme and mobile menu - FIXED
         this.addListener(this.dom.themeToggle, "click", () => this.toggleTheme());
-        this.addListener(this.dom.mobileMenuBtn, "click", () => this.toggleMobileMenu());
 
         // Navigation
         this.dom.navBtns.forEach((btn) => {
@@ -516,6 +572,7 @@ class SmartGroupEvaluator {
     // ===============================
     // AUTHENTICATION - FIXED
     // ===============================
+
     async handleSuccessfulLogin(user) {
         try {
             console.log("Handling successful login for:", user.email);
@@ -900,11 +957,8 @@ class SmartGroupEvaluator {
                     // Export page doesn't need additional loading
                     break;
                 case "admin-management":
-                    console.log("Loading admin management page...");
                     if (this.currentUser && this.currentUserData?.type === "super-admin") {
                         await this.loadAdmins();
-                    } else {
-                        console.log("User not authorized for admin management");
                     }
                     break;
             }
@@ -916,12 +970,6 @@ class SmartGroupEvaluator {
 
     enableAllNavigation(isLoggedIn) {
         console.log("Enabling navigation for:", isLoggedIn ? "Logged in" : "Logged out");
-        console.log("Current user data:", this.currentUserData);
-        
-        if (!this.dom.navBtns || this.dom.navBtns.length === 0) {
-            console.error("Navigation buttons not found");
-            return;
-        }
         
         this.dom.navBtns.forEach((btn) => {
             const pageId = btn.getAttribute("data-page");
@@ -938,7 +986,6 @@ class SmartGroupEvaluator {
                     btn.style.pointerEvents = "auto";
                     btn.disabled = false;
                     btn.classList.remove("disabled-nav");
-                    console.log(`Super admin access granted for: ${pageId}`);
                 } else if (userRole === "admin") {
                     // Admin - admin-management বাদে সকল page
                     if (pageId === "admin-management") {
@@ -946,13 +993,11 @@ class SmartGroupEvaluator {
                         btn.style.pointerEvents = "none";
                         btn.disabled = true;
                         btn.classList.add("disabled-nav");
-                        console.log(`Admin access denied for: ${pageId}`);
                     } else {
                         btn.style.opacity = "1";
                         btn.style.pointerEvents = "auto";
                         btn.disabled = false;
                         btn.classList.remove("disabled-nav");
-                        console.log(`Admin access granted for: ${pageId}`);
                     }
                 } else {
                     // Regular user - শুধু public pages
@@ -961,13 +1006,11 @@ class SmartGroupEvaluator {
                         btn.style.pointerEvents = "auto";
                         btn.disabled = false;
                         btn.classList.remove("disabled-nav");
-                        console.log(`Regular user access granted for: ${pageId}`);
                     } else {
                         btn.style.opacity = "0.5";
                         btn.style.pointerEvents = "none";
                         btn.disabled = true;
                         btn.classList.add("disabled-nav");
-                        console.log(`Regular user access denied for: ${pageId}`);
                     }
                 }
             } else {
@@ -977,20 +1020,18 @@ class SmartGroupEvaluator {
                     btn.style.pointerEvents = "auto";
                     btn.disabled = false;
                     btn.classList.remove("disabled-nav");
-                    console.log(`Public access granted for: ${pageId}`);
                 } else {
                     btn.style.opacity = "0.5";
                     btn.style.pointerEvents = "none";
                     btn.disabled = true;
                     btn.classList.add("disabled-nav");
-                    console.log(`Public access denied for: ${pageId}`);
                 }
             }
         });
     }
 
     updateUserInterface(userData) {
-        if (!this.dom.userInfo || !this.dom.logoutBtn || !this.dom.loginHeaderBtn) {
+        if (!this.dom.userInfo || !this.dom.logoutBtn || !this.dom.headerLoginBtn) {
             console.error("DOM elements not found for UI update");
             return;
         }
@@ -1012,7 +1053,7 @@ class SmartGroupEvaluator {
 
             // Show logout button, hide login button
             this.dom.logoutBtn.classList.remove("hidden");
-            this.dom.loginHeaderBtn.classList.add("hidden");
+            this.dom.headerLoginBtn.classList.add("hidden");
             
             console.log("UI updated for logged in user");
 
@@ -1022,7 +1063,7 @@ class SmartGroupEvaluator {
 
             // Show login button, hide logout button
             this.dom.logoutBtn.classList.add("hidden");
-            this.dom.loginHeaderBtn.classList.remove("hidden");
+            this.dom.headerLoginBtn.classList.remove("hidden");
             
             console.log("UI updated for logged out user");
         }
@@ -1043,11 +1084,6 @@ class SmartGroupEvaluator {
             console.log(`Page ${pageId} shown successfully`);
         } else {
             console.error(`Page with id page-${pageId} not found`);
-            // Fallback to dashboard if page not found
-            if (pageId !== "dashboard") {
-                this.showPage("dashboard");
-                this.showToast("পেজটি খুঁজে পাওয়া যায়নি", "error");
-            }
         }
 
         // Update active navigation
@@ -1246,10 +1282,7 @@ class SmartGroupEvaluator {
     }
 
     renderAdminManagement() {
-        if (!this.dom.adminManagementContent) {
-            console.error("Admin management content element not found");
-            return;
-        }
+        if (!this.dom.adminManagementContent) return;
 
         const filteredAdmins = this.getFilteredAdmins();
 
@@ -1612,12 +1645,6 @@ class SmartGroupEvaluator {
         }
     }
 
-    toggleMobileMenu() {
-        if (this.dom.sidebar) {
-            this.dom.sidebar.classList.toggle("hidden");
-        }
-    }
-
     ensurePublicPage() {
         const currentPage = this.getActivePage();
         console.log("Current active page:", currentPage);
@@ -1792,11 +1819,11 @@ class SmartGroupEvaluator {
                             <div class="text-sm text-gray-500">রোল: ${
                                 student.roll
                             } | জেন্ডার:${student.gender} | গ্রুপ: ${
-                    group?.name || "না"
+                    group?.name ||"নাই"
                 }</div>
                             <div class="text-sm text-gray-500">একাডেমিক: ${
-                                student.academicGroup || "না"
-                            } | সেশন: ${student.session || "না"}</div>
+                                student.academicGroup || "নাই"
+                            } | সেশন: ${student.session || "নাই"}</div>
                         </div>
                         <div class="flex gap-2">
                             ${
@@ -1854,9 +1881,9 @@ class SmartGroupEvaluator {
                         <div class="grid grid-cols-1 gap-2 text-sm text-gray-800 dark:text-gray-300 relative z-10">
                             <p><i class="fas fa-id-card mr-2 text-indigo-500"></i> রোল: ${student.roll}</p>
                             <p><i class="fas fa-venus-mars mr-2 text-pink-500"></i> জেন্ডার:${student.gender}</p>
-                            <p><i class="fas fa-users mr-2 text-green-500"></i> গ্রুপ: ${group?.name || "না"}</p>
-                            <p><i class="fas fa-book mr-2 text-orange-500"></i> একাডেমিক: ${student.academicGroup || "না"}</p>
-                            <p><i class="fas fa-calendar mr-2 text-blue-500"></i> সেশন: ${student.session || "না"}</p>
+                            <p><i class="fas fa-users mr-2 text-green-500"></i> গ্রুপ: ${group?.name ||"নাই"}</p>
+                            <p><i class="fas fa-book mr-2 text-orange-500"></i> একাডেমিক: ${student.academicGroup ||"নাই"}</p>
+                            <p><i class="fas fa-calendar mr-2 text-blue-500"></i> সেশন: ${student.session ||"নাই"}</p>
                             ${
                                 student.contact
                                     ? `<p><i class="fas fa-envelope mr-2 text-red-500"></i> ${student.contact}</p>`
@@ -1976,308 +2003,153 @@ class SmartGroupEvaluator {
     }
 
     // ===============================
-    // POPULATE SELECTS
+    // GROUP DETAILS WITH ENHANCED ANALYSIS - FIXED
     // ===============================
-    populateSelects() {
-        // Populate group selects
-        const groupSelects = [
-            "studentGroupInput",
-            "membersFilterGroup",
-            "cardsFilterGroup",
-            "groupMembersGroupSelect",
-            "analysisGroupSelect",
-            "evaluationGroupSelect",
-        ];
+    renderGroupDetails(groupId) {
+        if (!this.dom.groupDetailsContent) return;
 
-        groupSelects.forEach((selectId) => {
-            const select = document.getElementById(selectId);
-            if (select) {
-                select.innerHTML = `
-                    <option value="">সকল গ্রুপ</option>
-                    ${this.state.groups
-                        .map((g) => `<option value="${g.id}">${g.name}</option>`)
-                        .join("")}
-                `;
-            }
-        });
+        const group = this.state.groups.find((g) => g.id === groupId);
+        const groupStudents = this.state.students.filter(
+            (s) => s.groupId === groupId
+        );
+        const groupEvaluations = this.state.evaluations.filter(
+            (e) => e.groupId === groupId
+        );
 
-        // Populate task selects
-        const taskSelects = ["evaluationTaskSelect"];
-        taskSelects.forEach((selectId) => {
-            const select = document.getElementById(selectId);
-            if (select) {
-                select.innerHTML = `
-                    <option value="">টাস্ক নির্বাচন করুন</option>
-                    ${this.state.tasks
-                        .map((t) => `<option value="${t.id}">${t.name}</option>`)
-                        .join("")}
-                `;
-            }
-        });
-
-        // Populate role select
-        const roleSelect = document.getElementById("studentRoleInput");
-        if (roleSelect) {
-            roleSelect.innerHTML = `
-                <option value="">কোনোটি না</option>
-                ${Object.entries(this.roleNames)
-                    .map(([key, value]) => `<option value="${key}">${value}</option>`)
-                    .join("")}
-            `;
-        }
-    }
-
-    // ===============================
-    // AUTH FORM TOGGLE
-    // ===============================
-    toggleAuthForms(showRegister = false) {
-        const loginForm = document.getElementById("loginForm");
-        const registerForm = document.getElementById("registerForm");
-        const showRegisterBtn = document.getElementById("showRegister");
-        const showLoginBtn = document.getElementById("showLogin");
-
-        if (showRegister) {
-            loginForm.classList.add("hidden");
-            registerForm.classList.remove("hidden");
-            showRegisterBtn.classList.add("hidden");
-            showLoginBtn.classList.remove("hidden");
-        } else {
-            loginForm.classList.remove("hidden");
-            registerForm.classList.add("hidden");
-            showRegisterBtn.classList.remove("hidden");
-            showLoginBtn.classList.add("hidden");
-        }
-    }
-
-    // ===============================
-    // GROUP ANALYSIS - FIXED
-    // ===============================
-    renderGroupAnalysis() {
-        if (!this.dom.analysisGroupSelect || !this.dom.groupAnalysisDetails) return;
-
-        // Populate group select
-        this.dom.analysisGroupSelect.innerHTML = `
-            <option value="">সকল গ্রুপ</option>
-            ${this.state.groups
-                .map((g) => `<option value="${g.id}">${g.name}</option>`)
-                .join("")}
+        let content = `
+            <div class="mb-6">
+                
+                <!-- Summary Section -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <div class="text-blue-600 dark:text-blue-400 font-semibold text-center">মোট মূল্যায়ন</div>
+                        <div class="text-2xl font-bold text-blue-700 dark:text-blue-300 text-center">${groupEvaluations.length}</div>
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <div class="text-green-600 dark:text-green-400 font-semibold text-center">সদস্য সংখ্যা</div>
+                        <div class="text-2xl font-bold text-green-700 dark:text-green-300 text-center">${groupStudents.length}</div>
+                    </div>
+                    <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                        <div class="text-purple-600 dark:text-purple-400 font-semibold text-center">গড় স্কোর</div>
+                        <div class="text-2xl font-bold text-purple-700 dark:text-purple-300 text-center">${this.calculateGroupAverageScore(groupId).toFixed(2)}</div>
+                    </div>
+                </div>
+            </div>
         `;
 
-        // Render initial analysis
-        this.updateGroupAnalysis();
-    }
-
-    updateGroupAnalysis() {
-        const selectedGroupId = this.dom.analysisGroupSelect?.value || "";
-        const container = this.dom.groupAnalysisDetails;
-        if (!container) return;
-
-        let groupsToAnalyze = this.state.groups;
-        if (selectedGroupId) {
-            groupsToAnalyze = groupsToAnalyze.filter((g) => g.id === selectedGroupId);
-        }
-
-        if (groupsToAnalyze.length === 0) {
-            container.innerHTML =
-                '<p class="text-center text-gray-500 py-8">কোন গ্রুপ পাওয়া যায়নি</p>';
-            return;
-        }
-
-        let content = "";
-
-        groupsToAnalyze.forEach((group) => {
-            const groupStudents = this.state.students.filter(
-                (s) => s.groupId === group.id
-            );
-            const groupEvaluations = this.state.evaluations.filter(
-                (e) => e.groupId === group.id
-            );
-
-            // Calculate comprehensive statistics
-            const stats = this.calculateGroupComprehensiveStats(
-                group.id,
-                groupStudents,
-                groupEvaluations
-            );
-
-            content += `
-                <div class="mb-8 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                    <!-- Group Header -->
-                    <div class="mb-6 text-center">
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">${
-                            group.name
-                        } - বিস্তারিত বিশ্লেষণ</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                                <div class="text-blue-600 dark:text-blue-400 text-sm">সদস্য</div>
-                                <div class="text-xl font-bold text-blue-700 dark:text-blue-300">${
-                                    stats.memberCount
-                                }</div>
-                            </div>
-                            <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-                                <div class="text-green-600 dark:text-green-400 text-sm">মূল্যায়ন</div>
-                                <div class="text-xl font-bold text-green-700 dark:text-green-300">${
-                                    stats.evaluationCount
-                                }</div>
-                            </div>
-                            <div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
-                                <div class="text-purple-600 dark:text-purple-400 text-sm">গড় স্কোর</div>
-                                <div class="text-xl font-bold text-purple-700 dark:text-purple-300">${stats.overallAverage.toFixed(
-                                    2
-                                )}</div>
-                            </div>
-                            <div class="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg">
-                                <div class="text-orange-600 dark:text-orange-400 text-sm">সর্বোচ্চ</div>
-                                <div class="text-xl font-bold text-orange-700 dark:text-orange-300">${stats.maxScore.toFixed(
-                                    2
-                                )}</div>
+        if (groupEvaluations.length === 0) {
+            content += `<p class="text-gray-500 text-center py-8">কোন মূল্যায়ন পাওয়া যায়নি</p>`;
+        } else {
+            groupEvaluations.forEach((evalItem) => {
+                const task = this.state.tasks.find((t) => t.id === evalItem.taskId);
+                const evalStats = this.calculateEvaluationStats(evalItem);
+                
+                content += `
+                    <div class="mb-8 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                        <!-- Evaluation Summary -->
+                        <div class="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <h5 class="font-semibold text-lg mb-2 text-gray-800 dark:text-white">${task?.name || "Unknown Task"}</h5>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                    <div class="text-gray-600 dark:text-gray-400">গড় স্কোর</div>
+                                    <div class="font-semibold text-blue-600 dark:text-blue-400">${evalStats.averageScore.toFixed(2)}</div>
+                                </div>
+                                <div>
+                                    <div class="text-gray-600 dark:text-gray-400">সর্বোচ্চ স্কোর</div>
+                                    <div class="font-semibold text-green-600 dark:text-green-400">${evalStats.maxScore}</div>
+                                </div>
+                                <div>
+                                    <div class="text-gray-600 dark:text-gray-400">ন্যূনতম স্কোর</div>
+                                    <div class="font-semibold text-red-600 dark:text-red-400">${evalStats.minScore}</div>
+                                </div>
+                                <div>
+                                    <div class="text-gray-600 dark:text-gray-400">মোট যোগফল</div>
+                                    <div class="font-semibold text-purple-600 dark:text-purple-400">${evalStats.totalScore}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Performance by Task -->
-                    <div class="mb-6">
-                        <h4 class="font-semibold text-lg mb-4 text-gray-800 dark:text-white">টাস্ক অনুযায়ী পারফরম্যান্স</h4>
-                        <div class="space-y-4">
-                            ${stats.taskPerformance
-                                .map(
-                                    (task) => `
-                                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <h5 class="font-medium text-gray-800 dark:text-white">${
-                                                task.taskName
-                                            }</h5>
-                                            <span class="text-sm font-semibold ${
-                                                task.averageScore >= 80
-                                                    ? "text-green-600 dark:text-green-400"
-                                                    : task.averageScore >= 60
-                                                    ? "text-yellow-600 dark:text-yellow-400"
-                                                    : "text-red-600 dark:text-red-400"
-                                            }">
-                                                গড়: ${task.averageScore.toFixed(2)}
-                                            </span>
-                                        </div>
-                                        <div class="grid grid-cols-3 gap-2 text-sm">
-                                            <div class="text-center">
-                                                <div class="text-gray-600 dark:text-gray-400">সর্বোচ্চ</div>
-                                                <div class="font-semibold text-green-600 dark:text-green-400">${task.maxScore.toFixed(
-                                                    2
-                                                )}</div>
-                                            </div>
-                                            <div class="text-center">
-                                                <div class="text-gray-600 dark:text-gray-400">সর্বনিম্ন</div>
-                                                <div class="font-semibold text-red-600 dark:text-red-400">${task.minScore.toFixed(
-                                                    2
-                                                )}</div>
-                                            </div>
-                                            <div class="text-center">
-                                                <div class="text-gray-600 dark:text-gray-400">অংশগ্রহণ</div>
-                                                <div class="font-semibold text-blue-600 dark:text-blue-400">${
-                                                    task.participants
-                                                }</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `
-                                )
-                                .join("")}
-                        </div>
-                    </div>
-
-                    <!-- Student Performance -->
-                    <div>
-                        <h4 class="font-semibold text-lg mb-4 text-gray-800 dark:text-white">শিক্ষার্থী পারফরম্যান্স</h4>
-                        <div class="overflow-x-auto">
-                            <table class="w-full border-collapse">
+                        <!-- Detailed Table -->
+                        <div class="overflow-auto">
+                            <table class="evaluation-table w-full border-collapse">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-700">
-                                        <th class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">শিক্ষার্থী</th>
-                                        <th class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">দায়িত্ব</th>
-                                        <th class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">গড় স্কোর</th>
-                                        <th class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">মোট মূল্যায়ন</th>
-                                        <th class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">স্ট্যাটাস</th>
+                                        <th class="border border-gray-300 dark:border-gray-600 p-3 text-left text-gray-800 dark:text-white">শিক্ষার্থী</th>
+                                        <th class="border border-gray-300 dark:border-gray-600 p-3 text-left text-gray-800 dark:text-white">টাস্ক স্কোর</th>
+                                        <th class="border border-gray-300 dark:border-gray-600 p-3 text-left text-gray-800 dark:text-white">টিমওয়ার্ক</th>
+                                        <th class="border border-gray-300 dark:border-gray-600 p-3 text-left text-gray-800 dark:text-white">অতিরিক্ত পয়েন্ট</th>
+                                        <th class="border border-gray-300 dark:border-gray-600 p-3 text-left text-gray-800 dark:text-white">মোট</th>
+                                        <th class="border border-gray-300 dark:border-gray-600 p-3 text-left text-gray-800 dark:text-white">মন্তব্য</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${stats.studentPerformance
-                                        .map(
-                                            (student) => `
-                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                <td class="border border-gray-300 dark:border-gray-600 p-2 text-gray-700 dark:text-gray-300">${student.name}</td>
-                                                <td class="border border-gray-300 dark:border-gray-600 p-2 text-gray-700 dark:text-gray-300">${student.roleName}</td>
-                                                <td class="border border-gray-300 dark:border-gray-600 p-2 text-gray-700 dark:text-gray-300">${student.averageScore.toFixed(
-                                                    2
-                                                )}</td>
-                                                <td class="border border-gray-300 dark:border-gray-600 p-2 text-gray-700 dark:text-gray-300">${student.evaluationCount}</td>
-                                                <td class="border border-gray-300 dark:border-gray-600 p-2">
-                                                    <span class="px-2 py-1 rounded text-xs ${
-                                                        student.averageScore >= 80
-                                                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                                            : student.averageScore >= 60
-                                                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                                                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                                    }">
-                                                        ${
-                                                            student.averageScore >= 80
-                                                                ? "চমৎকার"
-                                                                : student.averageScore >=
-                                                                    60
-                                                                ? "ভাল"
-                                                                : "সুযোগ আছে"
-                                                        }
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        `
-                                        )
-                                        .join("")}
+                `;
+
+                groupStudents.forEach((student) => {
+                    const score = evalItem.scores?.[student.id] || {};
+                    const optionMarks = score.optionMarks || {};
+                    let additionalMarks = 0;
+                    let optionDetails = [];
+
+                    Object.values(optionMarks).forEach((opt) => {
+                        if (opt.selected) {
+                            const optDef = this.evaluationOptions.find(
+                                (o) => o.id === opt.optionId
+                            );
+                            if (optDef) {
+                                additionalMarks += optDef.marks;
+                                optionDetails.push(optDef.text);
+                            }
+                        }
+                    });
+
+                    const total =
+                        (score.taskScore || 0) +
+                        (score.teamworkScore || 0) +
+                        additionalMarks;
+
+                    content += `
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="border border-gray-300 dark:border-gray-600 p-3 text-gray-700 dark:text-gray-300">${student.name}${
+                        student.role ? ` (${this.roleNames[student.role]})` : ""
+                    }</td>
+                                    <td class="border border-gray-300 dark:border-gray-600 p-3 text-gray-700 dark:text-gray-300">${score.taskScore || 0}</td>
+                                    <td class="border border-gray-300 dark:border-gray-600 p-3 text-gray-700 dark:text-gray-300">${score.teamworkScore || 0}</td>
+                                    <td class="border border-gray-300 dark:border-gray-600 p-3 text-gray-700 dark:text-gray-300">${additionalMarks}</td>
+                                    <td class="border border-gray-300 dark:border-gray-600 p-3 font-semibold text-blue-600 dark:text-blue-400">${total}</td>
+                                    <td class="border border-gray-300 dark:border-gray-600 p-3 text-gray-700 dark:text-gray-300">${score.comments || "-"}</td>
+                                </tr>
+                            `;
+                });
+
+                content += `
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                </div>
-            `;
-        });
+                `;
+            });
+        }
 
-        container.innerHTML = content;
+        this.dom.groupDetailsContent.innerHTML = content;
     }
 
-    calculateGroupComprehensiveStats(groupId, groupStudents, groupEvaluations) {
-        const stats = {
-            memberCount: groupStudents.length,
-            evaluationCount: groupEvaluations.length,
-            overallAverage: 0,
-            maxScore: 0,
-            minScore: Infinity,
-            taskPerformance: [],
-            rolePerformance: [],
-            studentPerformance: [],
-        };
+    // ===============================
+    // CALCULATION METHODS - FIXED
+    // ===============================
+    calculateGroupAverageScore(groupId) {
+        const groupEvaluations = this.state.evaluations.filter(
+            (e) => e.groupId === groupId
+        );
+        
+        if (groupEvaluations.length === 0) return 0;
 
-        // Calculate student performances
-        const studentScores = {};
-        groupStudents.forEach((student) => {
-            studentScores[student.id] = {
-                name: student.name,
-                roleName: this.roleNames[student.role] || "নির্ধারিত হয়নি",
-                totalScore: 0,
-                evaluationCount: 0,
-                averageScore: 0,
-            };
-        });
+        let totalScore = 0;
+        let evaluationCount = 0;
 
-        // Calculate scores from evaluations
         groupEvaluations.forEach((evalItem) => {
-            if (!evalItem.scores) return;
-
-            const task = this.state.tasks.find((t) => t.id === evalItem.taskId);
-            let taskTotal = 0;
-            let taskCount = 0;
-            let taskMax = 0;
-            let taskMin = Infinity;
-
-            Object.entries(evalItem.scores).forEach(([studentId, score]) => {
-                if (studentScores[studentId]) {
+            if (evalItem.scores) {
+                Object.values(evalItem.scores).forEach((score) => {
                     let additionalMarks = 0;
                     if (score.optionMarks) {
                         Object.values(score.optionMarks).forEach((opt) => {
@@ -2290,72 +2162,120 @@ class SmartGroupEvaluator {
                         });
                     }
 
-                    const total =
-                        (score.taskScore || 0) +
-                        (score.teamworkScore || 0) +
-                        additionalMarks;
-
-                    studentScores[studentId].totalScore += total;
-                    studentScores[studentId].evaluationCount++;
-
-                    // Update task statistics
-                    taskTotal += total;
-                    taskCount++;
-                    taskMax = Math.max(taskMax, total);
-                    taskMin = Math.min(taskMin, total);
-                }
-            });
-
-            // Add task performance data
-            if (taskCount > 0) {
-                stats.taskPerformance.push({
-                    taskName: task?.name || "Unknown Task",
-                    averageScore: taskTotal / taskCount,
-                    maxScore: taskMax,
-                    minScore: taskMin === Infinity ? 0 : taskMin,
-                    participants: taskCount,
+                    totalScore +=
+                        (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
+                    evaluationCount++;
                 });
             }
         });
 
-        // Calculate student averages and overall statistics
-        let overallTotal = 0;
-        let overallCount = 0;
+        return evaluationCount > 0 ? totalScore / evaluationCount : 0;
+    }
 
-        Object.values(studentScores).forEach((studentData) => {
-            if (studentData.evaluationCount > 0) {
-                studentData.averageScore =
-                    studentData.totalScore / studentData.evaluationCount;
-                stats.studentPerformance.push(studentData);
+    calculateEvaluationStats(evaluation) {
+        const stats = {
+            totalScore: 0,
+            averageScore: 0,
+            maxScore: 0,
+            minScore: Infinity,
+            studentCount: 0
+        };
 
-                overallTotal += studentData.averageScore;
-                overallCount++;
-                stats.maxScore = Math.max(stats.maxScore, studentData.averageScore);
-                stats.minScore = Math.min(stats.minScore, studentData.averageScore);
-            }
-        });
+        if (evaluation.scores) {
+            Object.values(evaluation.scores).forEach((score) => {
+                let additionalMarks = 0;
+                if (score.optionMarks) {
+                    Object.values(score.optionMarks).forEach((opt) => {
+                        if (opt.selected) {
+                            const optDef = this.evaluationOptions.find(
+                                (o) => o.id === opt.optionId
+                            );
+                            if (optDef) additionalMarks += optDef.marks;
+                        }
+                    });
+                }
 
-        stats.overallAverage = overallCount > 0 ? overallTotal / overallCount : 0;
-        stats.minScore = stats.minScore === Infinity ? 0 : stats.minScore;
+                const studentTotal =
+                    (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
+                
+                stats.totalScore += studentTotal;
+                stats.maxScore = Math.max(stats.maxScore, studentTotal);
+                stats.minScore = Math.min(stats.minScore, studentTotal);
+                stats.studentCount++;
+            });
 
-        // Calculate role-wise performance
-        const roleStats = {};
-        stats.studentPerformance.forEach((student) => {
-            const role = student.roleName;
-            if (!roleStats[role]) {
-                roleStats[role] = { total: 0, count: 0 };
-            }
-            roleStats[role].total += student.averageScore;
-            roleStats[role].count++;
-        });
-
-        stats.rolePerformance = Object.entries(roleStats).map(([role, data]) => ({
-            roleName: role,
-            averageScore: data.total / data.count,
-            count: data.count,
-        }));
+            stats.averageScore = stats.studentCount > 0 ? stats.totalScore / stats.studentCount : 0;
+            stats.minScore = stats.minScore === Infinity ? 0 : stats.minScore;
+        }
 
         return stats;
+    }
+
+    calculateEvaluationTotalScore(evaluation) {
+        if (!evaluation.scores) return 0;
+
+        let total = 0;
+        Object.values(evaluation.scores).forEach((score) => {
+            let additionalMarks = 0;
+            if (score.optionMarks) {
+                Object.values(score.optionMarks).forEach((opt) => {
+                    if (opt.selected) {
+                        const optDef = this.evaluationOptions.find(
+                            (o) => o.id === opt.optionId
+                        );
+                        if (optDef) additionalMarks += optDef.marks;
+                    }
+                });
+            }
+
+            total +=
+                (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
+        });
+
+        return total;
+    }
+
+    calculateProblemSolvingStats() {
+        const stats = {
+            totalProblems: 0,
+            cannotDo: 0,
+            learnedCannotWrite: 0,
+            learnedCanWrite: 0,
+            weeklyHomework: 0,
+            weeklyAttendance: 0,
+        };
+
+        this.state.evaluations.forEach((evalItem) => {
+            if (!evalItem.scores) return;
+            Object.values(evalItem.scores).forEach((score) => {
+                stats.totalProblems++;
+                if (score.optionMarks) {
+                    Object.values(score.optionMarks).forEach((opt) => {
+                        if (opt.selected) {
+                            switch (opt.optionId) {
+                                case "cannot_do":
+                                    stats.cannotDo++;
+                                    break;
+                                case "learned_cannot_write":
+                                    stats.learnedCannotWrite++;
+                                    break;
+                                case "learned_can_write":
+                                    stats.learnedCanWrite++;
+                                    break;
+                                case "weekly_homework":
+                                    stats.weeklyHomework++;
+                                    break;
+                                case "weekly_attendance":
+                                    stats.weeklyAttendance++;
+                                    break;
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        this.state.problemStats = stats;
     }
 
     // ===============================
@@ -2609,73 +2529,360 @@ class SmartGroupEvaluator {
     }
 
     // ===============================
-    // CALCULATION METHODS
+    // EDIT OPERATIONS - FIXED
     // ===============================
-    calculateEvaluationTotalScore(evaluation) {
-        if (!evaluation.scores) return 0;
+    async editStudent(id) {
+        const student = this.state.students.find((s) => s.id === id);
+        if (!student) return;
 
-        let total = 0;
-        Object.values(evaluation.scores).forEach((score) => {
-            let additionalMarks = 0;
-            if (score.optionMarks) {
-                Object.values(score.optionMarks).forEach((opt) => {
-                    if (opt.selected) {
-                        const optDef = this.evaluationOptions.find(
-                            (o) => o.id === opt.optionId
-                        );
-                        if (optDef) additionalMarks += optDef.marks;
-                    }
-                });
+        this.dom.editModalTitle.textContent = "শিক্ষার্থী সম্পাদনা";
+        this.dom.editModalContent.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">নাম</label>
+                        <input id="editName" type="text" value="${
+                            student.name
+                        }" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">রোল</label>
+                        <input id="editRoll" type="text" value="${
+                            student.roll
+                        }" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">লিঙ্গ</label>
+                        <select id="editGender" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                            <option value="ছেলে" ${
+                                student.gender === "ছেলে" ? "selected" : ""
+                            }>ছেলে</option>
+                            <option value="মেয়ে" ${
+                                student.gender === "মেয়ে" ? "selected" : ""
+                            }>মেয়ে</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">গ্রুপ</label>
+                        <select id="editGroup" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                            ${this.state.groups
+                                .map(
+                                    (g) =>
+                                        `<option value="${g.id}" ${
+                                            student.groupId === g.id ? "selected" : ""
+                                        }>${g.name}</option>`
+                                )
+                                .join("")}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">যোগাযোগ</label>
+                        <input id="editContact" type="text" value="${
+                            student.contact || ""
+                        }" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">একাডেমিক গ্রুপ</label>
+                        <input id="editAcademicGroup" type="text" value="${
+                            student.academicGroup || ""
+                        }" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="50">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">সেশন</label>
+                        <input id="editSession" type="text" value="${
+                            student.session || ""
+                        }" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">দায়িত্ব</label>
+                        <select id="editRole" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                            <option value="">কোনোটি না</option>
+                            ${Object.entries(this.roleNames)
+                                .map(
+                                    ([key, value]) =>
+                                        `<option value="${key}" ${
+                                            student.role === key ? "selected" : ""
+                                        }>${value}</option>`
+                                )
+                                .join("")}
+                        </select>
+                    </div>
+                </div>
+            `;
+
+        this.editCallback = async () => {
+            const newData = {
+                name: document.getElementById("editName").value.trim(),
+                roll: document.getElementById("editRoll").value.trim(),
+                gender: document.getElementById("editGender").value,
+                groupId: document.getElementById("editGroup").value,
+                contact: document.getElementById("editContact").value.trim(),
+                academicGroup: document
+                    .getElementById("editAcademicGroup")
+                    .value.trim(),
+                session: document.getElementById("editSession").value.trim(),
+                role: document.getElementById("editRole").value,
+            };
+
+            if (
+                !newData.name ||
+                !newData.roll ||
+                !newData.gender ||
+                !newData.groupId ||
+                !newData.academicGroup ||
+                !newData.session
+            ) {
+                this.showToast("সমস্ত প্রয়োজনীয় তথ্য পূরণ করুন", "error");
+                return;
             }
 
-            total +=
-                (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
-        });
+            const rollChanged = newData.roll !== student.roll;
+            const academicChanged = newData.academicGroup !== student.academicGroup;
 
-        return total;
-    }
+            if (
+                (rollChanged || academicChanged) &&
+                (await this.checkStudentUniqueness(
+                    newData.roll,
+                    newData.academicGroup,
+                    id
+                ))
+            ) {
+                this.showToast(
+                    "এই রোল ও একাডেমিক গ্রুপের শিক্ষার্থী ইতিমধ্যে আছে",
+                    "error"
+                );
+                return;
+            }
 
-    calculateProblemSolvingStats() {
-        const stats = {
-            totalProblems: 0,
-            cannotDo: 0,
-            learnedCannotWrite: 0,
-            learnedCanWrite: 0,
-            weeklyHomework: 0,
-            weeklyAttendance: 0,
+            this.showLoading();
+            try {
+                await db.collection("students").doc(id).update(newData);
+                // Clear cache and reload data
+                this.cache.clear("students_data");
+                await this.loadStudents();
+                this.showToast("শিক্ষার্থী সফলভাবে আপডেট করা হয়েছে", "success");
+            } catch (error) {
+                this.showToast("সম্পাদনা ব্যর্থ: " + error.message, "error");
+            } finally {
+                this.hideLoading();
+            }
         };
 
-        this.state.evaluations.forEach((evalItem) => {
-            if (!evalItem.scores) return;
-            Object.values(evalItem.scores).forEach((score) => {
-                stats.totalProblems++;
-                if (score.optionMarks) {
-                    Object.values(score.optionMarks).forEach((opt) => {
-                        if (opt.selected) {
-                            switch (opt.optionId) {
-                                case "cannot_do":
-                                    stats.cannotDo++;
-                                    break;
-                                case "learned_cannot_write":
-                                    stats.learnedCannotWrite++;
-                                    break;
-                                case "learned_can_write":
-                                    stats.learnedCanWrite++;
-                                    break;
-                                case "weekly_homework":
-                                    stats.weeklyHomework++;
-                                    break;
-                                case "weekly_attendance":
-                                    stats.weeklyAttendance++;
-                                    break;
-                            }
-                        }
-                    });
-                }
-            });
-        });
+        this.showEditModal();
+    }
 
-        this.state.problemStats = stats;
+    async editGroup(id) {
+        const group = this.state.groups.find((g) => g.id === id);
+        if (!group) return;
+
+        this.dom.editModalTitle.textContent = "গ্রুপ সম্পাদনা";
+        this.dom.editModalContent.innerHTML = `
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">গ্রুপ নাম</label>
+                    <input id="editGroupName" type="text" value="${group.name}" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="50">
+                </div>
+            `;
+
+        this.editCallback = async () => {
+            const name = document.getElementById("editGroupName").value.trim();
+            if (!name) {
+                this.showToast("নাম লিখুন", "error");
+                return;
+            }
+            this.showLoading();
+            try {
+                await db.collection("groups").doc(id).update({ name });
+                // Clear cache and reload data
+                this.cache.clear("groups_data");
+                await this.loadGroups();
+                this.showToast("গ্রুপ সফলভাবে আপডেট করা হয়েছে", "success");
+            } catch (error) {
+                this.showToast("সম্পাদনা ব্যর্থ: " + error.message, "error");
+            } finally {
+                this.hideLoading();
+            }
+        };
+
+        this.showEditModal();
+    }
+
+    async editTask(id) {
+        const task = this.state.tasks.find((t) => t.id === id);
+        if (!task) return;
+
+        const dateStr = task.date?.seconds
+            ? new Date(task.date.seconds * 1000).toISOString().split("T")[0]
+            : "";
+
+        this.dom.editModalTitle.textContent = "টাস্ক সম্পাদনা";
+        this.dom.editModalContent.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">টাস্ক নাম</label>
+                        <input id="editTaskName" type="text" value="${
+                            task.name
+                        }" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">বিবরণ</label>
+                        <textarea id="editTaskDescription" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="500">${
+                            task.description || ""
+                        }</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">সর্বোচ্চ স্কোর</label>
+                        <input id="editTaskMaxScore" type="number" value="${
+                            task.maxScore
+                        }" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" min="1" max="1000">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">তারিখ</label>
+                        <input id="editTaskDate" type="date" value="${dateStr}" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+            `;
+
+        this.editCallback = async () => {
+            const name = document.getElementById("editTaskName").value.trim();
+            const description = document
+                .getElementById("editTaskDescription")
+                .value.trim();
+            const maxScore = parseInt(
+                document.getElementById("editTaskMaxScore").value
+            );
+            const dateStr = document.getElementById("editTaskDate").value;
+
+            if (!name || !description || isNaN(maxScore) || !dateStr) {
+                this.showToast("সমস্ত তথ্য পূরণ করুন", "error");
+                return;
+            }
+
+            const date = new Date(dateStr);
+
+            this.showLoading();
+            try {
+                await db
+                    .collection("tasks")
+                    .doc(id)
+                    .update({ name, description, maxScore, date });
+                // Clear cache and reload data
+                this.cache.clear("tasks_data");
+                await this.loadTasks();
+                this.showToast("টাস্ক সফলভাবে আপডেট করা হয়েছে", "success");
+            } catch (error) {
+                this.showToast("সম্পাদনা ব্যর্থ: " + error.message, "error");
+            } finally {
+                this.hideLoading();
+            }
+        };
+
+        this.showEditModal();
+    }
+
+    async editEvaluation(id) {
+        const evaluation = this.state.evaluations.find((e) => e.id === id);
+        if (!evaluation) return;
+
+        this.dom.editModalTitle.textContent = "মূল্যায়ন সম্পাদনা";
+
+        // Find task and group
+        const task = this.state.tasks.find((t) => t.id === evaluation.taskId);
+        const group = this.state.groups.find((g) => g.id === evaluation.groupId);
+
+        this.dom.editModalContent.innerHTML = `
+                <div class="mb-4">
+                    <p class="text-gray-700 dark:text-gray-300"><strong>টাস্ক:</strong> ${task?.name || "Unknown"}</p>
+                    <p class="text-gray-700 dark:text-gray-300"><strong>গ্রুপ:</strong> ${group?.name || "Unknown"}</p>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400">মূল্যায়ন সম্পাদনা করতে মূল্যায়ন পৃষ্ঠায় যান এবং সংশ্লিষ্ট টাস্ক ও গ্রুপ নির্বাচন করুন।</p>
+            `;
+
+        this.editCallback = () => {
+            // Navigate to evaluation page with pre-selected values
+            this.handleNavigation({
+                currentTarget: document.querySelector('[data-page="evaluation"]'),
+            });
+            setTimeout(() => {
+                if (this.dom.evaluationTaskSelect)
+                    this.dom.evaluationTaskSelect.value = evaluation.taskId;
+                if (this.dom.evaluationGroupSelect)
+                    this.dom.evaluationGroupSelect.value = evaluation.groupId;
+                this.startEvaluation();
+            }, 500);
+            this.hideEditModal();
+        };
+
+        this.showEditModal();
+    }
+
+    // ===============================
+    // DELETE OPERATIONS
+    // ===============================
+    async deleteStudent(id) {
+        this.showDeleteModal("এই শিক্ষার্থী ডিলিট করবেন?", async () => {
+            this.showLoading();
+            try {
+                await db.collection("students").doc(id).delete();
+                // Clear cache and reload data
+                this.cache.clear("students_data");
+                await this.loadStudents();
+                this.showToast("শিক্ষার্থী সফলভাবে ডিলিট করা হয়েছে", "success");
+            } catch (error) {
+                this.showToast("ডিলিট ব্যর্থ: " + error.message, "error");
+            } finally {
+                this.hideLoading();
+            }
+        });
+    }
+
+    async deleteGroup(id) {
+        this.showDeleteModal("এই গ্রুপ ডিলিট করবেন?", async () => {
+            this.showLoading();
+            try {
+                await db.collection("groups").doc(id).delete();
+                // Clear cache and reload data
+                this.cache.clear("groups_data");
+                await this.loadGroups();
+                this.showToast("গ্রুপ সফলভাবে ডিলিট করা হয়েছে", "success");
+            } catch (error) {
+                this.showToast("ডিলিট ব্যর্থ: " + error.message, "error");
+            } finally {
+                this.hideLoading();
+            }
+        });
+    }
+
+    async deleteTask(id) {
+        this.showDeleteModal("এই টাস্ক ডিলিট করবেন?", async () => {
+            this.showLoading();
+            try {
+                await db.collection("tasks").doc(id).delete();
+                // Clear cache and reload data
+                this.cache.clear("tasks_data");
+                await this.loadTasks();
+                this.showToast("টাস্ক সফলভাবে ডিলিট করা হয়েছে", "success");
+            } catch (error) {
+                this.showToast("ডিলিট ব্যর্থ: " + error.message, "error");
+            } finally {
+                this.hideLoading();
+            }
+        });
+    }
+
+    async deleteEvaluation(id) {
+        this.showDeleteModal("এই মূল্যায়ন ডিলিট করবেন?", async () => {
+            this.showLoading();
+            try {
+                await db.collection("evaluations").doc(id).delete();
+                // Clear cache and reload data
+                this.cache.clear("evaluations_data");
+                await this.loadEvaluations();
+                this.showToast("মূল্যায়ন সফলভাবে ডিলিট করা হয়েছে", "success");
+            } catch (error) {
+                this.showToast("ডিলিট ব্যর্থ: " + error.message, "error");
+            } finally {
+                this.hideLoading();
+            }
+        });
     }
 
     // ===============================
@@ -2883,7 +3090,7 @@ class SmartGroupEvaluator {
         let colorIndex = 0;
       
         container.innerHTML = `
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-4">
             ${Object.entries(academicCounts)
               .map(([group, count]) => {
                 const percent = total > 0 ? Math.round((count / total) * 100) : 0;
@@ -2891,8 +3098,8 @@ class SmartGroupEvaluator {
                 colorIndex++;
       
                 return `
-                  <div class="rounded-2xl p-5 transition transform hover:-translate-y-1 hover:shadow-xl 
-                              glass-card border border-white/20 dark:border-white/10">
+                  <div class="rounded-2xl p-3 transition transform hover:-translate-y-1 hover:shadow-xl 
+                              glass-card border border-white/20 dark:border-white/10 ">
                     <div class="flex justify-between items-center mb-3">
                       <div class="font-semibold text-lg text-gray-800 dark:text-gray-100">${group}</div>
                       <div class="text-sm text-gray-600 dark:text-gray-300">${count} (${percent}%)</div>
@@ -2925,38 +3132,39 @@ class SmartGroupEvaluator {
         };
       
         container.innerHTML = `
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            ${sortedGroups.map((group, index) => {
-              const rank = index + 1;
-              const style = rankStyles[rank] || { gradient: "from-indigo-400 to-purple-500", text: "text-white", icon: "🏆", glow: "" };
-              const delay = index * 150; // entrance delay in ms
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          ${sortedGroups.map((group, index) => {
+            const rank = index + 1;
+            const style = rankStyles[rank] || { gradient: "from-indigo-400 to-purple-500", text: "text-white", icon: "🏆", glow: "" };
+            const delay = index * 150; // entrance delay in ms
       
-              return `
-                <div 
-                  class="relative rounded-3xl p-8 cursor-pointer 
-                         bg-gradient-to-br ${style.gradient} ${style.text} ${style.glow} 
-                         transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl
-                         opacity-0 translate-y-6 animate-slide-in"
-                  style="animation-delay: ${delay}ms"
-                  onclick="smartEvaluator.showGroupDetailsModal('${group.id}')"
-                >
-                  <!-- Rank Ribbon -->
-                 <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 
-            bg-white/80 dark:bg-gray-800/70 
-            rounded-full px-4 py-2 font-bold text-lg 
-            shadow-md flex items-center justify-center">
-  <span class="mr-1 text-3xl">${style.icon}</span> Rank ${rank}
-</div>
-      
-                  <!-- Group Info -->
-                  <h3 class="font-extrabold text-2xl mb-2 drop-shadow-sm">${group.name}</h3>
-                  <p class="text-lg font-semibold">✨ স্কোর: ${scores[group.id].score.toFixed(2)}</p>
-                  <p class="text-sm mt-1 opacity-90">👥 সদস্য: ${scores[group.id].members} জন</p>
+            return `
+              <div 
+                class="relative rounded-3xl p-6 sm:p-8 cursor-pointer 
+                       bg-gradient-to-br ${style.gradient} ${style.text} ${style.glow} 
+                       transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl
+                       opacity-0 translate-y-6 animate-slide-in"
+                style="animation-delay: ${delay}ms"
+                onclick="smartEvaluator.showGroupDetailsModal('${group.id}')"
+              >
+                <!-- Rank Ribbon -->
+                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 
+                            bg-white/80 dark:bg-gray-800/70 
+                            rounded-full px-3 sm:px-4 py-1 sm:py-2 font-bold 
+                            text-sm sm:text-lg shadow-md flex items-center justify-center">
+                  <span class="mr-1 text-xl sm:text-3xl">${style.icon}</span> Rank ${rank}
                 </div>
-              `;
-            }).join("")}
-          </div>
-        `;
+      
+                <!-- Group Info -->
+                <h3 class="font-extrabold text-xl sm:text-2xl mb-2 drop-shadow-sm truncate">${group.name}</h3>
+                <p class="text-base sm:text-lg font-semibold">✨ স্কোর: ${scores[group.id].score.toFixed(2)}</p>
+                <p class="text-sm sm:text-base mt-1 opacity-90">👥 সদস্য: ${scores[group.id].members} জন</p>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+      
     }
 
     renderGroupsRanking() {
@@ -3184,9 +3392,6 @@ class SmartGroupEvaluator {
         this.setupRankingSearch();
     }
 
-    // ===============================
-    // RANKING SEARCH FUNCTIONALITY
-    // ===============================
     setupRankingSearch() {
         // সার্চ ইনপুট তৈরি করুন যদি না থেকে থাকে
         if (!document.getElementById('rankingSearchInput')) {
@@ -3302,18 +3507,394 @@ class SmartGroupEvaluator {
     }
 
     // ===============================
-    // REFRESH RANKING
+    // GROUP ANALYSIS
     // ===============================
-    refreshRanking() {
-        this.cache.clear("evaluations_data");
-        this.loadEvaluations().then(() => {
-            this.renderStudentRanking();
-            this.showToast("র‌্যাঙ্কিং রিফ্রেশ করা হয়েছে", "success");
+    renderGroupAnalysis() {
+        if (!this.dom.analysisGroupSelect || !this.dom.groupAnalysisDetails) return;
+
+        // Populate group select
+        this.dom.analysisGroupSelect.innerHTML = `
+            <option value="">সকল গ্রুপ</option>
+            ${this.state.groups
+                .map((g) => `<option value="${g.id}">${g.name}</option>`)
+                .join("")}
+        `;
+
+        // Render initial analysis
+        this.updateGroupAnalysis();
+    }
+
+    updateGroupAnalysis() {
+        const selectedGroupId = this.dom.analysisGroupSelect?.value || "";
+        const container = this.dom.groupAnalysisDetails;
+        if (!container) return;
+
+        let groupsToAnalyze = this.state.groups;
+        if (selectedGroupId) {
+            groupsToAnalyze = groupsToAnalyze.filter((g) => g.id === selectedGroupId);
+        }
+
+        if (groupsToAnalyze.length === 0) {
+            container.innerHTML =
+                '<p class="text-center text-gray-500 py-8">কোন গ্রুপ পাওয়া যায়নি</p>';
+            return;
+        }
+
+        let content = "";
+
+        groupsToAnalyze.forEach((group) => {
+            const groupStudents = this.state.students.filter(
+                (s) => s.groupId === group.id
+            );
+            const groupEvaluations = this.state.evaluations.filter(
+                (e) => e.groupId === group.id
+            );
+
+            // Calculate comprehensive statistics
+            const stats = this.calculateGroupComprehensiveStats(
+                group.id,
+                groupStudents,
+                groupEvaluations
+            );
+
+            content += `
+                <div class="mb-8 p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                    <!-- Group Header -->
+                    <div class="mb-6 text-center">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">${
+                            group.name
+                        } - বিস্তারিত বিশ্লেষণ</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                                <div class="text-blue-600 dark:text-blue-400 text-sm">সদস্য</div>
+                                <div class="text-xl font-bold text-blue-700 dark:text-blue-300">${
+                                    stats.memberCount
+                                }</div>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                                <div class="text-green-600 dark:text-green-400 text-sm">মূল্যায়ন</div>
+                                <div class="text-xl font-bold text-green-700 dark:text-green-300">${
+                                    stats.evaluationCount
+                                }</div>
+                            </div>
+                            <div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
+                                <div class="text-purple-600 dark:text-purple-400 text-sm">গড় স্কোর</div>
+                                <div class="text-xl font-bold text-purple-700 dark:text-purple-300">${stats.overallAverage.toFixed(
+                                    2
+                                )}</div>
+                            </div>
+                            <div class="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg">
+                                <div class="text-orange-600 dark:text-orange-400 text-sm">সর্বোচ্চ</div>
+                                <div class="text-xl font-bold text-orange-700 dark:text-orange-300">${stats.maxScore.toFixed(
+                                    2
+                                )}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance by Task -->
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-lg mb-4 text-gray-800 dark:text-white">টাস্ক অনুযায়ী পারফরম্যান্স</h4>
+                        <div class="space-y-4">
+                            ${stats.taskPerformance
+                                .map(
+                                    (task) => `
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <h5 class="font-medium text-gray-800 dark:text-white">${
+                                                task.taskName
+                                            }</h5>
+                                            <span class="text-sm font-semibold ${
+                                                task.averageScore >= 80
+                                                    ? "text-green-600 dark:text-green-400"
+                                                    : task.averageScore >= 60
+                                                    ? "text-yellow-600 dark:text-yellow-400"
+                                                    : "text-red-600 dark:text-red-400"
+                                            }">
+                                                গড়: ${task.averageScore.toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2 text-sm">
+                                            <div class="text-center">
+                                                <div class="text-gray-600 dark:text-gray-400">সর্বোচ্চ</div>
+                                                <div class="font-semibold text-green-600 dark:text-green-400">${task.maxScore.toFixed(
+                                                    2
+                                                )}</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-gray-600 dark:text-gray-400">সর্বনিম্ন</div>
+                                                <div class="font-semibold text-red-600 dark:text-red-400">${task.minScore.toFixed(
+                                                    2
+                                                )}</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-gray-600 dark:text-gray-400">অংশগ্রহণ</div>
+                                                <div class="font-semibold text-blue-600 dark:text-blue-400">${
+                                                    task.participants
+                                                }</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `
+                                )
+                                .join("")}
+                        </div>
+                    </div>
+
+                    <!-- Role-wise Performance -->
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-lg mb-4 text-gray-800 dark:text-white">দায়িত্ব অনুযায়ী পারফরম্যান্স</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${stats.rolePerformance
+                                .map(
+                                    (role) => `
+                                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-medium text-gray-800 dark:text-white">${
+                                                role.roleName
+                                            }</span>
+                                            <span class="text-sm px-2 py-1 rounded ${
+                                                role.averageScore >= 80
+                                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                                    : role.averageScore >= 60
+                                                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                            }">
+                                                ${role.averageScore.toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                            ${role.count} জন
+                                        </div>
+                                    </div>
+                                `
+                                )
+                                .join("")}
+                        </div>
+                    </div>
+
+                    <!-- Student Performance -->
+                    <div>
+                        <h4 class="font-semibold text-lg mb-4 text-gray-800 dark:text-white">শিক্ষার্থী পারফরম্যান্স</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-700">
+                                        <th class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">শিক্ষার্থী</th>
+                                        <th class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">দায়িত্ব</th>
+                                        <th class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">গড় স্কোর</th>
+                                        <th class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">মোট মূল্যায়ন</th>
+                                        <th class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">স্ট্যাটাস</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${stats.studentPerformance
+                                        .map(
+                                            (student) => `
+                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                <td class="border border-gray-300 dark:border-gray-600 p-2 text-gray-700 dark:text-gray-300">${student.name}</td>
+                                                <td class="border border-gray-300 dark:border-gray-600 p-2 text-gray-700 dark:text-gray-300">${student.roleName}</td>
+                                                <td class="border border-gray-300 dark:border-gray-600 p-2 text-gray-700 dark:text-gray-300">${student.averageScore.toFixed(
+                                                    2
+                                                )}</td>
+                                                <td class="border border-gray-300 dark:border-gray-600 p-2 text-gray-700 dark:text-gray-300">${student.evaluationCount}</td>
+                                                <td class="border border-gray-300 dark:border-gray-600 p-2">
+                                                    <span class="px-2 py-1 text-xs rounded ${
+                                                        student.averageScore >= 80
+                                                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                                            : student.averageScore >= 60
+                                                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                                    }">
+                                                        ${
+                                                            student.averageScore >= 80
+                                                                ? "Excellent"
+                                                                : student.averageScore >= 60
+                                                                ? "Good"
+                                                                : "Needs Improvement"
+                                                        }
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        `
+                                        )
+                                        .join("")}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
         });
+
+        container.innerHTML = content;
+    }
+
+    calculateGroupComprehensiveStats(groupId, students, evaluations) {
+        const stats = {
+            memberCount: students.length,
+            evaluationCount: evaluations.length,
+            overallAverage: 0,
+            maxScore: 0,
+            minScore: Infinity,
+            taskPerformance: [],
+            rolePerformance: [],
+            studentPerformance: [],
+        };
+
+        // Calculate student averages
+        const studentAverages = {};
+        students.forEach((student) => {
+            let totalScore = 0;
+            let evalCount = 0;
+
+            evaluations.forEach((evalItem) => {
+                const score = evalItem.scores?.[student.id];
+                if (score) {
+                    let additionalMarks = 0;
+                    if (score.optionMarks) {
+                        Object.values(score.optionMarks).forEach((opt) => {
+                            if (opt.selected) {
+                                const optDef = this.evaluationOptions.find(
+                                    (o) => o.id === opt.optionId
+                                );
+                                if (optDef) additionalMarks += optDef.marks;
+                            }
+                        });
+                    }
+
+                    const studentScore =
+                        (score.taskScore || 0) +
+                        (score.teamworkScore || 0) +
+                        additionalMarks;
+                    totalScore += studentScore;
+                    evalCount++;
+
+                    // Update overall max/min
+                    stats.maxScore = Math.max(stats.maxScore, studentScore);
+                    stats.minScore = Math.min(stats.minScore, studentScore);
+                }
+            });
+
+            if (evalCount > 0) {
+                studentAverages[student.id] = {
+                    average: totalScore / evalCount,
+                    count: evalCount,
+                };
+            }
+        });
+
+        // Calculate overall average
+        const validAverages = Object.values(studentAverages).filter(
+            (s) => s.count >= 2
+        );
+        if (validAverages.length > 0) {
+            stats.overallAverage =
+                validAverages.reduce((sum, s) => sum + s.average, 0) /
+                validAverages.length;
+        }
+
+        // Calculate task performance
+        const taskStats = {};
+        evaluations.forEach((evalItem) => {
+            const task = this.state.tasks.find((t) => t.id === evalItem.taskId);
+            if (!task) return;
+
+            if (!taskStats[task.id]) {
+                taskStats[task.id] = {
+                    taskName: task.name,
+                    scores: [],
+                };
+            }
+
+            students.forEach((student) => {
+                const score = evalItem.scores?.[student.id];
+                if (score) {
+                    let additionalMarks = 0;
+                    if (score.optionMarks) {
+                        Object.values(score.optionMarks).forEach((opt) => {
+                            if (opt.selected) {
+                                const optDef = this.evaluationOptions.find(
+                                    (o) => o.id === opt.optionId
+                                );
+                                if (optDef) additionalMarks += optDef.marks;
+                            }
+                        });
+                    }
+
+                    const totalScore =
+                        (score.taskScore || 0) +
+                        (score.teamworkScore || 0) +
+                        additionalMarks;
+                    taskStats[task.id].scores.push(totalScore);
+                }
+            });
+        });
+
+        stats.taskPerformance = Object.values(taskStats).map((task) => ({
+            taskName: task.taskName,
+            averageScore:
+                task.scores.length > 0
+                    ? task.scores.reduce((a, b) => a + b, 0) / task.scores.length
+                    : 0,
+            maxScore: task.scores.length > 0 ? Math.max(...task.scores) : 0,
+            minScore: task.scores.length > 0 ? Math.min(...task.scores) : 0,
+            participants: task.scores.length,
+        }));
+
+        // Calculate role performance
+        const roleStats = {};
+        students.forEach((student) => {
+            const role = student.role || "no-role";
+            const roleName = this.roleNames[role] || "দায়িত্ব নেই";
+            const studentAvg = studentAverages[student.id];
+
+            if (!roleStats[role]) {
+                roleStats[role] = {
+                    roleName,
+                    scores: [],
+                    count: 0,
+                };
+            }
+
+            if (studentAvg && studentAvg.count >= 2) {
+                roleStats[role].scores.push(studentAvg.average);
+                roleStats[role].count++;
+            }
+        });
+
+        stats.rolePerformance = Object.values(roleStats)
+            .map((role) => ({
+                roleName: role.roleName,
+                averageScore:
+                    role.scores.length > 0
+                        ? role.scores.reduce((a, b) => a + b, 0) / role.scores.length
+                        : 0,
+                count: role.count,
+            }))
+            .filter((role) => role.count > 0);
+
+        // Student performance
+        stats.studentPerformance = students
+            .map((student) => {
+                const studentAvg = studentAverages[student.id];
+                return {
+                    name: student.name,
+                    roleName: this.roleNames[student.role] || "দায়িত্ব নেই",
+                    averageScore: studentAvg && studentAvg.count >= 2 ? studentAvg.average : 0,
+                    evaluationCount: studentAvg ? studentAvg.count : 0,
+                };
+            })
+            .filter((student) => student.evaluationCount >= 2)
+            .sort((a, b) => b.averageScore - a.averageScore);
+
+        stats.minScore = stats.minScore === Infinity ? 0 : stats.minScore;
+
+        return stats;
     }
 
     // ===============================
-    // GROUP MEMBERS MANAGEMENT
+    // GROUP MEMBERS
     // ===============================
     renderGroupMembers() {
         if (!this.dom.groupMembersGroupSelect || !this.dom.groupMembersList) return;
@@ -3322,227 +3903,119 @@ class SmartGroupEvaluator {
         this.dom.groupMembersGroupSelect.innerHTML = `
             <option value="">সকল গ্রুপ</option>
             ${this.state.groups
-                .map(
-                    (g) =>
-                        `<option value="${g.id}" ${
-                            this.filters.groupMembersFilterGroupId === g.id
-                                ? "selected"
-                                : ""
-                        }>${g.name}</option>`
-                )
+                .map((g) => `<option value="${g.id}">${g.name}</option>`)
                 .join("")}
         `;
 
-        const filteredStudents = this.getFilteredGroupMembers();
-        this.renderGroupMembersList(filteredStudents);
-    }
-
-    getFilteredGroupMembers() {
-        let students = this.state.students;
-
+        // Set current filter value if exists
         if (this.filters.groupMembersFilterGroupId) {
-            students = students.filter(
-                (s) => s.groupId === this.filters.groupMembersFilterGroupId
-            );
+            this.dom.groupMembersGroupSelect.value =
+                this.filters.groupMembersFilterGroupId;
         }
 
-        return students;
+        this.updateGroupMembersList();
     }
 
-    renderGroupMembersList(students) {
-        if (!this.dom.groupMembersList) return;
+    updateGroupMembersList() {
+        const groupId = this.filters.groupMembersFilterGroupId;
+        const container = this.dom.groupMembersList;
+        if (!container) return;
 
-        // Group students by group
+        let students = this.state.students;
+        if (groupId) {
+            students = students.filter((s) => s.groupId === groupId);
+        }
+
+        if (students.length === 0) {
+            container.innerHTML =
+                '<p class="text-center text-gray-500 py-8">কোন সদস্য পাওয়া যায়নি</p>';
+            return;
+        }
+
+        // Group by group
         const studentsByGroup = {};
         students.forEach((student) => {
-            const groupId = student.groupId;
-            if (!studentsByGroup[groupId]) {
-                studentsByGroup[groupId] = [];
+            const group = this.state.groups.find((g) => g.id === student.groupId);
+            const groupName = group?.name || "গ্রুপ নেই";
+            if (!studentsByGroup[groupName]) {
+                studentsByGroup[groupName] = [];
             }
-            studentsByGroup[groupId].push(student);
+            studentsByGroup[groupName].push(student);
         });
 
         let content = "";
 
-        if (Object.keys(studentsByGroup).length === 0) {
-            content = '<p class="text-center text-gray-500 py-8">কোন শিক্ষার্থী পাওয়া যায়নি</p>';
-        } else {
-            Object.entries(studentsByGroup).forEach(([groupId, groupStudents]) => {
-                const group = this.state.groups.find((g) => g.id === groupId);
-                content += `
-                    <div class="mb-6">
-                        <h4 class="font-semibold text-lg mb-4 text-gray-800 dark:text-white">${
-                            group?.name || "Unknown Group"
-                        } - সদস্য তালিকা</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:">${
-                                            this.roleNames[student.role] || student.role
-                                        }</span>`
-                                        : '<span class="px-2 py-1 text-xs rounded-md bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">দায়িত্ব বাকি</span>';
+        Object.entries(studentsByGroup).forEach(([groupName, groupStudents]) => {
+            content += `
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800 dark:text-white">${groupName}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${groupStudents
+                            .map((student) => {
+                                const roleBadge = student.role
+                                    ? `<span class="member-role-badge ${student.role}">${
+                                        this.roleNames[student.role]
+                                    }</span>`
+                                    : "";
 
-                                    return `
-                                        <div class="group-member-card bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                                            <div class="flex items-start justify-between mb-3">
-                                                <h5 class="font-medium text-gray-800 dark:text-white">${
-                                                    student.name
-                                                }</h5>
-                                                ${roleBadge}
-                                            </div>
-                                            <div class="space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                                                <p><i class="fas fa-id-card mr-2"></i>রোল: ${
-                                                    student.roll
-                                                }</p>
-                                                <p><i class="fas fa-venus-mars mr-2"></i>জেন্ডার:${student.gender}</p>
-                                                <p><i class="fas fa-book mr-2"></i>একাডেমিক: ${
-                                                    student.academicGroup || "নির্ধারিত হয়নি"
-                                                }</p>
-                                                <p><i class="fas fa-calendar mr-2"></i>সেশন: ${
-                                                    student.session || "নির্ধারিত হয়নি"
-                                                }</p>
+                                return `
+                                <div class="member-card bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-gray-800 dark:text-white">${
+                                                student.name
+                                            }</h4>
+                                            <div class="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-id-card mr-2 w-4"></i>
+                                                    <span>রোল: ${student.roll}</span>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-venus-mars mr-2 w-4"></i>
+                                                    <span>লিঙ্গ: ${student.gender}</span>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-book mr-2 w-4"></i>
+                                                    <span>একাডেমিক: ${
+                                                        student.academicGroup ||"নাই"
+                                                    }</span>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-calendar mr-2 w-4"></i>
+                                                    <span>সেশন: ${
+                                                        student.session ||"নাই"
+                                                    }</span>
+                                                </div>
                                                 ${
                                                     student.contact
-                                                        ? `<p><i class="fas fa-envelope mr-2"></i>${student.contact}</p>`
+                                                        ? `
+                                                    <div class="flex items-center">
+                                                        <i class="fas fa-envelope mr-2 w-4"></i>
+                                                        <span>${student.contact}</span>
+                                                    </div>
+                                                    `
                                                         : ""
                                                 }
                                             </div>
+                                            ${roleBadge}
                                         </div>
-                                    `;
-                                })
-                                .join("")}
-                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            })
+                            .join("")}
                     </div>
-                `;
-            });
-        }
+                </div>
+            `;
+        });
 
-        this.dom.groupMembersList.innerHTML = content;
+        container.innerHTML = content;
     }
 
     // ===============================
-    // EXPORT FUNCTIONALITY
+    // EVALUATION SYSTEM - FIXED
     // ===============================
-    exportAllData() {
-        const exportData = {
-            groups: this.state.groups,
-            students: this.state.students,
-            tasks: this.state.tasks,
-            evaluations: this.state.evaluations,
-            problemStats: this.state.problemStats,
-            exportDate: new Date().toISOString(),
-        };
-
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataBlob = new Blob([dataStr], { type: "application/json" });
-        this.downloadFile(dataBlob, "smart_evaluator_all_data.json");
-        this.showToast("সমস্ত ডেটা JSON ফাইলে এক্সপোর্ট করা হয়েছে", "success");
-    }
-
-    exportStudentsCSV() {
-        const headers = [
-            "নাম",
-            "রোল",
-            "জেন্ডার",
-            "গ্রুপ",
-            "যোগাযোগ",
-            "একাডেমিক গ্রুপ",
-            "সেশন",
-            "দায়িত্ব",
-        ];
-        const rows = this.state.students.map((student) => {
-            const group = this.state.groups.find((g) => g.id === student.groupId);
-            return [
-                student.name,
-                student.roll,
-                student.gender,
-                group?.name || "",
-                student.contact || "",
-                student.academicGroup || "",
-                student.session || "",
-                this.roleNames[student.role] || student.role || "",
-            ];
-        });
-
-        this.exportToCSV(headers, rows, "students.csv");
-        this.showToast("শিক্ষার্থী ডেটা CSV ফাইলে এক্সপোর্ট করা হয়েছে", "success");
-    }
-
-    exportGroupsCSV() {
-        const headers = ["গ্রুপ নাম", "সদস্য সংখ্যা", "গড় স্কোর"];
-        const memberCountMap = this.computeMemberCountMap();
-        const groupScores = this.calculateGroupScores();
-
-        const rows = this.state.groups.map((group) => {
-            return [
-                group.name,
-                memberCountMap[group.id] || 0,
-                groupScores[group.id]?.score.toFixed(2) || "0",
-            ];
-        });
-
-        this.exportToCSV(headers, rows, "groups.csv");
-        this.showToast("গ্রুপ ডেটা CSV ফাইলে এক্সপোর্ট করা হয়েছে", "success");
-    }
-
-    exportEvaluationsCSV() {
-        const headers = [
-            "টাস্ক",
-            "গ্রুপ",
-            "মূল্যায়নের তারিখ",
-            "মোট স্কোর",
-            "মূল্যায়নকারী",
-        ];
-        const rows = this.state.evaluations.map((evaluation) => {
-            const task = this.state.tasks.find((t) => t.id === evaluation.taskId);
-            const group = this.state.groups.find((g) => g.id === evaluation.groupId);
-            const dateStr = evaluation.updatedAt?.seconds
-                ? new Date(evaluation.updatedAt.seconds * 1000).toLocaleDateString(
-                    "bn-BD"
-                )
-                : "তারিখ নেই";
-            const totalScore = this.calculateEvaluationTotalScore(evaluation);
-
-            return [
-                task?.name || "Unknown Task",
-                group?.name || "Unknown Group",
-                dateStr,
-                totalScore.toString(),
-                evaluation.evaluator || "Unknown",
-            ];
-        });
-
-        this.exportToCSV(headers, rows, "evaluations.csv");
-        this.showToast("মূল্যায়ন ডেটা CSV ফাইলে এক্সপোর্ট করা হয়েছে", "success");
-    }
-
-    exportToCSV(headers, rows, filename) {
-        const csvContent = [headers.join(",")];
-        rows.forEach((row) => {
-            const escapedRow = row.map((field) => {
-                const fieldStr = field ? field.toString() : "";
-                return `"${fieldStr.replace(/"/g, '""')}"`;
-            });
-            csvContent.push(escapedRow.join(","));
-        });
-
-        const csvString = csvContent.join("\n");
-        const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
-        this.downloadFile(blob, filename);
-    }
-
-    downloadFile(blob, filename) {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }
-
-    // ===============================
-    // EVALUATION MANAGEMENT
-    // ===============================
-    async startEvaluation() {
+    startEvaluation() {
         const taskId = this.dom.evaluationTaskSelect?.value;
         const groupId = this.dom.evaluationGroupSelect?.value;
 
@@ -3551,236 +4024,651 @@ class SmartGroupEvaluator {
             return;
         }
 
-        const groupStudents = this.getStudentsInGroup(groupId);
-        if (groupStudents.length === 0) {
+        const task = this.state.tasks.find((t) => t.id === taskId);
+        const group = this.state.groups.find((g) => g.id === groupId);
+        const students = this.getStudentsInGroup(groupId);
+
+        if (!task || !group) {
+            this.showToast("টাস্ক বা গ্রুপ পাওয়া যায়নি", "error");
+            return;
+        }
+
+        if (students.length === 0) {
             this.showToast("এই গ্রুপে কোন শিক্ষার্থী নেই", "error");
             return;
         }
 
-        const task = this.state.tasks.find((t) => t.id === taskId);
-        if (!task) {
-            this.showToast("টাস্ক পাওয়া যায়নি", "error");
-            return;
-        }
+        // Check if evaluation already exists
+        const existingEvaluation = this.state.evaluations.find(
+            (e) => e.taskId === taskId && e.groupId === groupId
+        );
 
         this.currentEvaluation = {
             taskId,
             groupId,
-            task,
-            groupStudents,
-            scores: {},
+            existingId: existingEvaluation?.id,
+            scores: existingEvaluation?.scores || {},
         };
 
-        this.renderEvaluationForm();
-        this.showPage("evaluation-form");
+        this.renderEvaluationForm(task, group, students);
     }
 
-    renderEvaluationForm() {
-        if (!this.dom.evaluationForm || !this.currentEvaluation) return;
+    renderEvaluationForm(task, group, students) {
+        if (!this.dom.evaluationForm) return;
 
-        const { task, groupStudents } = this.currentEvaluation;
-
-        this.dom.evaluationForm.innerHTML = `
-            <div class="evaluation-header mb-6">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white">মূল্যায়ন ফর্ম</h3>
-                <p class="text-gray-600 dark:text-gray-400">টাস্ক: ${
-                    task.name
-                } | শিক্ষার্থী: ${groupStudents.length} জন</p>
+        let formHTML = `
+            <div class="evaluation-header bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-6 mb-6">
+                <h3 class="text-xl font-bold mb-2">${task.name} - ${group.name}</h3>
+                <p class="opacity-90">${task.description || "কোন বিবরণ নেই"}</p>
+                <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                    <div class="flex items-center">
+                        <i class="fas fa-users mr-2"></i>
+                        <span>সদস্য: ${students.length} জন</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-star mr-2"></i>
+                        <span>সর্বোচ্চ স্কোর: ${task.maxScore}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-calendar mr-2"></i>
+                        <span>তারিখ: ${new Date().toLocaleDateString("bn-BD")}</span>
+                    </div>
+                </div>
             </div>
-            
-            <div class="space-y-6">
-                ${groupStudents
-                    .map(
-                        (student, index) => `
-                        <div class="student-evaluation bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                            <h4 class="font-semibold text-lg mb-4 text-gray-800 dark:text-white">${
-                                student.name
-                            } (রোল: ${student.roll})</h4>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        টাস্ক স্কোর (০-${task.maxScore})
-                                    </label>
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        max="${task.maxScore}"
-                                        class="task-score-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                                        data-student-id="${student.id}"
-                                        placeholder="টাস্ক স্কোর"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        টিমওয়ার্ক স্কোর (০-১০)
-                                    </label>
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        max="10"
-                                        class="teamwork-score-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                                        data-student-id="${student.id}"
-                                        placeholder="টিমওয়ার্ক স্কোর"
-                                    >
-                                </div>
-                            </div>
-                            
-                            <div class="evaluation-options mb-4">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    অতিরিক্ত তথ্য
-                                </label>
-                                <div class="space-y-2">
-                                    ${this.evaluationOptions
-                                        .map(
-                                            (option) => `
-                                            <label class="flex items-center space-x-2 cursor-pointer">
-                                                <input 
-                                                    type="checkbox" 
-                                                    class="option-checkbox"
-                                                    data-student-id="${student.id}"
-                                                    data-option-id="${option.id}"
-                                                >
-                                                <span class="text-sm text-gray-700 dark:text-gray-300">${
-                                                    option.text
-                                                }</span>
-                                            </label>
-                                        `
-                                        )
-                                        .join("")}
-                                </div>
-                            </div>
-                            
-                            <div class="notes-section">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    মন্তব্য
-                                </label>
-                                <textarea 
-                                    class="evaluation-notes w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                                    data-student-id="${student.id}"
-                                    placeholder="কোন বিশেষ মন্তব্য থাকলে এখানে লিখুন..."
-                                    rows="2"
-                                ></textarea>
+        `;
+
+        students.forEach((student) => {
+            const existingScore = this.currentEvaluation.scores[student.id] || {};
+            const roleBadge = student.role
+                ? `<span class="member-role-badge ${student.role}">${this.roleNames[student.role]}</span>`
+                : "";
+
+            formHTML += `
+                <div class="student-evaluation-section bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
+                    <div class="student-header flex justify-between items-center mb-4">
+                        <div>
+                            <h4 class="font-semibold text-lg text-gray-800 dark:text-white">${student.name}</h4>
+                            <div class="flex items-center space-x-2 mt-1">
+                                ${roleBadge}
+                                <span class="text-sm text-gray-500">রোল: ${student.roll}</span>
                             </div>
                         </div>
-                    `
-                    )
-                    .join("")}
-            </div>
-            
-            <div class="evaluation-actions mt-6 flex justify-end space-x-4">
+                        <div class="text-right">
+                            <span class="text-sm text-gray-500">একাডেমিক: ${student.academicGroup || "নির্ধারিত হয়নি"}</span>
+                        </div>
+                    </div>
+
+                    <!-- Task Score -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                            টাস্ক স্কোর (০-${task.maxScore})
+                        </label>
+                        <input 
+                            type="number" 
+                            min="0" 
+                            max="${task.maxScore}"
+                            value="${existingScore.taskScore || ""}"
+                            onchange="smartEvaluator.updateStudentScore('${student.id}', 'taskScore', this.value)"
+                            class="task-score-input w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white"
+                            placeholder="০-${task.maxScore}"
+                        >
+                    </div>
+
+                    <!-- Teamwork Score -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                            টিমওয়ার্ক স্কোর (০-১০)
+                        </label>
+                        <input 
+                            type="number" 
+                            min="0" 
+                            max="10"
+                            value="${existingScore.teamworkScore || ""}"
+                            onchange="smartEvaluator.updateStudentScore('${student.id}', 'teamworkScore', this.value)"
+                            class="teamwork-score-input w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white"
+                            placeholder="০-১০"
+                        >
+                    </div>
+
+                    <!-- Evaluation Options -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                            অতিরিক্ত মূল্যায়ন অপশন
+                        </label>
+                        <div class="space-y-2">
+                            ${this.evaluationOptions
+                                .map((option) => {
+                                    const existingOption =
+                                        existingScore.optionMarks?.[option.id];
+                                    const isChecked = existingOption?.selected || false;
+                                    const existingMarks = existingOption?.marks || 0;
+
+                                    return `
+                                    <label class="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                        <input 
+                                            type="checkbox" 
+                                            ${isChecked ? "checked" : ""}
+                                            onchange="smartEvaluator.toggleEvaluationOption('${
+                                                student.id
+                                            }', '${option.id}', this.checked)"
+                                            class="option-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        >
+                                        <div class="flex-1">
+                                            <span class="text-sm text-gray-700 dark:text-gray-300">${
+                                                option.text
+                                            }</span>
+                                            <span class="text-xs ${
+                                                option.marks >= 0
+                                                    ? "text-green-600"
+                                                    : "text-red-600"
+                                            }">
+                                                (${option.marks >= 0 ? "+" : ""}${
+                                        option.marks
+                                    } মার্কস)
+                                            </span>
+                                        </div>
+                                    </label>
+                                `;
+                                })
+                                .join("")}
+                        </div>
+                    </div>
+
+                    <!-- Comments -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                            মন্তব্য
+                        </label>
+                        <textarea 
+                            oninput="smartEvaluator.updateStudentScore('${student.id}', 'comments', this.value)"
+                            class="comments-input w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white"
+                            placeholder="মন্তব্য লিখুন..."
+                            rows="2"
+                        >${existingScore.comments || ""}</textarea>
+                    </div>
+                </div>
+            `;
+        });
+
+        formHTML += `
+            <div class="evaluation-actions flex justify-end space-x-4 mt-6">
                 <button 
-                    type="button" 
-                    class="cancel-evaluation px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
                     onclick="smartEvaluator.cancelEvaluation()"
+                    class="cancel-evaluation-btn px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                     বাতিল
                 </button>
                 <button 
-                    type="button" 
-                    class="save-evaluation px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    onclick="smartEvaluator.saveEvaluation()"
+                    onclick="smartEvaluator.submitEvaluation()"
+                    class="submit-evaluation-btn px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                 >
-                    মূল্যায়ন সংরক্ষণ করুন
+                    মূল্যায়ন সাবমিট করুন
                 </button>
             </div>
         `;
+
+        this.dom.evaluationForm.innerHTML = formHTML;
+        this.dom.evaluationForm.classList.remove("hidden");
     }
 
-    async saveEvaluation() {
-        if (!this.currentEvaluation) return;
-
-        const { taskId, groupId, groupStudents } = this.currentEvaluation;
-        const scores = {};
-
-        let hasErrors = false;
-
-        groupStudents.forEach((student) => {
-            const taskScoreInput = document.querySelector(
-                `.task-score-input[data-student-id="${student.id}"]`
-            );
-            const teamworkScoreInput = document.querySelector(
-                `.teamwork-score-input[data-student-id="${student.id}"]`
-            );
-
-            const taskScore = parseInt(taskScoreInput?.value) || 0;
-            const teamworkScore = parseInt(teamworkScoreInput?.value) || 0;
-
-            // Validation
-            if (taskScore < 0 || taskScore > this.currentEvaluation.task.maxScore) {
-                hasErrors = true;
-                taskScoreInput?.classList.add("border-red-500");
-            } else {
-                taskScoreInput?.classList.remove("border-red-500");
-            }
-
-            if (teamworkScore < 0 || teamworkScore > 10) {
-                hasErrors = true;
-                teamworkScoreInput?.classList.add("border-red-500");
-            } else {
-                teamworkScoreInput?.classList.remove("border-red-500");
-            }
-
-            // Collect option marks
-            const optionMarks = {};
-            this.evaluationOptions.forEach((option) => {
-                const checkbox = document.querySelector(
-                    `.option-checkbox[data-student-id="${student.id}"][data-option-id="${option.id}"]`
-                );
-                optionMarks[option.id] = {
-                    optionId: option.id,
-                    selected: checkbox?.checked || false,
-                    marks: option.marks,
-                };
-            });
-
-            // Collect notes
-            const notesInput = document.querySelector(
-                `.evaluation-notes[data-student-id="${student.id}"]`
-            );
-            const notes = notesInput?.value || "";
-
-            scores[student.id] = {
-                taskScore,
-                teamworkScore,
-                optionMarks,
-                notes,
-            };
-        });
-
-        if (hasErrors) {
-            this.showToast("কিছু স্কোর ভুল হয়েছে, দয়া করে চেক করুন", "error");
-            return;
+    updateStudentScore(studentId, field, value) {
+        if (!this.currentEvaluation.scores[studentId]) {
+            this.currentEvaluation.scores[studentId] = {};
         }
 
-        this.showLoading("মূল্যায়ন সংরক্ষণ করা হচ্ছে...");
-        try {
-            await db.collection("evaluations").add({
-                taskId,
-                groupId,
-                scores,
-                evaluator: this.currentUser?.email || "Unknown",
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            });
+        if (field === "taskScore" || field === "teamworkScore") {
+            this.currentEvaluation.scores[studentId][field] = parseFloat(value) || 0;
+        } else if (field === "comments") {
+            this.currentEvaluation.scores[studentId][field] = value;
+        }
+    }
 
-            // Clear cache and reload data
-            this.cache.clear("evaluations_data");
-            await this.loadEvaluations();
+    toggleEvaluationOption(studentId, optionId, isChecked) {
+        if (!this.currentEvaluation.scores[studentId]) {
+            this.currentEvaluation.scores[studentId] = {};
+        }
+        if (!this.currentEvaluation.scores[studentId].optionMarks) {
+            this.currentEvaluation.scores[studentId].optionMarks = {};
+        }
 
-            this.showToast("মূল্যায়ন সফলভাবে সংরক্ষণ করা হয়েছে", "success");
-            this.cancelEvaluation();
-        } catch (error) {
-            console.error("Error saving evaluation:", error);
-            this.showToast("মূল্যায়ন সংরক্ষণ করতে সমস্যা: " + error.message, "error");
-        } finally {
-            this.hideLoading();
+        const option = this.evaluationOptions.find((o) => o.id === optionId);
+        if (option) {
+            this.currentEvaluation.scores[studentId].optionMarks[optionId] = {
+                optionId,
+                selected: isChecked,
+                marks: option.marks,
+            };
         }
     }
 
     cancelEvaluation() {
         this.currentEvaluation = null;
-        this.showPage("evaluation");
+        if (this.dom.evaluationForm) {
+            this.dom.evaluationForm.classList.add("hidden");
+        }
+        this.showToast("মূল্যায়ন বাতিল করা হয়েছে", "info");
+    }
+
+    async submitEvaluation() {
+        if (!this.currentEvaluation) {
+            this.showToast("কোন সক্রিয় মূল্যায়ন নেই", "error");
+            return;
+        }
+
+        // Validate scores
+        const task = this.state.tasks.find(
+            (t) => t.id === this.currentEvaluation.taskId
+        );
+        let hasErrors = false;
+
+        Object.entries(this.currentEvaluation.scores).forEach(([studentId, score]) => {
+            if (score.taskScore && score.taskScore > task.maxScore) {
+                this.showToast(
+                    `টাস্ক স্কোর ${task.maxScore} এর বেশি হতে পারবে না`,
+                    "error"
+                );
+                hasErrors = true;
+                return;
+            }
+            if (score.teamworkScore && score.teamworkScore > 10) {
+                this.showToast("টিমওয়ার্ক স্কোর ১০ এর বেশি হতে পারবে না", "error");
+                hasErrors = true;
+                return;
+            }
+        });
+
+        if (hasErrors) return;
+
+        this.showLoading("মূল্যায়ন সংরক্ষণ হচ্ছে...");
+        try {
+            const evaluationData = {
+                taskId: this.currentEvaluation.taskId,
+                groupId: this.currentEvaluation.groupId,
+                scores: this.currentEvaluation.scores,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            };
+
+            if (this.currentEvaluation.existingId) {
+                // Update existing evaluation
+                await db
+                    .collection("evaluations")
+                    .doc(this.currentEvaluation.existingId)
+                    .update(evaluationData);
+            } else {
+                // Create new evaluation
+                await db.collection("evaluations").add(evaluationData);
+            }
+
+            // Clear cache and reload data
+            this.cache.clear("evaluations_data");
+            await this.loadEvaluations();
+
+            this.currentEvaluation = null;
+            if (this.dom.evaluationForm) {
+                this.dom.evaluationForm.classList.add("hidden");
+            }
+
+            this.showToast("মূল্যায়ন সফলভাবে সংরক্ষণ করা হয়েছে", "success");
+        } catch (error) {
+            console.error("Evaluation submission error:", error);
+            this.showToast("মূল্যায়ন সংরক্ষণ ব্যর্থ: " + error.message, "error");
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    // ===============================
+    // CSV IMPORT/EXPORT
+    // ===============================
+    handleCSVFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const fileName = this.dom.csvFileName;
+        if (fileName) fileName.textContent = file.name;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const csvData = e.target.result;
+                this.csvImportData = this.parseCSV(csvData);
+                this.showToast("CSV ফাইল লোড成功", "success");
+            } catch (error) {
+                this.showToast("CSV পার্স করতে সমস্যা: " + error.message, "error");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    parseCSV(csvText) {
+        const lines = csvText.split("\n").filter((line) => line.trim());
+        if (lines.length < 2) {
+            throw new Error("CSV ফাইলে ডেটা নেই");
+        }
+
+        const headers = lines[0].split(",").map((h) => h.trim());
+        const requiredHeaders = ["name", "roll", "gender", "academicGroup", "session"];
+        const missingHeaders = requiredHeaders.filter((h) => !headers.includes(h));
+
+        if (missingHeaders.length > 0) {
+            throw new Error(
+                `প্রয়োজনীয় হেডার missing: ${missingHeaders.join(", ")}`
+            );
+        }
+
+        const data = [];
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(",").map((v) => v.trim());
+            if (values.length !== headers.length) continue;
+
+            const row = {};
+            headers.forEach((header, index) => {
+                row[header] = values[index];
+            });
+            data.push(row);
+        }
+
+        return data;
+    }
+
+    async processCSVImport() {
+        if (!this.csvImportData || this.csvImportData.length === 0) {
+            this.showToast("প্রথমে CSV ফাইল নির্বাচন করুন", "error");
+            return;
+        }
+
+        this.showLoading("শিক্ষার্থী ইমপোর্ট হচ্ছে...");
+        try {
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const studentData of this.csvImportData) {
+                try {
+                    // Check uniqueness
+                    const isDuplicate = await this.checkStudentUniqueness(
+                        studentData.roll,
+                        studentData.academicGroup
+                    );
+                    if (isDuplicate) {
+                        errorCount++;
+                        continue;
+                    }
+
+                    await db.collection("students").add({
+                        name: studentData.name,
+                        roll: studentData.roll,
+                        gender: studentData.gender,
+                        groupId: studentData.groupId || "",
+                        contact: studentData.contact || "",
+                        academicGroup: studentData.academicGroup,
+                        session: studentData.session,
+                        role: studentData.role || "",
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    });
+                    successCount++;
+                } catch (error) {
+                    errorCount++;
+                    console.error("Error importing student:", error);
+                }
+            }
+
+            // Clear cache and reload data
+            this.cache.clear("students_data");
+            await this.loadStudents();
+
+            this.csvImportData = null;
+            if (this.dom.csvFileInput) this.dom.csvFileInput.value = "";
+            if (this.dom.csvFileName) this.dom.csvFileName.textContent = "";
+
+            this.showToast(
+                `ইমপোর্ট সম্পন্ন: ${successCount} সফল, ${errorCount} ব্যর্থ`,
+                successCount > 0 ? "success" : "warning"
+            );
+        } catch (error) {
+            this.showToast("ইমপোর্ট ব্যর্থ: " + error.message, "error");
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    downloadCSVTemplate() {
+        const headers = [
+            "name",
+            "roll",
+            "gender",
+            "groupId",
+            "contact",
+            "academicGroup",
+            "session",
+            "role",
+        ];
+        const template = [headers.join(",")].join("\n");
+
+        const blob = new Blob([template], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "students_template.csv";
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    // ===============================
+    // EXPORT FUNCTIONALITY
+    // ===============================
+    async exportAllData() {
+        this.showLoading("ডেটা এক্সপোর্ট হচ্ছে...");
+        try {
+            const exportData = {
+                groups: this.state.groups,
+                students: this.state.students,
+                tasks: this.state.tasks,
+                evaluations: this.state.evaluations,
+                exportedAt: new Date().toISOString(),
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+                type: "application/json",
+            });
+            this.downloadBlob(blob, "smart_evaluator_data.json");
+            this.showToast("সমস্ত ডেটা এক্সপোর্ট成功", "success");
+        } catch (error) {
+            this.showToast("এক্সপোর্ট ব্যর্থ: " + error.message, "error");
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    async exportStudentsCSV() {
+        this.showLoading("শিক্ষার্থী ডেটা এক্সপোর্ট হচ্ছে...");
+        try {
+            const headers = [
+                "Name",
+                "Roll",
+                "Gender",
+                "Group",
+                "Contact",
+                "Academic Group",
+                "Session",
+                "Role",
+            ];
+            const csvData = this.state.students.map((student) => {
+                const group = this.state.groups.find((g) => g.id === student.groupId);
+                return [
+                    student.name,
+                    student.roll,
+                    student.gender,
+                    group?.name || "",
+                    student.contact || "",
+                    student.academicGroup || "",
+                    student.session || "",
+                    this.roleNames[student.role] || student.role || "",
+                ];
+            });
+
+            const csvContent = [headers, ...csvData]
+                .map((row) => row.map((cell) => `"${cell}"`).join(","))
+                .join("\n");
+
+            const blob = new Blob([csvContent], { type: "text/csv" });
+            this.downloadBlob(blob, "students_data.csv");
+            this.showToast("শিক্ষার্থী ডেটা এক্সপোর্ট成功", "success");
+        } catch (error) {
+            this.showToast("এক্সপোর্ট ব্যর্থ: " + error.message, "error");
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    async exportGroupsCSV() {
+        this.showLoading("গ্রুপ ডেটা এক্সপোর্ট হচ্ছে...");
+        try {
+            const memberCountMap = this.computeMemberCountMap();
+            const headers = ["Group Name", "Member Count"];
+            const csvData = this.state.groups.map((group) => [
+                group.name,
+                memberCountMap[group.id] || 0,
+            ]);
+
+            const csvContent = [headers, ...csvData]
+                .map((row) => row.map((cell) => `"${cell}"`).join(","))
+                .join("\n");
+
+            const blob = new Blob([csvContent], { type: "text/csv" });
+            this.downloadBlob(blob, "groups_data.csv");
+            this.showToast("গ্রুপ ডেটা এক্সপোর্ট成功", "success");
+        } catch (error) {
+            this.showToast("এক্সপোর্ট ব্যর্থ: " + error.message, "error");
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    async exportEvaluationsCSV() {
+        this.showLoading("মূল্যায়ন ডেটা এক্সপোর্ট হচ্ছে...");
+        try {
+            const headers = [
+                "Task",
+                "Group",
+                "Student",
+                "Task Score",
+                "Teamwork Score",
+                "Additional Marks",
+                "Total Score",
+                "Comments",
+            ];
+            const csvData = [];
+
+            this.state.evaluations.forEach((evaluation) => {
+                const task = this.state.tasks.find((t) => t.id === evaluation.taskId);
+                const group = this.state.groups.find((g) => g.id === evaluation.groupId);
+
+                if (evaluation.scores) {
+                    Object.entries(evaluation.scores).forEach(([studentId, score]) => {
+                        const student = this.state.students.find(
+                            (s) => s.id === studentId
+                        );
+                        if (!student) return;
+
+                        let additionalMarks = 0;
+                        if (score.optionMarks) {
+                            Object.values(score.optionMarks).forEach((opt) => {
+                                if (opt.selected) {
+                                    const optDef = this.evaluationOptions.find(
+                                        (o) => o.id === opt.optionId
+                                    );
+                                    if (optDef) additionalMarks += optDef.marks;
+                                }
+                            });
+                        }
+
+                        const totalScore =
+                            (score.taskScore || 0) +
+                            (score.teamworkScore || 0) +
+                            additionalMarks;
+
+                        csvData.push([
+                            task?.name || "Unknown",
+                            group?.name || "Unknown",
+                            student.name,
+                            score.taskScore || 0,
+                            score.teamworkScore || 0,
+                            additionalMarks,
+                            totalScore,
+                            score.comments || "",
+                        ]);
+                    });
+                }
+            });
+
+            const csvContent = [headers, ...csvData]
+                .map((row) => row.map((cell) => `"${cell}"`).join(","))
+                .join("\n");
+
+            const blob = new Blob([csvContent], { type: "text/csv" });
+            this.downloadBlob(blob, "evaluations_data.csv");
+            this.showToast("মূল্যায়ন ডেটা এক্সপোর্ট成功", "success");
+        } catch (error) {
+            this.showToast("এক্সপোর্ট ব্যর্থ: " + error.message, "error");
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    downloadBlob(blob, filename) {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    // ===============================
+    // POPULATE SELECTS
+    // ===============================
+    populateSelects() {
+        this.populateGroupSelects();
+        this.populateTaskSelects();
+    }
+
+    populateGroupSelects() {
+        const groupSelects = [
+            "studentGroupInput",
+            "membersFilterGroup",
+            "cardsFilterGroup",
+            "groupMembersGroupSelect",
+            "analysisGroupSelect",
+            "evaluationGroupSelect",
+        ];
+
+        groupSelects.forEach((selectId) => {
+            const select = document.getElementById(selectId);
+            if (select) {
+                select.innerHTML = `
+                    <option value="">সকল গ্রুপ</option>
+                    ${this.state.groups
+                        .map((g) => `<option value="${g.id}">${g.name}</option>`)
+                        .join("")}
+                `;
+            }
+        });
+    }
+
+    populateTaskSelects() {
+        const taskSelects = ["evaluationTaskSelect"];
+
+        taskSelects.forEach((selectId) => {
+            const select = document.getElementById(selectId);
+            if (select) {
+                select.innerHTML = `
+                    <option value="">টাস্ক নির্বাচন করুন</option>
+                    ${this.state.tasks
+                        .map((t) => `<option value="${t.id}">${t.name}</option>`)
+                        .join("")}
+                `;
+            }
+        });
     }
 
     // ===============================
@@ -3797,508 +4685,54 @@ class SmartGroupEvaluator {
     }
 
     // ===============================
-    // CSV IMPORT FUNCTIONALITY
-    // ===============================
-    handleCSVFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const fileName = file.name;
-        if (!fileName.toLowerCase().endsWith(".csv")) {
-            this.showToast("শুধুমাত্র CSV ফাইল সাপোর্টেড", "error");
-            return;
-        }
-
-        if (this.dom.csvFileName) {
-            this.dom.csvFileName.textContent = fileName;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const csvText = e.target.result;
-                this.parseCSVData(csvText);
-                if (this.dom.processImportBtn) {
-                    this.dom.processImportBtn.disabled = false;
-                }
-            } catch (error) {
-                console.error("CSV parsing error:", error);
-                this.showToast("CSV ফাইল পড়তে সমস্যা", "error");
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    parseCSVData(csvText) {
-        const lines = csvText.split("\n").filter((line) => line.trim());
-        if (lines.length < 2) {
-            throw new Error("CSV ফাইলে পর্যাপ্ত ডেটা নেই");
-        }
-
-        const headers = lines[0].split(",").map((h) => h.trim());
-        const requiredHeaders = ["নাম", "রোল", "জেন্ডার", "গ্রুপ", "একাডেমিক গ্রুপ", "সেশন"];
-        
-        // Check for required headers
-        const missingHeaders = requiredHeaders.filter(
-            (header) => !headers.includes(header)
-        );
-        if (missingHeaders.length > 0) {
-            throw new Error(
-                `প্রয়োজনীয় হেডার পাওয়া যায়নি: ${missingHeaders.join(", ")}`
-            );
-        }
-
-        const students = [];
-        for (let i = 1; i < lines.length; i++) {
-            const values = this.parseCSVLine(lines[i]);
-            if (values.length !== headers.length) continue;
-
-            const student = {};
-            headers.forEach((header, index) => {
-                student[header] = values[index]?.trim() || "";
-            });
-
-            // Validate required fields
-            if (
-                student["নাম"] &&
-                student["রোল"] &&
-                student["জেন্ডার"] &&
-                student["গ্রুপ"] &&
-                student["একাডেমিক গ্রুপ"] &&
-                student["সেশন"]
-            ) {
-                students.push(student);
-            }
-        }
-
-        this.csvImportData = students;
-        this.showToast(
-            `${students.length} জন শিক্ষার্থী CSV থেকে পড়া হয়েছে`,
-            "success"
-        );
-    }
-
-    parseCSVLine(line) {
-        const result = [];
-        let current = "";
-        let inQuotes = false;
-
-        for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-
-            if (char === '"') {
-                inQuotes = !inQuotes;
-            } else if (char === "," && !inQuotes) {
-                result.push(current);
-                current = "";
-            } else {
-                current += char;
-            }
-        }
-
-        result.push(current);
-        return result.map((field) => field.replace(/^"|"$/g, ""));
-    }
-
-    async processCSVImport() {
-        if (!this.csvImportData || this.csvImportData.length === 0) {
-            this.showToast("প্রথমে CSV ফাইল আপলোড করুন", "error");
-            return;
-        }
-
-        this.showLoading("শিক্ষার্থী ইম্পোর্ট করা হচ্ছে...");
-        try {
-            let successCount = 0;
-            let errorCount = 0;
-
-            for (const studentData of this.csvImportData) {
-                try {
-                    // Find or create group
-                    let groupId = null;
-                    const groupName = studentData["গ্রুপ"];
-                    if (groupName) {
-                        let group = this.state.groups.find(
-                            (g) => g.name === groupName
-                        );
-                        if (!group) {
-                            const groupDoc = await db.collection("groups").add({
-                                name: groupName,
-                                memberCount: 0,
-                                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            });
-                            groupId = groupDoc.id;
-                            // Add to local state
-                            this.state.groups.push({
-                                id: groupId,
-                                name: groupName,
-                                memberCount: 0,
-                            });
-                        } else {
-                            groupId = group.id;
-                        }
-                    }
-
-                    // Check for duplicate
-                    const isDuplicate = await this.checkStudentUniqueness(
-                        studentData["রোল"],
-                        studentData["একাডেমিক গ্রুপ"]
-                    );
-                    if (isDuplicate) {
-                        errorCount++;
-                        continue;
-                    }
-
-                    // Create student
-                    await db.collection("students").add({
-                        name: studentData["নাম"],
-                        roll: studentData["রোল"],
-                        gender: studentData["জেন্ডার"],
-                        groupId: groupId,
-                        contact: studentData["যোগাযোগ"] || "",
-                        academicGroup: studentData["একাডেমিক গ্রুপ"],
-                        session: studentData["সেশন"],
-                        role: studentData["দায়িত্ব"] || "",
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    });
-
-                    successCount++;
-                } catch (error) {
-                    console.error("Error importing student:", error);
-                    errorCount++;
-                }
-            }
-
-            // Clear cache and reload data
-            this.cache.clear("students_data");
-            this.cache.clear("groups_data");
-            await this.loadStudents();
-            await this.loadGroups();
-
-            this.showToast(
-                `ইম্পোর্ট সম্পন্ন: ${successCount} সফল, ${errorCount} ব্যর্থ`,
-                successCount > 0 ? "success" : "warning"
-            );
-
-            // Reset form
-            this.csvImportData = null;
-            if (this.dom.csvFileInput) this.dom.csvFileInput.value = "";
-            if (this.dom.csvFileName) this.dom.csvFileName.textContent = "কোন ফাইল নির্বাচন করা হয়নি";
-            if (this.dom.processImportBtn) this.dom.processImportBtn.disabled = true;
-        } catch (error) {
-            console.error("Import process error:", error);
-            this.showToast("ইম্পোর্ট করতে সমস্যা: " + error.message, "error");
-        } finally {
-            this.hideLoading();
-        }
-    }
-
-    downloadCSVTemplate() {
-        const headers = [
-            "নাম",
-            "রোল",
-            "জেন্ডার",
-            "গ্রুপ",
-            "যোগাযোগ",
-            "একাডেমিক গ্রুপ",
-            "সেশন",
-            "দায়িত্ব",
-        ];
-        const sampleData = [
-            [
-                "আব্দুল্লাহ আল মামুন",
-                "2023001",
-                "ছেলে",
-                "গ্রুপ এ",
-                "mamun@example.com",
-                "বিজ্ঞান",
-                "২০২০-২১",
-                "team-leader",
-            ],
-            [
-                "ফাতেমা বেগম",
-                "2023002",
-                "মেয়ে",
-                "গ্রুপ বি",
-                "fatema@example.com",
-                "মানবিক",
-                "২০২০-২১",
-                "reporter",
-            ],
-        ];
-
-        const csvContent = [headers.join(",")];
-        sampleData.forEach((row) => {
-            csvContent.push(row.join(","));
-        });
-
-        const csvString = csvContent.join("\n");
-        const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
-        this.downloadFile(blob, "student_import_template.csv");
-        this.showToast("CSV টেমপ্লেট ডাউনলোড করা হয়েছে", "success");
-    }
-
-    importCSV() {
-        if (this.dom.csvFileInput) {
-            this.dom.csvFileInput.click();
-        }
-    }
-
-    // ===============================
     // GROUP DETAILS MODAL
     // ===============================
-    async showGroupDetailsModal(groupId) {
+    showGroupDetailsModal(groupId) {
         const group = this.state.groups.find((g) => g.id === groupId);
         if (!group) return;
 
-        const groupStudents = this.getStudentsInGroup(groupId);
-        const groupEvaluations = this.state.evaluations.filter(
-            (e) => e.groupId === groupId
-        );
-
-        // Calculate group statistics
-        const stats = this.calculateGroupComprehensiveStats(
-            groupId,
-            groupStudents,
-            groupEvaluations
-        );
-
         if (this.dom.groupDetailsTitle) {
-            this.dom.groupDetailsTitle.textContent = `${group.name} - বিস্তারিত তথ্য`;
+            this.dom.groupDetailsTitle.textContent = `${group.name} - বিস্তারিত বিশ্লেষণ`;
         }
 
-        if (this.dom.groupDetailsContent) {
-            this.dom.groupDetailsContent.innerHTML = `
-                <div class="space-y-6">
-                    <!-- Statistics -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="stat-card bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                            <div class="text-blue-600 dark:text-blue-400 text-sm">সদস্য</div>
-                            <div class="text-xl font-bold text-blue-700 dark:text-blue-300">${
-                                stats.memberCount
-                            }</div>
-                        </div>
-                        <div class="stat-card bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                            <div class="text-green-600 dark:text-green-400 text-sm">মূল্যায়ন</div>
-                            <div class="text-xl font-bold text-green-700 dark:text-green-300">${
-                                stats.evaluationCount
-                            }</div>
-                        </div>
-                        <div class="stat-card bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                            <div class="text-purple-600 dark:text-purple-400 text-sm">গড় স্কোর</div>
-                            <div class="text-xl font-bold text-purple-700 dark:text-purple-300">${stats.overallAverage.toFixed(
-                                2
-                            )}</div>
-                        </div>
-                        <div class="stat-card bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
-                            <div class="text-orange-600 dark:text-orange-400 text-sm">সর্বোচ্চ</div>
-                            <div class="text-xl font-bold text-orange-700 dark:text-orange-300">${stats.maxScore.toFixed(
-                                2
-                            )}</div>
-                        </div>
-                    </div>
-
-                    <!-- Members List -->
-                    <div>
-                        <h4 class="font-semibold text-lg mb-4 text-gray-800 dark:text-white">সদস্য তালিকা</h4>
-                        <div class="space-y-3">
-                            ${groupStudents
-                                .map(
-                                    (student) => `
-                                    <div class="flex justify-between items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                        <div>
-                                            <div class="font-medium text-gray-800 dark:text-white">${
-                                                student.name
-                                            }</div>
-                                            <div class="text-sm text-gray-500">রোল: ${
-                                                student.roll
-                                            } | একাডেমিক: ${
-                                        student.academicGroup || "না"
-                                    }</div>
-                                        </div>
-                                        <span class="px-2 py-1 rounded text-xs ${
-                                            student.role
-                                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                                                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                                        }">
-                                            ${
-                                                student.role
-                                                    ? this.roleNames[student.role]
-                                                    : "দায়িত্ব বাকি"
-                                            }
-                                        </span>
-                                    </div>
-                                `
-                                )
-                                .join("")}
-                        </div>
-                    </div>
-
-                    <!-- Recent Evaluations -->
-                    <div>
-                        <h4 class="font-semibold text-lg mb-4 text-gray-800 dark:text-white">সাম্প্রতিক মূল্যায়ন</h4>
-                        <div class="space-y-2">
-                            ${groupEvaluations
-                                .slice(0, 5)
-                                .map((evalItem) => {
-                                    const task = this.state.tasks.find(
-                                        (t) => t.id === evalItem.taskId
-                                    );
-                                    const totalScore =
-                                        this.calculateEvaluationTotalScore(evalItem);
-                                    const dateStr = evalItem.updatedAt?.seconds
-                                        ? new Date(
-                                            evalItem.updatedAt.seconds * 1000
-                                        ).toLocaleDateString("bn-BD")
-                                        : "তারিখ নেই";
-
-                                    return `
-                                        <div class="flex justify-between items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-white">${
-                                                    task?.name || "Unknown Task"
-                                                }</div>
-                                                <div class="text-sm text-gray-500">তারিখ: ${dateStr}</div>
-                                            </div>
-                                            <span class="font-semibold text-blue-600 dark:text-blue-400">${totalScore}</span>
-                                        </div>
-                                    `;
-                                })
-                                .join("")}
-                            ${
-                                groupEvaluations.length === 0
-                                    ? '<p class="text-center text-gray-500 py-4">কোন মূল্যায়ন নেই</p>'
-                                    : ""
-                            }
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
+        this.renderGroupDetails(groupId);
         this.showModal(this.dom.groupDetailsModal);
     }
 
     hideGroupDetailsModal() {
         this.hideModal(this.dom.groupDetailsModal);
     }
+
+    // ===============================
+    // REFRESH RANKING
+    // ===============================
+    refreshRanking() {
+        this.renderStudentRanking();
+        this.showToast("র‌্যাঙ্কিং রিফ্রেশ করা হয়েছে", "success");
+    }
+
+    // ===============================
+    // AUTH FORM TOGGLE
+    // ===============================
+    toggleAuthForms(showRegister = true) {
+        const loginForm = document.getElementById("loginForm");
+        const registerForm = document.getElementById("registerForm");
+
+        if (loginForm && registerForm) {
+            if (showRegister) {
+                loginForm.classList.add("hidden");
+                registerForm.classList.remove("hidden");
+            } else {
+                loginForm.classList.remove("hidden");
+                registerForm.classList.add("hidden");
+            }
+        }
+    }
 }
 
-// Initialize the application when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
-    window.smartEvaluator = new SmartGroupEvaluator();
+// Initialize the application
+let smartEvaluator;
+
+document.addEventListener("DOMContentLoaded", function () {
+    smartEvaluator = new SmartGroupEvaluator();
 });
-
-// Add CSS for animations and additional styles
-const additionalStyles = `
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .animate-slide-in {
-        animation: slideIn 0.6s ease-out forwards;
-    }
-    
-    .student-group-color-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-    .student-group-color-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
-    .student-group-color-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
-    .student-group-color-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: black; }
-    .student-group-color-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: black; }
-    .student-group-color-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: black; }
-    
-    .rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; font-weight: bold; }
-    .rank-2 { background: linear-gradient(135deg, #C0C0C0, #A9A9A9); color: #000; font-weight: bold; }
-    .rank-3 { background: linear-gradient(135deg, #CD7F32, #8B4513); color: #fff; font-weight: bold; }
-    .rank-other { background: #f3f4f6; color: #6b7280; }
-    
-    .glass-card {
-        backdrop-filter: blur(10px);
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .dark .glass-card {
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .card-hover {
-        transition: all 0.3s ease;
-    }
-    
-    .card-hover:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    }
-    
-    .progress-bar {
-        background: #e5e7eb;
-        border-radius: 10px;
-        overflow: hidden;
-        height: 8px;
-    }
-    
-    .progress-fill {
-        height: 100%;
-        border-radius: 10px;
-        transition: width 0.5s ease;
-    }
-    
-    .member-role-badge {
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-    
-    .member-role-badge.team-leader { background: #fee2e2; color: #dc2626; }
-    .member-role-badge.time-keeper { background: #dbeafe; color: #1d4ed8; }
-    .member-role-badge.reporter { background: #f0fdf4; color: #16a34a; }
-    .member-role-badge.resource-manager { background: #fef3c7; color: #d97706; }
-    .member-role-badge.peace-maker { background: #f3e8ff; color: #7c3aed; }
-    
-    .serial-number {
-        font-family: 'Arial', sans-serif;
-        font-weight: 900;
-        opacity: 0.3;
-        user-select: none;
-        pointer-events: none;
-    }
-    
-    .rank-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        font-weight: bold;
-        font-size: 0.875rem;
-    }
-    
-    .student-card {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .student-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-    }
-`;
-
-// Add styles to document
-const styleSheet = document.createElement("style");
-styleSheet.textContent = additionalStyles;
-document.head.appendChild(styleSheet);

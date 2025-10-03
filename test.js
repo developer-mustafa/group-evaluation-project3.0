@@ -323,8 +323,9 @@ setupAuthStateListener() {
             googleSignInBtn: document.getElementById("googleSignInBtn"),
             logoutBtn: document.getElementById("logoutBtn"),
             themeToggle: document.getElementById("themeToggle"),
-            mobileMenuBtn: document.getElementById("mobileMenuBtn"),
-            sidebar: document.querySelector(".sidebar"),
+      
+
+
             pageTitle: document.getElementById("pageTitle"),
             userInfo: document.getElementById("userInfo"),
 
@@ -470,7 +471,8 @@ setupAuthStateListener() {
 
         // Theme and mobile menu - FIXED
         this.addListener(this.dom.themeToggle, "click", () => this.toggleTheme());
-        this.addListener(this.dom.mobileMenuBtn, "click", () => this.toggleMobileMenu());
+
+       
 
         // Navigation
         this.dom.navBtns.forEach((btn) => {
@@ -1656,11 +1658,7 @@ updateUserInterface(userData) {
         }
     }
 
-    toggleMobileMenu() {
-        if (this.dom.sidebar) {
-            this.dom.sidebar.classList.toggle("hidden");
-        }
-    }
+  
 
     ensurePublicPage() {
         const currentPage = this.getActivePage();
@@ -2088,7 +2086,7 @@ updateUserInterface(userData) {
                         </div>
 
                         <!-- Detailed Table -->
-                        <div class="overflow-x-auto">
+                        <div class="overflow-auto">
                             <table class="evaluation-table w-full border-collapse">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-700">
@@ -3150,7 +3148,7 @@ updateUserInterface(userData) {
         };
       
         container.innerHTML = `
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             ${sortedGroups.map((group, index) => {
               const rank = index + 1;
               const style = rankStyles[rank] || { gradient: "from-indigo-400 to-purple-500", text: "text-white", icon: "🏆", glow: "" };
