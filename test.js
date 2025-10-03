@@ -1981,21 +1981,20 @@ class SmartGroupEvaluator {
 
         let content = `
             <div class="mb-6">
-                <h4 class="font-semibold text-xl mb-4 text-gray-800 dark:text-white">${group.name} - বিস্তারিত ফলাফল</h4>
                 
                 <!-- Summary Section -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                        <div class="text-blue-600 dark:text-blue-400 font-semibold">মোট মূল্যায়ন</div>
-                        <div class="text-2xl font-bold text-blue-700 dark:text-blue-300">${groupEvaluations.length}</div>
+                        <div class="text-blue-600 dark:text-blue-400 font-semibold text-center">মোট মূল্যায়ন</div>
+                        <div class="text-2xl font-bold text-blue-700 dark:text-blue-300 text-center">${groupEvaluations.length}</div>
                     </div>
                     <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                        <div class="text-green-600 dark:text-green-400 font-semibold">সদস্য সংখ্যা</div>
-                        <div class="text-2xl font-bold text-green-700 dark:text-green-300">${groupStudents.length}</div>
+                        <div class="text-green-600 dark:text-green-400 font-semibold text-center">সদস্য সংখ্যা</div>
+                        <div class="text-2xl font-bold text-green-700 dark:text-green-300 text-center">${groupStudents.length}</div>
                     </div>
                     <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                        <div class="text-purple-600 dark:text-purple-400 font-semibold">গড় স্কোর</div>
-                        <div class="text-2xl font-bold text-purple-700 dark:text-purple-300">${this.calculateGroupAverageScore(groupId).toFixed(2)}</div>
+                        <div class="text-purple-600 dark:text-purple-400 font-semibold text-center">গড় স্কোর</div>
+                        <div class="text-2xl font-bold text-purple-700 dark:text-purple-300 text-center">${this.calculateGroupAverageScore(groupId).toFixed(2)}</div>
                     </div>
                 </div>
             </div>
@@ -4714,7 +4713,7 @@ renderRankingList(rankings) {
         const group = this.state.groups.find((g) => g.id === groupId);
         if (!group) return;
 
-        this.dom.groupDetailsTitle.textContent = `${group.name} - বিস্তারিত তথ্য`;
+        this.dom.groupDetailsTitle.textContent = `${group.name} - বিস্তারিত ফলাফলের তথ্য:`;
         this.renderGroupDetails(groupId);
         this.showModal(this.dom.groupDetailsModal);
     }
