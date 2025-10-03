@@ -48,8 +48,8 @@
 </head>
 <body class="bg-gray-50 dark:bg-darkBg text-gray-800 dark:text-gray-200 transition-colors duration-300">
  <!-- Toast Notification -->
-<div id="toast" class="fixed bottom-6 right-6 z-50 hidden transition-all duration-500 transform translate-y-4 opacity-0">
-    <div id="toastBox" class="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center space-x-3 min-w-[280px] max-w-[380px]">
+<div id="toast" class="fixed bottom-0 right-6 z-50 hidden transition-all duration-500 transform translate-y-4 opacity-0">
+    <div id="toastBox" class=">
         <i id="toastIcon" class="fas fa-check-circle text-xl"></i>
         <span id="toastMessage" class="font-medium">Operation successful</span>
         <button onclick="hideToast()" class="ml-auto text-white hover:text-gray-200 focus:outline-none">✖</button>
@@ -246,7 +246,7 @@
         <div class="app-container">
             <!-- Sidebar -->
             <div class="sidebar">
-                <nav class="p-4 space-y-2">
+                <nav class="p-3 space-y-2">
                     <button class="nav-btn active" data-page="dashboard">
                         <i class="fas fa-tachometer-alt mr-3"></i>ড্যাশবোর্ড
                     </button>
@@ -282,7 +282,7 @@
                     </button>
                     <div id="adminManagementSection" >
                         <button class="nav-btn private-tab" data-page="admin-management">
-                            <i class="fas fa-user-shield mr-3"></i>অ্যাডমিন ব্যবস্থাপনা
+                            <i class="fas fa-user-shield mr-3"></i>অ্যাডমিন কন্ট্রোল
                         </button>
                     </div>
                 </nav>
@@ -299,28 +299,28 @@
                         </div>
                       
                         <!-- একাডেমিক গ্রুপ -->
-                        <div class="card">
-                          <div class="card-header">
-                            <h3 class="card-title">একাডেমিক গ্রুপ</h3>
-                          </div>
-                          <div class="card-body">
-                            <div id="academicGroupStatsList" class="space-y-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-6 auto-rows-[minmax(100px,auto)]"></div>
-                          </div>
-                        </div>
+                      
+                          
+                            <div id="academicGroupStatsList" class="card-body shadow-md rounded-xl"></div>
+                        
                       
                         <!-- শীর্ষ গ্রুপসমূহ -->
-                        <div class="top-groups-section">
-                          <div class="card">
-                            <div class="card-header">
-                              <h3 class="card-title">শীর্ষ গ্রুপসমূহ</h3>
+                      
+                        <div class="top-groups-section max-w-6xl mx-auto px-4 py-2">
+                            <!-- Title -->
+                            <div class="text-center mb-5">
+                              <h3 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
+                               ফলাফলের শীর্ষে ৩ গ্রুপ:
+                              </h3>
                             </div>
-                            <div class="card-body">
-                              <div id="topGroupsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <!-- Top groups cards will go here -->
-                              </div>
+                          
+                            <!-- Top Groups Container -->
+                            <div id="topGroupsContainer" class="">
+                              <!-- Top groups cards will be injected here -->
                             </div>
                           </div>
-                        </div>
+                          
+                          
                       
                         <!-- গ্রুপ র‌্যাঙ্কিং -->
                         <div class="groups-ranking-section">
@@ -670,7 +670,9 @@
 
     <!-- <script src="./optimiseMain2.js"></script> -->
     <!-- <script src="./opt4.js"></script> -->
-    <script src="./OPT3.JS"></script>
+    <!-- <script src="./OPT3.JS"></script> -->
+
+    <script src="./test.js"></script>
   
 
 </body>

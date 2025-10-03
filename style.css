@@ -309,7 +309,7 @@ h6 { font-size: var(--text-base); }
 }
 
 .sidebar {
-  width: 280px;
+  width: 230px;
   flex-shrink: 0;
   height: 100vh;
   overflow-y: auto;
@@ -1627,7 +1627,7 @@ header {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 580px) {
   .app-container {
     flex-direction: column;
   }
@@ -1742,27 +1742,44 @@ header {
     font-size: 1.75rem;
   }
 }
-
-/* ===== SCROLLBAR STYLING ===== */
+/* ===== SCROLLBAR STYLING - PREMIUM VERSION ===== */
 ::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: var(--radius-sm);
-  transition: all 0.3s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-dark);
-}
-
+    width: 8px;
+    height: 8px; /* horizontal scrollbar */
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05); /* light mode track */
+    border-radius: 10px;
+  }
+  
+  .dark ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1); /* dark mode track */
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #8b5cf6, #6366f1); /* purple gradient */
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #a78bfa, #818cf8); /* brighter on hover */
+    transform: scale(1.1);
+  }
+  
+  /* Optional: subtle shadow for thumb */
+  ::-webkit-scrollbar-thumb {
+    box-shadow: inset 0 0 2px rgba(0,0,0,0.3);
+  }
+  
+  /* Optional: smooth scrolling for the page */
+  html {
+    scroll-behavior: smooth;
+  }
+  
 /* ===== THEME SWITCHER STYLES ===== */
 .theme-switcher {
   position: fixed;
@@ -2061,4 +2078,32 @@ textarea:focus-visible {
   .stat-card:hover {
     transform: none;
   }
+}
+
+
+@keyframes slide-in {
+    0% { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-slide-in {
+    animation: slide-in 0.6s forwards;
+  }
+
+  /* গ্রুপ অনুযায়ী আলাদা কার্ড কালার */
+.student-group-color-1 { background: linear-gradient(to top right, #fdfbfb, #ebedee); }
+.student-group-color-2 { background: linear-gradient(to top right, #fef6f9, #fde2e4); }
+.student-group-color-3 { background: linear-gradient(to top right, #f0fdfa, #ccfbf1); }
+.student-group-color-4 { background: linear-gradient(to top right, #fefce8, #fef9c3); }
+.student-group-color-5 { background: linear-gradient(to top right, #eef2ff, #e0e7ff); }
+.student-group-color-6 { background: linear-gradient(to top right, #f5f3ff, #ede9fe); }
+
+/* Dark mode এ কন্টেন্ট readable */
+.dark .student-group-color-1,
+.dark .student-group-color-2,
+.dark .student-group-color-3,
+.dark .student-group-color-4,
+.dark .student-group-color-5,
+.dark .student-group-color-6 {
+    background: #1f2937; /* neutral dark */
 }

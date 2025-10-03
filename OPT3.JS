@@ -3913,61 +3913,102 @@ class SmartGroupEvaluator {
       renderAcademicGroupStats() {
         const container = document.getElementById("academicGroupStatsList");
         if (!container) return;
-    
+      
         const academicCounts = {};
         this.state.students.forEach((s) => {
           const ag = s.academicGroup || "অজানা";
           academicCounts[ag] = (academicCounts[ag] || 0) + 1;
         });
-    
+      
         const total = this.state.students.length;
-        container.innerHTML = Object.entries(academicCounts)
-          .map(([group, count]) => {
-            const percent = total > 0 ? Math.round((count / total) * 100) : 0;
-            return `
-                    <div class="glass-card rounded-lg p-4 card-hover">
-                        <div class="flex justify-between mb-1">
-                            <div class="font-medium">${group}</div>
-                            <div class="text-sm text-gray-500">${count} (${percent}%)</div>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill bg-purple-500" style="width:${percent}%"></div>
-                        </div>
+      
+        // কিছু কালার ভ্যারিয়েন্ট (গ্রুপভেদে পাল্টাবে)
+        const colorClasses = [
+          "from-purple-500 to-indigo-500",
+          "from-green-400 to-emerald-500",
+          "from-pink-500 to-rose-500",
+          "from-orange-400 to-red-500",
+          "from-blue-500 to-cyan-500",
+          "from-teal-400 to-green-500",
+        ];
+      
+        let colorIndex = 0;
+      
+        container.innerHTML = `
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-6">
+            ${Object.entries(academicCounts)
+              .map(([group, count]) => {
+                const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+                const gradient = colorClasses[colorIndex % colorClasses.length];
+                colorIndex++;
+      
+                return `
+                  <div class="rounded-2xl p-5 transition transform hover:-translate-y-1 hover:shadow-xl 
+                              glass-card border border-white/20 dark:border-white/10">
+                    <div class="flex justify-between items-center mb-3">
+                      <div class="font-semibold text-lg text-gray-800 dark:text-gray-100">${group}</div>
+                      <div class="text-sm text-gray-600 dark:text-gray-300">${count} (${percent}%)</div>
                     </div>
+                    <div class="w-full h-3 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                      <div class="h-full bg-gradient-to-r ${gradient} rounded-full transition-all duration-700" 
+                           style="width:${percent}%"></div>
+                    </div>
+                  </div>
                 `;
-          })
-          .join("");
+              })
+              .join("")}
+          </div>
+        `;
       }
-    
+      
+      
       renderTopGroups() {
         const container = document.getElementById("topGroupsContainer");
         if (!container) return;
-    
+      
         const scores = this.calculateGroupScores();
         const sortedGroups = [...this.state.groups]
           .sort((a, b) => scores[b.id].score - scores[a.id].score)
           .slice(0, 3);
-    
-        container.innerHTML = sortedGroups
-          .map((group, index) => {
-            const rank = index + 1;
-            return `
-                    <div class="rank-card rank-${rank}-card card-hover" onclick="smartEvaluator.showGroupDetailsModal('${
-              group.id
-            }')" style="cursor: pointer;">
-                        <div class="rank-title rank-${rank}-title">Rank ${rank}</div>
-                        <h3 class="font-bold text-lg">${group.name}</h3>
-                        <p class="text-xl font-semibold">স্কোর: ${scores[
-                          group.id
-                        ].score.toFixed(2)}</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">সদস্য: ${
-                          scores[group.id].members
-                        } জন</p>
-                    </div>
-                `;
-          })
-          .join("");
+      
+        const rankStyles = {
+          1: { gradient: "from-yellow-400 via-yellow-500 to-yellow-600", text: "text-yellow-900 dark:text-yellow-100", icon: "👑", glow: "shadow-[0_0_20px_5px_rgba(255,223,0,0.6)]" },
+          2: { gradient: "from-gray-300 via-gray-400 to-gray-500", text: "text-gray-900 dark:text-gray-100", icon: "🥈", glow: "shadow-[0_0_15px_3px_rgba(192,192,192,0.5)]" },
+          3: { gradient: "from-orange-400 via-orange-500 to-orange-600", text: "text-orange-900 dark:text-orange-100", icon: "🥉", glow: "shadow-[0_0_15px_3px_rgba(205,127,50,0.5)]" }
+        };
+      
+        container.innerHTML = `
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            ${sortedGroups.map((group, index) => {
+              const rank = index + 1;
+              const style = rankStyles[rank] || { gradient: "from-indigo-400 to-purple-500", text: "text-white", icon: "🏆", glow: "" };
+              const delay = index * 150; // entrance delay in ms
+      
+              return `
+                <div 
+                  class="relative rounded-3xl p-6 cursor-pointer 
+                         bg-gradient-to-br ${style.gradient} ${style.text} ${style.glow} 
+                         transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl
+                         opacity-0 translate-y-6 animate-slide-in"
+                  style="animation-delay: ${delay}ms"
+                  onclick="smartEvaluator.showGroupDetailsModal('${group.id}')"
+                >
+                  <!-- Rank Ribbon -->
+                  <div class="absolute -top-4 -right-4 bg-white/80 dark:bg-gray-800/70 rounded-full px-4 py-2 font-bold text-lg shadow-md flex items-center justify-center">
+                    <span class="mr-1">${style.icon}</span> Rank ${rank}
+                  </div>
+      
+                  <!-- Group Info -->
+                  <h3 class="font-extrabold text-2xl mb-2 drop-shadow-sm">${group.name}</h3>
+                  <p class="text-lg font-semibold">✨ স্কোর: ${scores[group.id].score.toFixed(2)}</p>
+                  <p class="text-sm mt-1 opacity-90">👥 সদস্য: ${scores[group.id].members} জন</p>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        `;
       }
+      
     
       renderGroupsRanking() {
         const container = document.getElementById("groupsRankingList");
