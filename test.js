@@ -246,6 +246,7 @@ class SmartGroupEvaluator {
         // Core DOM elements
         this.dom = {
             loginHeaderBtn: document.getElementById("headerLoginBtn"),
+            exportPage: document.getElementById('page-export'),
             authModal: document.getElementById("authModal"),
             appContainer: document.getElementById("appContainer"),
             loginForm: document.getElementById("loginForm"),
@@ -3103,7 +3104,7 @@ class SmartGroupEvaluator {
       
               return `
                 <div 
-                  class="relative rounded-3xl p-6 cursor-pointer 
+                  class="relative rounded-3xl p-8 cursor-pointer 
                          bg-gradient-to-br ${style.gradient} ${style.text} ${style.glow} 
                          transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl
                          opacity-0 translate-y-6 animate-slide-in"
@@ -3111,9 +3112,13 @@ class SmartGroupEvaluator {
                   onclick="smartEvaluator.showGroupDetailsModal('${group.id}')"
                 >
                   <!-- Rank Ribbon -->
-                  <div class="absolute -top-4 -right-4 bg-white/80 dark:bg-gray-800/70 rounded-full px-4 py-2 font-bold text-lg shadow-md flex items-center justify-center">
-                    <span class="mr-1">${style.icon}</span> Rank ${rank}
-                  </div>
+                 <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 
+            bg-white/80 dark:bg-gray-800/70 
+            rounded-full px-4 py-2 font-bold text-lg 
+            shadow-md flex items-center justify-center">
+  <span class="mr-1 text-3xl">${style.icon}</span> Rank ${rank}
+</div>
+
       
                   <!-- Group Info -->
                   <h3 class="font-extrabold text-2xl mb-2 drop-shadow-sm">${group.name}</h3>
@@ -4110,158 +4115,294 @@ renderRankingList(rankings) {
     }
 
 
+  // ===============================
+    // CSV IMPORT/EXPORT
+    // ===============================
+    importCSV() {
+        this.dom.csvFileInput.click();
+    }
 
-    // ===============================
-    // EXPORT METHODS
-    // ===============================
-    async exportAllData() {
-        this.showLoading("এক্সপোর্ট তৈরি হচ্ছে...");
+    async handleCSVFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        this.dom.csvFileName.textContent = file.name;
+        this.dom.processImportBtn.classList.remove('hidden');
+
+        // Parse CSV file
+        Papa.parse(file, {
+            header: true,
+            complete: (results) => {
+                this.csvImportData = results.data;
+                this.showToast(`${results.data.length}টি শিক্ষার্থীর ডেটা লোড হয়েছে`, 'success');
+            },
+            error: (error) => {
+                this.showToast('CSV ফাইল পার্স করতে সমস্যা: ' + error.message, 'error');
+            }
+        });
+    }
+
+    async processCSVImport() {
+        if (!this.csvImportData || this.csvImportData.length === 0) {
+            this.showToast('প্রথমে CSV ফাইল নির্বাচন করুন', 'error');
+            return;
+        }
+
+        this.showLoading('শিক্ষার্থী ইম্পোর্ট হচ্ছে...');
+        let successCount = 0;
+        let errorCount = 0;
+
         try {
-            await Promise.all([
-                this.loadGroups(),
-                this.loadStudents(),
-                this.loadTasks(),
-                this.loadEvaluations(),
-            ]);
+            for (const studentData of this.csvImportData) {
+                try {
+                    // Validate required fields
+                    if (!studentData.নাম || !studentData.রোল || !studentData.গ্রুপ) {
+                        errorCount++;
+                        continue;
+                    }
 
-            const exportData = {
-                groups: this.state.groups,
-                students: this.state.students,
-                tasks: this.state.tasks,
-                evaluations: this.state.evaluations,
-                exportedAt: new Date().toISOString(),
-            };
+                    // Find group by name
+                    const group = this.state.groups.find(g => g.name === studentData.গ্রুপ);
+                    if (!group) {
+                        errorCount++;
+                        continue;
+                    }
 
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-                type: "application/json",
-            });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `smart_evaluator_backup_${new Date().toISOString().split("T")[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+                    // Check for duplicates
+                    const isDuplicate = await this.checkStudentUniqueness(studentData.রোল, studentData.একাডেমিক_গ্রুপ || '');
+                    if (isDuplicate) {
+                        errorCount++;
+                        continue;
+                    }
 
-            this.showToast("সমস্ত ডেটা সফলভাবে এক্সপোর্ট করা হয়েছে", "success");
+                    // Prepare student data
+                    const student = {
+                        name: studentData.নাম,
+                        roll: studentData.রোল,
+                        gender: studentData.লিঙ্গ || 'ছেলে',
+                        groupId: group.id,
+                        contact: studentData.যোগাযোগ || '',
+                        academicGroup: studentData.একাডেমিক_গ্রুপ || '',
+                        session: studentData.সেশন || '',
+                        role: this.getRoleKey(studentData.দায়িত্ব || '')
+                    };
+
+                    await db.collection("students").add({
+                        ...student,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    });
+
+                    successCount++;
+                } catch (error) {
+                    errorCount++;
+                }
+            }
+
+            // Clear cache and reload data
+            this.cache.clear('students_data');
+            await this.loadStudents();
+
+            // Reset form
+            this.dom.csvFileInput.value = '';
+            this.dom.csvFileName.textContent = 'কোন ফাইল নির্বাচন করা হয়নি';
+            this.dom.processImportBtn.classList.add('hidden');
+            this.csvImportData = null;
+
+            this.showToast(`${successCount}টি শিক্ষার্থী সফলভাবে ইম্পোর্ট হয়েছে, ${errorCount}টি ব্যর্থ`, 'success');
         } catch (error) {
-            this.showToast("এক্সপোর্ট ব্যর্থ: " + error.message, "error");
+            this.showToast('ইম্পোর্ট প্রসেস করতে সমস্যা: ' + error.message, 'error');
         } finally {
             this.hideLoading();
         }
     }
 
-    exportStudentsCSV() {
-        const headers = [
-            "নাম",
-            "রোল",
-            "লিঙ্গ",
-            "গ্রুপ",
-            "যোগাযোগ",
-            "একাডেমিক গ্রুপ",
-            "সেশন",
-            "দায়িত্ব",
-        ];
-
-        const rows = this.state.students.map((student) => {
-            const group = this.state.groups.find((g) => g.id === student.groupId);
-            return [
-                student.name,
-                student.roll,
-                student.gender,
-                group?.name || "",
-                student.contact || "",
-                student.academicGroup || "",
-                student.session || "",
-                this.roleNames[student.role] || "",
-            ];
-        });
-
-        this.downloadCSV([headers, ...rows], "students.csv");
-        this.showToast("শিক্ষার্থী ডেটা সফলভাবে এক্সপোর্ট করা হয়েছে", "success");
+    getRoleKey(roleName) {
+        const roleMap = {
+            'টিম লিডার': 'team-leader',
+            'টাইম কিপার': 'time-keeper',
+            'রিপোর্টার': 'reporter',
+            'রিসোর্স ম্যানেজার': 'resource-manager',
+            'পিস মেকার': 'peace-maker'
+        };
+        return roleMap[roleName] || '';
     }
 
-    exportGroupsCSV() {
-        const memberCountMap = this.computeMemberCountMap();
-        const headers = ["গ্রুপ নাম", "সদস্য সংখ্যা"];
-
-        const rows = this.state.groups.map((group) => [
-            group.name,
-            memberCountMap[group.id] || 0,
-        ]);
-
-        this.downloadCSV([headers, ...rows], "groups.csv");
-        this.showToast("গ্রুপ ডেটা সফলভাবে এক্সপোর্ট করা হয়েছে", "success");
-    }
-
-    exportEvaluationsCSV() {
-        const headers = [
-            "টাস্ক",
-            "গ্রুপ",
-            "শিক্ষার্থী",
-            "টাস্ক স্কোর",
-            "টিমওয়ার্ক স্কোর",
-            "অতিরিক্ত পয়েন্ট",
-            "মোট স্কোর",
-            "মন্তব্য",
-            "তারিখ",
+    downloadCSVTemplate() {
+        const headers = ['নাম', 'রোল', 'লিঙ্গ', 'গ্রুপ', 'একাডেমিক_গ্রুপ', 'সেশন', 'দায়িত্ব', 'যোগাযোগ'];
+        const sampleData = [
+            ['আব্দুল্লাহ আল মামুন', '101', 'ছেলে', 'গ্রুপ এ', 'বিজ্ঞান', '২০২৩-২৪', 'টিম লিডার', 'example@email.com'],
+            ['সাদিয়া ইসলাম', '102', 'মেয়ে', 'গ্রুপ এ', 'বিজ্ঞান', '২০২৩-২৪', 'রিপোর্টার', '']
         ];
 
-        const rows = [];
-        this.state.evaluations.forEach((evaluation) => {
-            const task = this.state.tasks.find((t) => t.id === evaluation.taskId);
-            const group = this.state.groups.find((g) => g.id === evaluation.groupId);
+        const csvContent = [headers, ...sampleData]
+            .map(row => row.map(field => `"${field}"`).join(','))
+            .join('\n');
 
-            if (evaluation.scores) {
-                Object.entries(evaluation.scores).forEach(([studentId, score]) => {
-                    const student = this.state.students.find((s) => s.id === studentId);
-                    if (!student) return;
+        this.downloadCSV(csvContent, 'student_template.csv');
+        this.showToast('CSV টেমপ্লেট ডাউনলোড হয়েছে', 'success');
+    }
 
-                    let additionalMarks = 0;
-                    if (score.optionMarks) {
-                        Object.values(score.optionMarks).forEach((opt) => {
-                            if (opt.selected) {
-                                const optDef = this.evaluationOptions.find(
-                                    (o) => o.id === opt.optionId
-                                );
-                                if (optDef) additionalMarks += optDef.marks;
+    async exportStudentsCSV() {
+        this.showLoading();
+        try {
+            const headers = ['নাম', 'রোল', 'লিঙ্গ', 'গ্রুপ', 'একাডেমিক_গ্রুপ', 'সেশন', 'দায়িত্ব', 'যোগাযোগ'];
+            const data = this.state.students.map(student => {
+                const group = this.state.groups.find(g => g.id === student.groupId);
+                return [
+                    student.name,
+                    student.roll,
+                    student.gender,
+                    group?.name || '',
+                    student.academicGroup || '',
+                    student.session || '',
+                    this.roleNames[student.role] || student.role || '',
+                    student.contact || ''
+                ];
+            });
+
+            const csvContent = [headers, ...data]
+                .map(row => row.map(field => `"${field}"`).join(','))
+                .join('\n');
+
+            this.downloadCSV(csvContent, 'students.csv');
+            this.showToast('শিক্ষার্থী CSV এক্সপোর্ট সফল', 'success');
+        } catch (error) {
+            this.showToast('CSV এক্সপোর্ট করতে সমস্যা', 'error');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    async exportGroupsCSV() {
+        this.showLoading();
+        try {
+            const headers = ['গ্রুপ নাম', 'সদস্য সংখ্যা', 'গড় স্কোর'];
+            const memberCountMap = this.computeMemberCountMap();
+            const groupScores = this.calculateGroupScores();
+            
+            const data = this.state.groups.map(group => [
+                group.name,
+                memberCountMap[group.id] || 0,
+                groupScores[group.id]?.score.toFixed(2) || '0.00'
+            ]);
+
+            const csvContent = [headers, ...data]
+                .map(row => row.map(field => `"${field}"`).join(','))
+                .join('\n');
+
+            this.downloadCSV(csvContent, 'groups.csv');
+            this.showToast('গ্রুপ CSV এক্সপোর্ট সফল', 'success');
+        } catch (error) {
+            this.showToast('CSV এক্সপোর্ট করতে সমস্যা', 'error');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    async exportEvaluationsCSV() {
+        this.showLoading();
+        try {
+            const headers = ['টাস্ক', 'গ্রুপ', 'শিক্ষার্থী', 'টাস্ক স্কোর', 'টিমওয়ার্ক স্কোর', 'অতিরিক্ত পয়েন্ট', 'মোট স্কোর', 'মন্তব্য'];
+            const data = [];
+
+            this.state.evaluations.forEach(evalItem => {
+                const task = this.state.tasks.find(t => t.id === evalItem.taskId);
+                const group = this.state.groups.find(g => g.id === evalItem.groupId);
+                
+                if (evalItem.scores) {
+                    Object.entries(evalItem.scores).forEach(([studentId, score]) => {
+                        const student = this.state.students.find(s => s.id === studentId);
+                        if (student) {
+                            let additionalMarks = 0;
+                            if (score.optionMarks) {
+                                Object.values(score.optionMarks).forEach(opt => {
+                                    if (opt.selected) {
+                                        const optDef = this.evaluationOptions.find(o => o.id === opt.optionId);
+                                        if (optDef) additionalMarks += optDef.marks;
+                                    }
+                                });
                             }
-                        });
-                    }
+                            
+                            const total = (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
+                            
+                            data.push([
+                                task?.name || 'Unknown',
+                                group?.name || 'Unknown',
+                                student.name,
+                                score.taskScore || 0,
+                                score.teamworkScore || 0,
+                                additionalMarks,
+                                total,
+                                score.comments || ''
+                            ]);
+                        }
+                    });
+                }
+            });
 
-                    const total =
-                        (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
-                    const dateStr = evaluation.updatedAt?.seconds
-                        ? new Date(evaluation.updatedAt.seconds * 1000).toLocaleDateString(
-                            "bn-BD"
-                        )
-                        : "";
+            const csvContent = [headers, ...data]
+                .map(row => row.map(field => `"${field}"`).join(','))
+                .join('\n');
 
-                    rows.push([
-                        task?.name || "",
-                        group?.name || "",
-                        student.name,
-                        score.taskScore || 0,
-                        score.teamworkScore || 0,
-                        additionalMarks,
-                        total,
-                        score.comments || "",
-                        dateStr,
-                    ]);
-                });
-            }
-        });
-
-        this.downloadCSV([headers, ...rows], "evaluations.csv");
-        this.showToast("মূল্যায়ন ডেটা সফলভাবে এক্সপোর্ট করা হয়েছে", "success");
+            this.downloadCSV(csvContent, 'evaluations.csv');
+            this.showToast('মূল্যায়ন CSV এক্সপোর্ট সফল', 'success');
+        } catch (error) {
+            this.showToast('CSV এক্সপোর্ট করতে সমস্যা', 'error');
+        } finally {
+            this.hideLoading();
+        }
     }
 
-    downloadCSV(data, filename) {
-        const csvContent = data.map((row) => row.map((cell) => `"${cell}"`).join(",")).join("\n");
-        const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    async exportAllData() {
+        this.showLoading('ডেটা এক্সপোর্ট হচ্ছে...');
+        
+        try {
+            // Create ZIP file with all CSV files
+            const zip = new JSZip();
+            
+            // Add students CSV
+            const studentsCSV = await this.generateStudentsCSV();
+            zip.file("students.csv", studentsCSV);
+            
+            // Add groups CSV with average scores
+            const groupsCSV = await this.generateGroupsCSV();
+            zip.file("groups.csv", groupsCSV);
+            
+            // Add evaluations CSV
+            const evaluationsCSV = await this.generateEvaluationsCSV();
+            zip.file("evaluations.csv", evaluationsCSV);
+            
+            // Add tasks CSV
+            const tasksCSV = await this.generateTasksCSV();
+            zip.file("tasks.csv", tasksCSV);
+            
+            // Add group performance report
+            const performanceCSV = await this.generatePerformanceReport();
+            zip.file("performance_report.csv", performanceCSV);
+            
+            // Generate and download ZIP
+            const content = await zip.generateAsync({type: "blob"});
+            const url = URL.createObjectURL(content);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `smart_evaluator_data_${new Date().toISOString().split('T')[0]}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.showToast('সমস্ত ডেটা ZIP এক্সপোর্ট সফল', 'success');
+        } catch (error) {
+            this.showToast('ZIP এক্সপোর্ট করতে সমস্যা: ' + error.message, 'error');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    downloadCSV(csvContent, filename) {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
@@ -4270,286 +4411,166 @@ renderRankingList(rankings) {
         URL.revokeObjectURL(url);
     }
 
-    // ===============================
-    // CSV IMPORT METHODS
-    // ===============================
-    importCSV() {
-        this.dom.csvFileInput?.click();
+    // Helper methods for CSV generation
+    async generateStudentsCSV() {
+        const headers = ['নাম', 'রোল', 'লিঙ্গ', 'গ্রুপ', 'একাডেমিক_গ্রুপ', 'সেশন', 'দায়িত্ব', 'যোগাযোগ'];
+        const data = this.state.students.map(student => {
+            const group = this.state.groups.find(g => g.id === student.groupId);
+            return [
+                student.name,
+                student.roll,
+                student.gender,
+                group?.name || '',
+                student.academicGroup || '',
+                student.session || '',
+                this.roleNames[student.role] || student.role || '',
+                student.contact || ''
+            ];
+        });
+
+        return [headers, ...data]
+            .map(row => row.map(field => `"${field}"`).join(','))
+            .join('\n');
     }
 
-    handleCSVFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+    async generateGroupsCSV() {
+        const headers = ['গ্রুপ নাম', 'সদস্য সংখ্যা', 'গড় স্কোর'];
+        const memberCountMap = this.computeMemberCountMap();
+        const groupScores = this.calculateGroupScores();
+        
+        const data = this.state.groups.map(group => [
+            group.name,
+            memberCountMap[group.id] || 0,
+            groupScores[group.id]?.score.toFixed(2) || '0.00'
+        ]);
 
-        const fileName = file.name.toLowerCase();
-        if (!fileName.endsWith(".csv")) {
-            this.showToast("শুধুমাত্র CSV ফাইল নির্বাচন করুন", "error");
-            return;
-        }
-
-        this.dom.csvFileName.textContent = file.name;
-        this.processCSVFile(file);
+        return [headers, ...data]
+            .map(row => row.map(field => `"${field}"`).join(','))
+            .join('\n');
     }
 
-    processCSVFile(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const csvData = e.target.result;
-                const rows = csvData.split("\n").map((row) => row.split(","));
-                
-                // Remove header and empty rows
-                const dataRows = rows.slice(1).filter((row) => row.length > 1 && row[0].trim());
-                
-                if (dataRows.length === 0) {
-                    this.showToast("CSV ফাইলে কোনো ডেটা নেই", "error");
-                    return;
-                }
+    async generateEvaluationsCSV() {
+        const headers = ['টাস্ক', 'গ্রুপ', 'শিক্ষার্থী', 'টাস্ক স্কোর', 'টিমওয়ার্ক স্কোর', 'অতিরিক্ত পয়েন্ট', 'মোট স্কোর', 'মন্তব্য'];
+        const data = [];
 
-                this.csvImportData = dataRows.map((row, index) => {
-                    // Clean up each cell - remove quotes and trim
-                    const cleanRow = row.map(cell => {
-                        let clean = cell.trim();
-                        // Remove surrounding quotes if present
-                        if (clean.startsWith('"') && clean.endsWith('"')) {
-                            clean = clean.slice(1, -1);
+        this.state.evaluations.forEach(evalItem => {
+            const task = this.state.tasks.find(t => t.id === evalItem.taskId);
+            const group = this.state.groups.find(g => g.id === evalItem.groupId);
+            
+            if (evalItem.scores) {
+                Object.entries(evalItem.scores).forEach(([studentId, score]) => {
+                    const student = this.state.students.find(s => s.id === studentId);
+                    if (student) {
+                        let additionalMarks = 0;
+                        if (score.optionMarks) {
+                            Object.values(score.optionMarks).forEach(opt => {
+                                if (opt.selected) {
+                                    const optDef = this.evaluationOptions.find(o => o.id === opt.optionId);
+                                    if (optDef) additionalMarks += optDef.marks;
+                                }
+                            });
                         }
-                        return clean;
-                    });
-
-                    return {
-                        name: cleanRow[0] || "",
-                        roll: cleanRow[1] || "",
-                        gender: cleanRow[2] || "ছেলে",
-                        groupName: cleanRow[3] || "",
-                        contact: cleanRow[4] || "",
-                        academicGroup: cleanRow[5] || "",
-                        session: cleanRow[6] || "",
-                        role: cleanRow[7] || "",
-                        rowNumber: index + 2, // +2 because of header and 1-based indexing
-                    };
+                        
+                        const total = (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
+                        
+                        data.push([
+                            task?.name || 'Unknown',
+                            group?.name || 'Unknown',
+                            student.name,
+                            score.taskScore || 0,
+                            score.teamworkScore || 0,
+                            additionalMarks,
+                            total,
+                            score.comments || ''
+                        ]);
+                    }
                 });
-
-                this.showCSVPreview();
-            } catch (error) {
-                this.showToast("CSV ফাইল প্রসেস করতে সমস্যা: " + error.message, "error");
             }
-        };
-        reader.readAsText(file);
+        });
+
+        return [headers, ...data]
+            .map(row => row.map(field => `"${field}"`).join(','))
+            .join('\n');
     }
 
-    showCSVPreview() {
-        if (!this.csvImportData || this.csvImportData.length === 0) {
-            this.showToast("প্রিভিউ ডেটা নেই", "error");
-            return;
-        }
+    async generateTasksCSV() {
+        const headers = ['টাস্ক নাম', 'বিবরণ', 'সর্বোচ্চ স্কোর', 'তারিখ'];
+        const data = this.state.tasks.map(task => {
+            const dateStr = task.date?.seconds ? 
+                new Date(task.date.seconds * 1000).toLocaleDateString("bn-BD") : 
+                'তারিখ নেই';
+            return [
+                task.name,
+                task.description || '',
+                task.maxScore,
+                dateStr
+            ];
+        });
 
-        const previewHTML = `
-            <div class="mb-4">
-                <h4 class="font-semibold text-lg mb-2 text-gray-800 dark:text-white">CSV প্রিভিউ</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    ${this.csvImportData.length} টি শিক্ষার্থী পাওয়া গেছে। নিচের তালিকা পর্যালোচনা করুন:
-                </p>
-                <div class="overflow-x-auto max-h-96 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
-                            <tr>
-                                <th class="p-2 text-left text-gray-800 dark:text-white">সারি</th>
-                                <th class="p-2 text-left text-gray-800 dark:text-white">নাম</th>
-                                <th class="p-2 text-left text-gray-800 dark:text-white">রোল</th>
-                                <th class="p-2 text-left text-gray-800 dark:text-white">লিঙ্গ</th>
-                                <th class="p-2 text-left text-gray-800 dark:text-white">গ্রুপ</th>
-                                <th class="p-2 text-left text-gray-800 dark:text-white">একাডেমিক</th>
-                                <th class="p-2 text-left text-gray-800 dark:text-white">স্ট্যাটাস</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${this.csvImportData
-                                .map((student) => {
-                                    const validation = this.validateStudentData(student);
-                                    return `
-                                        <tr class="border-b border-gray-200 dark:border-gray-700">
-                                            <td class="p-2 text-gray-700 dark:text-gray-300">${student.rowNumber}</td>
-                                            <td class="p-2 text-gray-700 dark:text-gray-300">${student.name}</td>
-                                            <td class="p-2 text-gray-700 dark:text-gray-300">${student.roll}</td>
-                                            <td class="p-2 text-gray-700 dark:text-gray-300">${student.gender}</td>
-                                            <td class="p-2 text-gray-700 dark:text-gray-300">${student.groupName}</td>
-                                            <td class="p-2 text-gray-700 dark:text-gray-300">${student.academicGroup}</td>
-                                            <td class="p-2">
-                                                <span class="px-2 py-1 rounded text-xs ${
-                                                    validation.isValid
-                                                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                                        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                                }">
-                                                    ${validation.isValid ? "ভাল" : validation.error}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    `;
-                                })
-                                .join("")}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `;
-
-        this.dom.editModalTitle.textContent = "CSV ইম্পোর্ট প্রিভিউ";
-        this.dom.editModalContent.innerHTML = previewHTML;
-        this.editCallback = () => this.processCSVImport();
-        this.showEditModal();
+        return [headers, ...data]
+            .map(row => row.map(field => `"${field}"`).join(','))
+            .join('\n');
     }
 
-    validateStudentData(student) {
-        if (!student.name || student.name.trim().length === 0) {
-            return { isValid: false, error: "নাম প্রয়োজন" };
-        }
-        if (!student.roll || student.roll.trim().length === 0) {
-            return { isValid: false, error: "রোল প্রয়োজন" };
-        }
-        if (!student.gender || !["ছেলে", "মেয়ে"].includes(student.gender)) {
-            return { isValid: false, error: "লিঙ্গ প্রয়োজন (ছেলে/মেয়ে)" };
-        }
-        if (!student.groupName || student.groupName.trim().length === 0) {
-            return { isValid: false, error: "গ্রুপ নাম প্রয়োজন" };
-        }
-        if (!student.academicGroup || student.academicGroup.trim().length === 0) {
-            return { isValid: false, error: "একাডেমিক গ্রুপ প্রয়োজন" };
-        }
-        return { isValid: true };
-    }
+    async generatePerformanceReport() {
+        const headers = ['গ্রুপ', 'টাস্ক', 'গড় স্কোর', 'সর্বোচ্চ স্কোর', 'ন্যূনতম স্কোর', 'মোট মূল্যায়ন'];
+        const data = [];
 
-    async processCSVImport() {
-        if (!this.csvImportData || this.csvImportData.length === 0) {
-            this.showToast("ইম্পোর্ট করার কোনো ডেটা নেই", "error");
-            return;
-        }
+        this.state.groups.forEach(group => {
+            const groupEvaluations = this.state.evaluations.filter(e => e.groupId === group.id);
+            
+            this.state.tasks.forEach(task => {
+                const taskEvaluations = groupEvaluations.filter(e => e.taskId === task.id);
+                
+                if (taskEvaluations.length > 0) {
+                    let totalScore = 0;
+                    let maxScore = 0;
+                    let minScore = Infinity;
+                    let evaluationCount = 0;
 
-        this.showLoading("ইম্পোর্ট হচ্ছে...");
-
-        try {
-            let successCount = 0;
-            let errorCount = 0;
-            const errors = [];
-
-            // Process each student
-            for (const studentData of this.csvImportData) {
-                try {
-                    const validation = this.validateStudentData(studentData);
-                    if (!validation.isValid) {
-                        errorCount++;
-                        errors.push(`সারি ${studentData.rowNumber}: ${validation.error}`);
-                        continue;
-                    }
-
-                    // Find or create group
-                    let group = this.state.groups.find(
-                        (g) => g.name === studentData.groupName
-                    );
-                    if (!group) {
-                        // Create new group
-                        const groupDoc = await db.collection("groups").add({
-                            name: studentData.groupName,
-                            memberCount: 0,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        });
-                        group = { id: groupDoc.id, name: studentData.groupName };
-                        this.state.groups.push(group);
-                    }
-
-                    // Check for duplicate student
-                    const isDuplicate = await this.checkStudentUniqueness(
-                        studentData.roll,
-                        studentData.academicGroup
-                    );
-                    if (isDuplicate) {
-                        errorCount++;
-                        errors.push(
-                            `সারি ${studentData.rowNumber}: এই রোল ও একাডেমিক গ্রুপের শিক্ষার্থী ইতিমধ্যে আছে`
-                        );
-                        continue;
-                    }
-
-                    // Create student
-                    await db.collection("students").add({
-                        name: studentData.name,
-                        roll: studentData.roll,
-                        gender: studentData.gender,
-                        groupId: group.id,
-                        contact: studentData.contact,
-                        academicGroup: studentData.academicGroup,
-                        session: studentData.session,
-                        role: studentData.role,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    taskEvaluations.forEach(evalItem => {
+                        if (evalItem.scores) {
+                            Object.values(evalItem.scores).forEach(score => {
+                                let additionalMarks = 0;
+                                if (score.optionMarks) {
+                                    Object.values(score.optionMarks).forEach(opt => {
+                                        if (opt.selected) {
+                                            const optDef = this.evaluationOptions.find(o => o.id === opt.optionId);
+                                            if (optDef) additionalMarks += optDef.marks;
+                                        }
+                                    });
+                                }
+                                
+                                const studentTotal = (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
+                                totalScore += studentTotal;
+                                maxScore = Math.max(maxScore, studentTotal);
+                                minScore = Math.min(minScore, studentTotal);
+                                evaluationCount++;
+                            });
+                        }
                     });
 
-                    successCount++;
-                } catch (error) {
-                    errorCount++;
-                    errors.push(`সারি ${studentData.rowNumber}: ${error.message}`);
+                    const avgScore = evaluationCount > 0 ? (totalScore / evaluationCount).toFixed(2) : 0;
+                    
+                    data.push([
+                        group.name,
+                        task.name,
+                        avgScore,
+                        maxScore,
+                        minScore === Infinity ? 0 : minScore,
+                        evaluationCount
+                    ]);
                 }
-            }
+            });
+        });
 
-            // Clear cache and reload data
-            this.cache.clear("students_data");
-            this.cache.clear("groups_data");
-            await this.loadStudents();
-            await this.loadGroups();
-
-            this.hideEditModal();
-
-            // Show results
-            let resultMessage = `${successCount} জন শিক্ষার্থী সফলভাবে ইম্পোর্ট হয়েছে`;
-            if (errorCount > 0) {
-                resultMessage += `, ${errorCount} জন ব্যর্থ`;
-                if (errors.length > 0) {
-                    console.error("Import errors:", errors);
-                }
-            }
-
-            this.showToast(resultMessage, errorCount > 0 ? "warning" : "success");
-            this.csvImportData = null;
-        } catch (error) {
-            this.showToast("ইম্পোর্ট ব্যর্থ: " + error.message, "error");
-        } finally {
-            this.hideLoading();
-        }
+        return [headers, ...data]
+            .map(row => row.map(field => `"${field}"`).join(','))
+            .join('\n');
     }
 
-    downloadCSVTemplate() {
-        const headers = [
-            "নাম",
-            "রোল",
-            "লিঙ্গ",
-            "গ্রুপ",
-            "যোগাযোগ",
-            "একাডেমিক গ্রুপ",
-            "সেশন",
-            "দায়িত্ব",
-        ];
 
-        const sampleData = [
-            ["রহিম আহমেদ", "101", "ছেলে", "গ্রুপ-এ", "rahim@example.com", "বিজ্ঞান", "2023-24", "team-leader"],
-            ["সুমাইয়া আক্তার", "102", "মেয়ে", "গ্রুপ-এ", "sumaiya@example.com", "বিজ্ঞান", "2023-24", "reporter"],
-            ["করিম উদ্দিন", "103", "ছেলে", "গ্রুপ-বি", "karim@example.com", "মানবিক", "2023-24", "time-keeper"],
-        ];
-
-        const csvContent = [headers, ...sampleData]
-            .map((row) => row.map((cell) => `"${cell}"`).join(","))
-            .join("\n");
-
-        const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "student_import_template.csv";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        this.showToast("টেমপ্লেট ডাউনলোড হয়েছে", "success");
-    }
+  
 
     // ===============================
     // GROUP MEMBERS MANAGEMENT

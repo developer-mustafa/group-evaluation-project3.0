@@ -288,6 +288,10 @@
                 </nav>
             </div>
 
+            <div id="page-export" class="page hidden">
+                <!-- Export page content -->
+            </div>
+            
             <!-- Main Content -->
             <div class="main-content">
                 <div class="page-content">
@@ -308,7 +312,7 @@
                       
                         <div class="top-groups-section max-w-6xl mx-auto px-4 py-2">
                             <!-- Title -->
-                            <div class="text-center mb-5">
+                            <div class="text-center mb-8">
                               <h3 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
                                ফলাফলের শীর্ষে ৩ গ্রুপ:
                               </h3>
@@ -326,7 +330,7 @@
                         <div class="groups-ranking-section">
                           <div class="card">
                             <div class="card-header">
-                              <h3 class="card-title">গ্রুপ র‌্যাঙ্কিং</h3>
+                              <h3 class="card-title">গ্রুপ র‌্যাঙ্কিং- সকল মূল্যায়ন পরীক্ষার গড় নম্বরের ভিত্তিতে</h3>
                             </div>
                             <div class="card-body">
                               <div id="groupsRankingList" class="space-y-3"></div>
@@ -458,7 +462,7 @@
                     <!-- All Students -->
                     <div id="page-all-students" class="page  hidden">
                         <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-4">সকল শিক্ষার্থী</h3>
+                            <h3 class="text-lg font-semibold mb-4">সকল শিক্ষার্থী (প্রতিটি গ্রুপ ভিন্ন রংয়ে)</h3>
                             <div class="flex flex-col md:flex-row gap-4 mb-4">
                                 <select id="cardsFilterGroup" class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700">
                                     <option value="">সকল গ্রুপ</option>
@@ -469,170 +473,45 @@
                         </div>
                     </div>
 
-                    <!-- Student Ranking -->
                     <div id="page-student-ranking" class="page hidden">
-                        <div class="mb-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-semibold">শিক্ষার্থী র‌্যাঙ্কিং</h3>
-                                <button id="refreshRanking" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                    <i class="fas fa-sync-alt mr-2"></i>রিফ্রেশ
-                                </button>
-                            </div>
-                            <div id="studentRankingList" class="space-y-3"></div>
+                        <div class="mb-6 max-w-4xl mx-auto">
+                          <!-- Ranking Rules Card -->
+                          <div class="rounded-3xl border-2 border-green-200 dark:border-green-600
+                                      bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600
+                                      dark:from-green-600 dark:via-emerald-700 dark:to-teal-800
+                                      shadow-2xl hover:shadow-green-200/50 dark:hover:shadow-green-800/50
+                                      text-white text-center transform transition-all duration-500 
+                                      hover:-translate-y-1 hover:scale-[1.02] backdrop-blur-sm relative overflow-hidden group p-6">
+                            
+                            <!-- Animated Background Elements -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
+                                        -skew-x-12 group-hover:skew-x-12 transition-transform duration-1000"></div>
+                            <div class="absolute -top-4 -left-4 w-8 h-8 bg-white/20 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+                            <div class="absolute -bottom-4 -right-4 w-12 h-12 bg-white/15 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+                            
+                        
+                            <!-- Ranking Rules Text -->
+                            <p class="text-sm sm:text-lg font-medium leading-relaxed tracking-wide
+                                       drop-shadow-md">
+                              <span class="font-bold text-white/95">র‌্যাঙ্কিং নিয়ম:</span><br class="sm:hidden">
+                              <span class="text-white/90">কমপক্ষে ২টি মূল্যায়ন/পরীক্ষায় অংশগ্রহন করা শিক্ষার্থীদের মধ্যে</span><br>
+                              <span class="text-white/90">গড় নম্বর বেশি হলে র‌্যাঙ্কিং হবে যদি ফলাফল সমান হয় তবে বেশি মূল্যায়নকারী/পরীক্ষায় অংশগ্রহনকারী র‌্যাঙ্ক হবে</span>
+                            </p>
+                          </div>
+                      
+                          <!-- Header with Refresh -->
+                          <div class="flex justify-between items-center my-6">
+                            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">শিক্ষার্থী র‌্যাঙ্কিং</h3>
+                            <button id="refreshRanking" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                              <i class="fas fa-sync-alt mr-2"></i> রিফ্রেশ
+                            </button>
+                          </div>
+                      
+                          <!-- Student Ranking List -->
+                          <div id="studentRankingList" class="space-y-4"></div>
                         </div>
-                    </div>
-
-                    <!-- Group Analysis -->
-                    <div id="page-group-analysis" class="page hidden">
-                        <div class="mb-6">
-                            <div class="flex flex-col md:flex-row gap-4 mb-4">
-                                <select id="analysisGroupSelect" multiple class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 h-32">
-                                </select>
-                                <button id="updateAnalysisBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
-                                    বিশ্লেষণ আপডেট করুন
-                                </button>
-                            </div>
-                            <div class="bg-white dark:bg-darkCard rounded-xl p-6 shadow-sm mb-6">
-                                <div class="h-80">
-                                    <canvas id="groupAnalysisChart"></canvas>
-                                </div>
-                            </div>
-                            <div id="groupAnalysisDetails" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                        </div>
-                    </div>
-
-                    <!-- Tasks Management -->
-                    <div id="page-tasks" class="page hidden">
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-4">নতুন টাস্ক তৈরি করুন</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">টাস্ক নাম*</label>
-                                    <input id="taskNameInput" type="text" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700" maxlength="100" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">সর্বোচ্চ স্কোর*</label>
-                                    <input id="taskMaxScoreInput" type="number" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700" min="1" max="1000" />
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium mb-2">বিবরণ*</label>
-                                    <textarea id="taskDescriptionInput" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700" maxlength="500" rows="3"></textarea>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">তারিখ*</label>
-                                    <input id="taskDateInput" type="date" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700" />
-                                </div>
-                            </div>
-                            <button id="addTaskBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">টাস্ক যোগ করুন</button>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold mb-4">টাস্ক তালিকা</h3>
-                            <div id="tasksList" class="space-y-4"></div>
-                        </div>
-                    </div>
-
-                    <!-- Evaluation -->
-                    <div id="page-evaluation" class="page hidden ">
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-4">মূল্যায়ন শুরু করুন</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">টাস্ক নির্বাচন করুন</label>
-                                    <select id="evaluationTaskSelect" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700"></select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">গ্রুপ নির্বাচন করুন</label>
-                                    <select id="evaluationGroupSelect" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700"></select>
-                                </div>
-                            </div>
-                            <button id="startEvaluationBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">মূল্যায়ন শুরু করুন</button>
-                        </div>
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-4">মূল্যায়ন তালিকা</h3>
-                            <div class="overflow-x-auto">
-                                <table class="w-full border-collapse border border-gray-300 dark:border-gray-600">
-                                    <thead>
-                                        <tr class="bg-gray-100 dark:bg-gray-700">
-                                            <th class="border border-gray-300 dark:border-gray-600 p-2">টাস্ক</th>
-                                            <th class="border border-gray-300 dark:border-gray-600 p-2">গ্রুপ</th>
-                                            <th class="border border-gray-300 dark:border-gray-600 p-2">তারিখ</th>
-                                            <th class="border border-gray-300 dark:border-gray-600 p-2">মোট স্কোর</th>
-                                            <th class="border border-gray-300 dark:border-gray-600 p-2">কার্যক্রম</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="evaluationListTable"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div id="evaluationForm"></div>
-                    </div>
-
-                    <!-- Group Policy -->
-                    <div id="page-group-policy" class="page hidden">
-                        <div class="max-w-4xl mx-auto">
-                            <h3 class="text-lg font-semibold mb-6">গ্রুপ নীতি ও নির্দেশিকা</h3>
-                            <div id="policySections" class="space-y-4"></div>
-                        </div>
-                    </div>
-
-                    <!-- Export -->
-                    <div id="page-export" class="page hidden">
-                        <div class="max-w-2xl mx-auto">
-                            <h3 class="text-lg font-semibold mb-6">ডেটা এক্সপোর্ট</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                                <button id="exportAllData" class="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg transition-colors flex flex-col items-center">
-                                    <i class="fas fa-file-archive text-2xl mb-2"></i>
-                                    <span>সমস্ত ডেটা (ZIP)</span>
-                                </button>
-                                <button id="exportStudentsCSV" class="bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg transition-colors flex flex-col items-center">
-                                    <i class="fas fa-user-graduate text-2xl mb-2"></i>
-                                    <span>শিক্ষার্থী CSV</span>
-                                </button>
-                                <button id="exportGroupsCSV" class="bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-lg transition-colors flex flex-col items-center">
-                                    <i class="fas fa-layer-group text-2xl mb-2"></i>
-                                    <span>গ্রুপ CSV</span>
-                                </button>
-                                <button id="exportEvaluationsCSV" class="bg-orange-600 hover:bg-orange-700 text-white p-4 rounded-lg transition-colors flex flex-col items-center">
-                                    <i class="fas fa-clipboard-check text-2xl mb-2"></i>
-                                    <span>মূল্যায়ন CSV</span>
-                                </button>
-                            </div>
-                            <div class="mb-8">
-                                <h4 class="text-lg font-semibold mb-4">শিক্ষার্থী ইম্পোর্ট (CSV)</h4>
-                                <div class="flex flex-col md:flex-row gap-4 items-center">
-                                    <input id="csvFileInput" type="file" accept=".csv" class="hidden" />
-                                    <button id="importStudentsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors">CSV ফাইল নির্বাচন করুন</button>
-                                    <span id="csvFileName" class="text-sm text-gray-600 dark:text-gray-400">কোন ফাইল নির্বাচন করা হয়নি</span>
-                                </div>
-                                <div class="mt-4">
-                                    <button id="processImportBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors hidden">ইম্পোর্ট প্রসেস করুন</button>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="text-lg font-semibold mb-4">এক্সপোর্ট টেমপ্লেট</h4>
-                                <button id="downloadTemplateBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                    <i class="fas fa-download mr-2"></i>CSV টেমপ্লেট ডাউনলোড
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Admin Management -->
-                    <div id="page-admin-management" class="page hidden">
-                        <div class="mb-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-semibold">অ্যাডমিন ব্যবস্থাপনা</h3>
-                                <button id="addAdminBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                    <i class="fas fa-plus mr-2"></i>নতুন অ্যাডমিন
-                                </button>
-                            </div>
-                            <div class="mb-4">
-                                <input id="adminSearchInput" type="text" placeholder="অ্যাডমিন খুঁজুন..." class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700" />
-                            </div>
-                            <div id="adminManagementContent"></div>
-                        </div>
-                    </div>
-                </div>
+                      </div>
+                      
             </div>
         </div>
     </div>
@@ -666,10 +545,10 @@
     <!-- Main Application -->
     <!-- <script src="app.js"></script> -->
     <!-- <script src="./OPT2.JS"></script> -->
-
-
     <!-- <script src="./optimiseMain2.js"></script> -->
     <!-- <script src="./opt4.js"></script> -->
+
+
     <!-- <script src="./OPT3.JS"></script> -->
 
     <script src="./test.js"></script>

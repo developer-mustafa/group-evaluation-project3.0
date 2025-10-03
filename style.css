@@ -2107,3 +2107,33 @@ textarea:focus-visible {
 .dark .student-group-color-6 {
     background: #1f2937; /* neutral dark */
 }
+
+
+/* Drop shadows & hover for interactive cards */
+.student-rank-item {
+  transition: all 0.3s ease;
+}
+.student-rank-item:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Dark mode readable */
+.dark #studentRankingList .student-rank-item {
+  background-color: #1f2937; /* Dark neutral */
+  color: #f9fafb;
+}
+
+/* Rank badges (Top 3) */
+.rank-1 { background: #facc15; color: #1f2937; }
+.rank-2 { background: #a3e635; color: #1f2937; }
+.rank-3 { background: #22d3ee; color: #1f2937; }
+.rank-other { background: #d1d5db; color: #1f2937; }
+
+/* Responsive spacing */
+@media (max-width: 640px) {
+  #studentRankingList .student-rank-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
