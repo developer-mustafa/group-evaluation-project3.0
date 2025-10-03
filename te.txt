@@ -1,0 +1,4 @@
+ <!-- Sidebar toggle for small screens -->
+                <button id="sidebarToggle" class="text-gray-600 dark:text-gray-300 focus:outline-none md:hidden">
+                  <i class="fas fa-bars text-xl"></i>
+                </button>

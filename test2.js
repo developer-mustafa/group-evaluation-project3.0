@@ -3156,7 +3156,7 @@ class SmartGroupEvaluator {
                 </div>
       
                 <!-- Group Info -->
-                <h3 class="font-extrabold text-xl sm:text-2xl mb-2 drop-shadow-sm truncate">${group.name}</h3>
+                <h3 class="font-extrabold text-xl sm:text-2xl mb-2 drop-shadow-sm ">${group.name}</h3>
                 <p class="text-base sm:text-lg font-semibold">✨ স্কোর: ${scores[group.id].score.toFixed(2)}</p>
                 <p class="text-sm sm:text-base mt-1 opacity-90">👥 সদস্য: ${scores[group.id].members} জন</p>
               </div>

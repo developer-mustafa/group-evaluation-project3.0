@@ -222,14 +222,18 @@
                     <!-- Logo and title -->
                     <div class="flex items-center space-x-4">
                         <h1 class="text-xl font-bold text-gray-800 dark:text-white">Smart Group Evaluator</h1>
+                        <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                            <i class="fas fa-moon"></i>
+                        </button>
                     </div>
                     
                     <!-- Right side buttons -->
                     <div class="flex items-center space-x-4">
-                        <!-- Theme Toggle Button -->
-                        <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            <i class="fas fa-moon"></i>
-                        </button>
+                     
+                         <!-- Sidebar toggle for small screens -->
+                <button id="sidebarToggle" class="text-gray-600 dark:text-gray-300 focus:outline-none md:hidden">
+                    <i class="fas fa-bars text-xl"></i>
+                  </button>
                         
                         <!-- User info and other buttons -->
                         <div id="userInfo" class="text-sm"></div>
