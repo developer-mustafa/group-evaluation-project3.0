@@ -6,6 +6,99 @@ class CacheManager {
         this.forceRefresh = false;
     }
 
+    // Add this method to handle missing DOM elements gracefully
+validateDOMPages() {
+    const requiredPages = [
+        'dashboard', 'groups', 'members', 'group-members', 'all-students',
+        'student-ranking', 'group-analysis', 'tasks', 'evaluation', 
+        'group-policy', 'export', 'admin-management'
+    ];
+
+    requiredPages.forEach(pageId => {
+        const pageElement = document.getElementById(`page-${pageId}`);
+        if (!pageElement) {
+            console.warn(`Page element not found: page-${pageId}`);
+        }
+    });
+}
+
+// Update the init method to call this validation
+async init() {
+    this.setupDOMReferences();
+    await this.initializeFirebase();
+    this.setupEventListeners();
+    this.setupAuthStateListener();
+    this.applySavedTheme();
+
+    // Validate DOM pages
+    this.validateDOMPages();
+
+    // DOM elements check করুন
+    console.log("DOM Elements Check:", {
+        headerLoginBtn: !!this.dom.headerLoginBtn,
+        logoutBtn: !!this.dom.logoutBtn,
+        userInfo: !!this.dom.userInfo,
+        appContainer: !!this.dom.appContainer,
+        authModal: !!this.dom.authModal
+    });
+
+    // Initially set to public view
+    this.updateUserInterface(null);
+    this.enableAllNavigation(false);
+    
+    // Public data load করুন
+    await this.loadPublicData();
+
+    this.isInitialized = true;
+    console.log("Smart Evaluator initialized successfully");
+    
+    // Debug info
+    setTimeout(() => {
+        this.debugAuthState();
+    }, 2000);
+}
+
+// Update the showPage method with better error handling
+showPage(pageId) {
+    console.log(`Showing page: ${pageId}`);
+    
+    // Hide all pages
+    this.dom.pages.forEach((page) => {
+        page.classList.add("hidden");
+    });
+
+    // Show selected page
+    const selectedPage = document.getElementById(`page-${pageId}`);
+    if (selectedPage) {
+        selectedPage.classList.remove("hidden");
+        console.log(`Page ${pageId} shown successfully`);
+    } else {
+        console.error(`Page with id page-${pageId} not found`);
+        // Fallback to dashboard if page doesn't exist
+        const dashboardPage = document.getElementById('page-dashboard');
+        if (dashboardPage) {
+            dashboardPage.classList.remove("hidden");
+            console.log(`Fallback to dashboard - page-${pageId} not found`);
+        }
+    }
+
+    // Update active navigation
+    this.dom.navBtns.forEach((btn) => {
+        btn.classList.remove("active");
+        if (btn.getAttribute("data-page") === pageId) {
+            btn.classList.add("active");
+        }
+    });
+
+    // Update page title
+    if (this.dom.pageTitle) {
+        const activeBtn = document.querySelector(`[data-page="${pageId}"]`);
+        if (activeBtn) {
+            this.dom.pageTitle.textContent = activeBtn.textContent.trim();
+        }
+    }
+}
+
     set(key, data, customDuration = null) {
         const cacheData = {
             data,
@@ -95,28 +188,33 @@ class SmartGroupEvaluator {
             adminSearchTerm: "",
         };
 
-        this.PUBLIC_PAGES = [
-            "dashboard",
-            "all-students",
-            "group-policy",
-            "export",
-            "student-ranking",
-            "group-analysis",
-        ];
-        this.PRIVATE_PAGES = [
-            "groups",
-            "members",
-            "group-members",
-            "tasks",
-            "evaluation",
-            "admin-management",
-        ];
+  // Update these arrays in your constructor
+this.PUBLIC_PAGES = [
+    "dashboard",
+    "all-students", 
+    "group-policy",
+    "export",
+    "student-ranking",
+    "group-analysis",
+];
+
+this.PRIVATE_PAGES = [
+    "groups",
+    "members",
+    "group-members", 
+    "tasks",
+    "evaluation",
+    "admin-management",
+];
+
+// ALL_PAGES for admin users
+this.ALL_PAGES = [...this.PUBLIC_PAGES, ...this.PRIVATE_PAGES];
 
         this.evaluationOptions = [
             { id: "cannot_do", text: "আমি এই টপিক এখনো পারিনা", marks: -5 },
             {
                 id: "learned_cannot_write",
-                text: "আমি এই টপিক শুধুমাত্র বুঝেছি কিন্তু ভালো করে শেখা হয়নি",
+                text: "আমি এই টপিক শুধুমাত্র বুঝেছি (ভালো করে শেখা হয়নি)",
                 marks: 5,
             },
             {
@@ -132,7 +230,7 @@ class SmartGroupEvaluator {
             {
                 id: "weekly_attendance",
                 text: "আমি সপ্তাহে প্রতিদিন উপস্থিত ছিলাম",
-                marks: 5,
+                marks: 10,
             },
         ];
 
@@ -192,27 +290,10 @@ class SmartGroupEvaluator {
         console.log("Current User:", this.currentUser);
         console.log("Current User Data:", this.currentUserData);
         console.log("Is Public Mode:", this.isPublicMode);
-        console.log("DOM Elements Status:", {
-            headerLoginBtn: {
-                element: !!this.dom.headerLoginBtn,
-                hidden: this.dom.headerLoginBtn?.classList.contains("hidden")
-            },
-            logoutBtn: {
-                element: !!this.dom.logoutBtn,
-                hidden: this.dom.logoutBtn?.classList.contains("hidden")
-            },
-            userInfo: {
-                element: !!this.dom.userInfo,
-                content: this.dom.userInfo?.innerHTML
-            },
-            appContainer: {
-                element: !!this.dom.appContainer,
-                hidden: this.dom.appContainer?.classList.contains("hidden")
-            },
-            authModal: {
-                element: !!this.dom.authModal,
-                hidden: this.dom.authModal?.classList.contains("hidden")
-            }
+        console.log("Available Pages:", {
+            public: this.PUBLIC_PAGES,
+            private: this.PRIVATE_PAGES,
+            all: this.ALL_PAGES
         });
         
         // Navigation buttons status
@@ -223,12 +304,13 @@ class SmartGroupEvaluator {
                 disabled: btn.disabled,
                 opacity: btn.style.opacity,
                 pointerEvents: btn.style.pointerEvents,
-                hasDisabledClass: btn.classList.contains("disabled-nav")
+                hasDisabledClass: btn.classList.contains("disabled-nav"),
+                isPublic: this.PUBLIC_PAGES.includes(pageId),
+                isPrivate: this.PRIVATE_PAGES.includes(pageId)
             };
         });
         console.log("Navigation Status:", navStatus);
     }
-
     async init() {
         this.setupDOMReferences();
         await this.initializeFirebase();
@@ -263,33 +345,32 @@ class SmartGroupEvaluator {
 
     setupAuthStateListener() {
         auth.onAuthStateChanged(async (user) => {
-            console.log("Auth State Changed:", user ? "Logged in" : "Logged out");
+            console.log("🔥 AUTH STATE CHANGED:", user ? `LOGGED IN: ${user.email}` : "LOGGED OUT");
             
             if (user) {
                 try {
-                    console.log("User logged in:", user.email);
+                    console.log("🔄 Fetching user admin data...");
                     this.currentUser = user;
                     
                     // User data fetch করুন
                     const userData = await this.getUserAdminData(user);
                     this.currentUserData = userData;
                     
-                    console.log("User data loaded:", userData);
+                    console.log("📋 User data loaded:", userData);
+                    console.log("🎯 User role:", userData?.type);
                     
                     // Successful login handle করুন
                     await this.handleSuccessfulLogin(user);
                 } catch (error) {
-                    console.error("Error in auth state change:", error);
-                    // Error হলে logout handle করুন
+                    console.error("❌ Error in auth state change:", error);
                     await this.handleLogout();
                 }
             } else {
-                console.log("User logged out");
+                console.log("👤 User logged out");
                 await this.handleLogout();
             }
         });
     }
-
     async initializeFirebase() {
         try {
             // Test Firebase connection with public read
@@ -320,6 +401,7 @@ class SmartGroupEvaluator {
             pageTitle: document.getElementById("pageTitle"),
             userInfo: document.getElementById("userInfo"),
             adminManagementSection: document.getElementById("adminManagementSection"),
+
             pages: document.querySelectorAll(".page"),
             navBtns: document.querySelectorAll(".nav-btn"),
 
@@ -370,6 +452,7 @@ class SmartGroupEvaluator {
             taskMaxScoreInput: document.getElementById("taskMaxScoreInput"),
             taskDateInput: document.getElementById("taskDateInput"),
             addTaskBtn: document.getElementById("addTaskBtn"),
+
             evaluationTaskSelect: document.getElementById("evaluationTaskSelect"),
             evaluationGroupSelect: document.getElementById("evaluationGroupSelect"),
             startEvaluationBtn: document.getElementById("startEvaluationBtn"),
@@ -824,52 +907,56 @@ class SmartGroupEvaluator {
 
     async getUserAdminData(user) {
         const cacheKey = `admin_${user.uid}`;
+        console.log("🔍 getUserAdminData called for user:", user.uid);
         
         try {
             // First try cache
             const cached = this.cache.get(cacheKey);
             if (cached) {
-                console.log("Admin data from cache:", cached);
+                console.log("💾 Admin data from CACHE:", cached);
                 return cached;
             }
-
+    
+            console.log("🔄 Fetching admin data from FIRESTORE...");
             // If not in cache, fetch from Firestore
             const adminDoc = await db.collection("admins").doc(user.uid).get();
-            console.log("Admin document fetch result:", adminDoc.exists);
+            console.log("📄 Admin document exists:", adminDoc.exists);
             
             if (adminDoc.exists) {
                 const data = adminDoc.data();
-                console.log("Admin data retrieved from Firestore:", data);
+                console.log("🎯 Admin data from FIRESTORE:", data);
                 this.cache.set(cacheKey, data);
                 return data;
             } else {
-                console.log("No admin document found for user:", user.uid);
+                console.log("⚠️ No admin document found for user:", user.uid);
                 // Return basic user info if not in admins collection
                 const basicData = {
                     email: user.email,
-                    type: "user",
+                    type: "user", // ⚠️ এখানে সমস্যা হতে পারে!
                     permissions: {
                         read: true,
                         write: false,
                         delete: false
                     }
                 };
+                console.log("🔄 Returning BASIC user data:", basicData);
                 this.cache.set(cacheKey, basicData);
                 return basicData;
             }
         } catch (error) {
-            console.error("Error fetching admin data:", error);
+            console.error("❌ Error fetching admin data:", error);
             
             // Return basic user info on error
             const basicData = {
                 email: user.email,
-                type: "user",
+                type: "user", // ⚠️ এখানেও সমস্যা!
                 permissions: {
                     read: true,
                     write: false,
                     delete: false
                 }
             };
+            console.log("🔄 Returning BASIC user data due to error:", basicData);
             this.cache.set(cacheKey, basicData);
             return basicData;
         }
@@ -878,7 +965,7 @@ class SmartGroupEvaluator {
     // ===============================
     // NAVIGATION & UI MANAGEMENT - FIXED
     // ===============================
-    async handleNavigation(event) {
+ async handleNavigation(event) {
         const btn = event.currentTarget;
         const pageId = btn.getAttribute("data-page");
         
@@ -887,39 +974,56 @@ class SmartGroupEvaluator {
             userData: this.currentUserData,
             isPublicMode: this.isPublicMode
         });
-
+    
         // Check if button is disabled
         if (btn.disabled || btn.classList.contains("disabled-nav")) {
             console.log(`Navigation denied: ${pageId} is disabled`);
             return;
         }
-
-        // Check authentication for private pages
+    
+        // Check if page exists
+        const pageElement = document.getElementById(`page-${pageId}`);
+        if (!pageElement) {
+            console.error(`Page element not found: page-${pageId}`);
+            this.showToast("এই পেজটি এখনও উপলব্ধ নয়", "error");
+            return;
+        }
+    
+        // Check authentication for private pages (only for non-admin users)
         if (!this.currentUser && this.PRIVATE_PAGES.includes(pageId)) {
             this.showToast("এই পেজ দেখতে লগইন প্রয়োজন", "error");
             this.showAuthModal();
             return;
         }
-
+    
         // For logged-in users, check role-based access
         if (this.currentUser) {
             const userRole = this.currentUserData?.type;
             
-            if (pageId === "admin-management" && userRole !== "super-admin") {
-                this.showToast("এই পেজ এক্সেস করতে সুপার অ্যাডমিন权限 প্রয়োজন", "error");
+            // Admin users can access all pages except admin-management for non-super-admin
+            if (pageId === "admin-management") {
+                if (userRole !== "super-admin") {
+                    this.showToast("এই পেজ এক্সেস করতে সুপার অ্যাডমিন权限 প্রয়োজন", "error");
+                    return;
+                }
+            }
+            
+            // For regular users, check if they're trying to access private pages
+            if (userRole === "user" && this.PRIVATE_PAGES.includes(pageId)) {
+                this.showToast("এই পেজ এক্সেস করতে অ্যাডমিন এক্সেস প্রয়োজন", "error");
                 return;
             }
         }
-
+    
         // Update navigation
         this.dom.navBtns.forEach((navBtn) => {
             navBtn.classList.remove("active");
         });
         btn.classList.add("active");
-
+    
         // Show page
         this.showPage(pageId);
-
+    
         // Load page-specific data
         try {
             switch (pageId) {
@@ -969,65 +1073,56 @@ class SmartGroupEvaluator {
     }
 
     enableAllNavigation(isLoggedIn) {
-        console.log("Enabling navigation for:", isLoggedIn ? "Logged in" : "Logged out");
+        console.log("🔍 === ENABLE NAVIGATION DEBUG ===");
+        console.log("isLoggedIn:", isLoggedIn);
+        console.log("currentUser:", this.currentUser);
+        console.log("currentUserData:", this.currentUserData);
         
         this.dom.navBtns.forEach((btn) => {
             const pageId = btn.getAttribute("data-page");
+            const isPrivateTab = btn.classList.contains("private-tab");
+            
+            // প্রথমে সব attribute এবং class রিমুভ করুন
+            btn.removeAttribute('disabled');
+            btn.style.opacity = "";
+            btn.style.pointerEvents = "";
+            btn.style.display = "";
+            btn.classList.remove("disabled-nav");
             
             if (isLoggedIn && this.currentUserData) {
-                // User is logged in AND has user data
-                const userRole = this.currentUserData.type;
+                // ✅ লগইন করা ইউজার - সকল ট্যাব এনাবলড
+                btn.removeAttribute('disabled');
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+                btn.style.display = "flex";
+                btn.disabled = false;
+                btn.classList.remove("disabled-nav");
+                console.log(`✅ ${pageId} ENABLED for logged in user`);
                 
-                console.log(`Checking access for page: ${pageId}, user role: ${userRole}`);
-                
-                if (userRole === "super-admin") {
-                    // Super Admin - সকল page access
-                    btn.style.opacity = "1";
-                    btn.style.pointerEvents = "auto";
-                    btn.disabled = false;
-                    btn.classList.remove("disabled-nav");
-                } else if (userRole === "admin") {
-                    // Admin - admin-management বাদে সকল page
-                    if (pageId === "admin-management") {
-                        btn.style.opacity = "0.5";
-                        btn.style.pointerEvents = "none";
-                        btn.disabled = true;
-                        btn.classList.add("disabled-nav");
-                    } else {
-                        btn.style.opacity = "1";
-                        btn.style.pointerEvents = "auto";
-                        btn.disabled = false;
-                        btn.classList.remove("disabled-nav");
-                    }
-                } else {
-                    // Regular user - শুধু public pages
-                    if (this.PUBLIC_PAGES.includes(pageId)) {
-                        btn.style.opacity = "1";
-                        btn.style.pointerEvents = "auto";
-                        btn.disabled = false;
-                        btn.classList.remove("disabled-nav");
-                    } else {
-                        btn.style.opacity = "0.5";
-                        btn.style.pointerEvents = "none";
-                        btn.disabled = true;
-                        btn.classList.add("disabled-nav");
-                    }
-                }
             } else {
-                // Not logged in - শুধু public pages
-                if (this.PUBLIC_PAGES.includes(pageId)) {
-                    btn.style.opacity = "1";
-                    btn.style.pointerEvents = "auto";
-                    btn.disabled = false;
-                    btn.classList.remove("disabled-nav");
-                } else {
-                    btn.style.opacity = "0.5";
+                // ❌ লগআউট করা ইউজার
+                if (isPrivateTab) {
+                    // প্রাইভেট ট্যাব - সম্পূর্ণ লুকানো
+                    btn.style.display = "none";
+                    btn.style.opacity = "0";
                     btn.style.pointerEvents = "none";
                     btn.disabled = true;
                     btn.classList.add("disabled-nav");
+                    console.log(`🚫 ${pageId} HIDDEN for public`);
+                } else {
+                    // পাবলিক ট্যাব - শুধুমাত্র এনাবলড
+                    btn.removeAttribute('disabled');
+                    btn.style.opacity = "1";
+                    btn.style.pointerEvents = "auto";
+                    btn.style.display = "flex";
+                    btn.disabled = false;
+                    btn.classList.remove("disabled-nav");
+                    console.log(`✅ ${pageId} ENABLED for public`);
                 }
             }
         });
+        
+        console.log("🔍 === END NAVIGATION DEBUG ===");
     }
 
     updateUserInterface(userData) {
@@ -1035,9 +1130,12 @@ class SmartGroupEvaluator {
             console.error("DOM elements not found for UI update");
             return;
         }
-
+    
         console.log("Updating UI with user data:", userData);
-
+    
+        // Remove any existing role classes from body
+        document.body.classList.remove("super-admin", "admin", "regular-user");
+    
         if (userData && this.currentUser) {
             // User is logged in
             const roleText = userData.type === "super-admin" ? "সুপার অ্যাডমিন" : 
@@ -1045,22 +1143,26 @@ class SmartGroupEvaluator {
             
             const roleColor = userData.type === "super-admin" ? "text-purple-600" : 
                              userData.type === "admin" ? "text-blue-600" : "text-green-600";
-
+    
+            // Add role class to body for CSS styling
+            document.body.classList.add(userData.type === "super-admin" ? "super-admin" : 
+                                      userData.type === "admin" ? "admin" : "regular-user");
+    
             this.dom.userInfo.innerHTML = `
                 <div class="font-medium">${userData.email}</div>
                 <div class="text-xs ${roleColor}">${roleText}</div>
             `;
-
+    
             // Show logout button, hide login button
             this.dom.logoutBtn.classList.remove("hidden");
             this.dom.headerLoginBtn.classList.add("hidden");
             
-            console.log("UI updated for logged in user");
-
+            console.log("UI updated for logged in user:", roleText);
+    
         } else {
             // User is logged out
             this.dom.userInfo.innerHTML = `<div class="text-xs text-gray-500">সাধারণ ব্যবহারকারী</div>`;
-
+    
             // Show login button, hide logout button
             this.dom.logoutBtn.classList.add("hidden");
             this.dom.headerLoginBtn.classList.remove("hidden");
@@ -1068,7 +1170,6 @@ class SmartGroupEvaluator {
             console.log("UI updated for logged out user");
         }
     }
-
     showPage(pageId) {
         console.log(`Showing page: ${pageId}`);
         
