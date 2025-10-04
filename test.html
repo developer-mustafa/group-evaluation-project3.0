@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Group Evaluator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Your existing CSS variables and base styles */
+        :root {
+            --primary: #3b82f6;
+            --primary-light: #60a5fa;
+            --primary-dark: #1d4ed8;
+            --background: #ffffff;
+            --surface: #f8fafc;
+            --card: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border: #e5e7eb;
+            --border-light: #f3f4f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            
+            --space-4: 1rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== APP LAYOUT ===== */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+            background: var(--background);
+        }
+
+        /* ===== SIDEBAR STYLES ===== */
+        .sidebar {
+            width: 280px;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: var(--space-4);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-section {
+            margin-bottom: var(--space-6);
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: var(--space-4);
+            padding: 0 var(--space-4);
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.875rem var(--space-4);
+            border-radius: var(--radius-lg);
+            transition: all 0.3s ease;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--primary);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: color-mix(in srgb, var(--primary) 8%, transparent);
+            color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .nav-btn:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-btn.active {
+            background: color-mix(in srgb, var(--primary) 12%, transparent);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-btn.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-btn i {
+            width: 20px;
+            margin-right: var(--space-4);
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-btn:hover i {
+            transform: scale(1.1);
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--primary);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+        }
+
+        .sidebar-footer {
+            padding: var(--space-6);
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .user-role {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .main-header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: var(--space-4) var(--space-6);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        #sidebarToggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #sidebarToggle:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .header-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .header-btn:hover {
+            background: var(--surface);
+            border-color: var(--primary-light);
+        }
+
+        .page-content {
+            flex: 1;
+            padding: var(--space-6);
+            overflow-y: auto;
+            background: var(--background);
+        }
+
+        .content-card {
+            background: var(--card);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            margin-bottom: var(--space-6);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-4);
+        }
+
+        /* ===== MOBILE RESPONSIVE STYLES ===== */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 85vw;
+                max-width: 320px;
+            }
+
+            .sidebar.sidebar-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            #sidebarToggle {
+                display: flex;
+            }
+
+            /* Overlay when sidebar is open */
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+                backdrop-filter: blur(4px);
+                display: none;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-content {
+                padding: var(--space-4);
+            }
+
+            .content-card {
+                padding: var(--space-4);
+            }
+
+            .main-header {
+                padding: var(--space-4);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title {
+                font-size: 1.25rem;
+            }
+
+            .logo-text {
+                font-size: 1.125rem;
+            }
+        }
+
+        /* ===== DARK MODE SUPPORT ===== */
+        .dark {
+            --background: #0f172a;
+            --surface: #1e293b;
+            --card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --border-light: #475569;
+        }
+
+        /* ===== SCROLLBAR STYLING ===== */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== DEMO CONTENT STYLES ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-6);
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+        }
+
+        .demo-placeholder {
+            height: 200px;
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            border: 2px dashed var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+     
+       <!-- Sidebar -->
+       <div id="sidebar"
+       class="sidebar mt-2 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-md fixed md:relative top-0 left-0 h-screen overflow-y-auto transition-all duration-300">
+
+       <!-- Mobile Close Button -->
+       <div
+           class="flex justify-between items-center p-4 md:hidden border-b border-gray-200 dark:border-gray-700">
+           <h2 class="text-lg font-semibold text-gray-700 dark:text-gray-200 sm:hidden">মেনু</h2>
+           <button id="closeSidebar" class="text-gray-600 dark:text-gray-300 hover:text-red-500 transition">
+               <i class="fas fa-times text-xl"></i>
+           </button>
+       </div>
+
+       <!-- Navigation -->
+       <nav class="p-3 space-y-1">
+           <button class="nav-btn active group" data-page="dashboard">
+               <i class="fas fa-tachometer-alt mr-4 w-5 text-gray-500 group-hover:text-blue-500"></i>
+               <span>ড্যাশবোর্ড</span>
+           </button>
+
+           <button class="nav-btn private-tab group" data-page="groups">
+               <i class="fas fa-layer-group mr-4 w-5 text-gray-500 group-hover:text-emerald-500"></i>
+               <span>গ্রুপ ব্যবস্থাপনা</span>
+           </button>
+
+           <button class="nav-btn private-tab group" data-page="members">
+               <i class="fas fa-user-plus mr-4 w-5 text-gray-500 group-hover:text-amber-500"></i>
+               <span>সদস্য যোগ করুন</span>
+           </button>
+
+           <button class="nav-btn private-tab group" data-page="group-members">
+               <i class="fas fa-users mr-4 w-5 text-gray-500 group-hover:text-purple-500"></i>
+               <span>গ্রুপ সদস্য</span>
+           </button>
+
+           <button class="nav-btn group" data-page="all-students">
+               <i class="fas fa-user-graduate mr-4 w-5 text-gray-500 group-hover:text-indigo-500"></i>
+               <span>সকল শিক্ষার্থী</span>
+           </button>
+
+           <button class="nav-btn group" data-page="student-ranking">
+               <i class="fas fa-trophy mr-4 w-5 text-gray-500 group-hover:text-yellow-500"></i>
+               <span>শিক্ষার্থী র‌্যাঙ্কিং</span>
+           </button>
+
+           <button class="nav-btn group" data-page="group-analysis">
+               <i class="fas fa-chart-bar mr-4 w-5 text-gray-500 group-hover:text-pink-500"></i>
+               <span>গ্রুপ বিশ্লেষণ</span>
+           </button>
+
+           <button class="nav-btn public-tab group" data-page="graph-analysis">
+               <i class="fas fa-chart-line mr-4 w-5 text-gray-500 group-hover:text-cyan-500"></i>
+               <span>গ্রাফ এনালাইসিস</span>
+           </button>
+
+           <button class="nav-btn private-tab group" data-page="tasks">
+               <i class="fas fa-tasks mr-4 w-5 text-gray-500 group-hover:text-green-500"></i>
+               <span>টাস্ক ব্যবস্থাপনা</span>
+           </button>
+
+           <button class="nav-btn private-tab group" data-page="evaluation">
+               <i class="fas fa-clipboard-check mr-4 w-5 text-gray-500 group-hover:text-blue-500"></i>
+               <span>মূল্যায়ন</span>
+           </button>
+
+           <button class="nav-btn group" data-page="group-policy">
+               <i class="fas fa-book mr-4 w-5 text-gray-500 group-hover:text-orange-500"></i>
+               <span>গ্রুপ নীতি</span>
+           </button>
+
+           <button class="nav-btn group" data-page="export">
+               <i class="fas fa-file-export mr-4 w-5 text-gray-500 group-hover:text-lime-500"></i>
+               <span>এক্সপোর্ট</span>
+           </button>
+
+           <div id="adminManagementSection">
+               <button class="nav-btn private-tab group" data-page="admin-management">
+                   <i class="fas fa-user-shield mr-4 w-5 text-gray-500 group-hover:text-red-500"></i>
+                   <span>অ্যাডমিন কন্ট্রোল</span>
+               </button>
+           </div>
+       </nav>
+   </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
+                <div class="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
+                    <div class="flex flex-col sm:flex-row justify-between items-center ">
+                        <!-- Logo and title section -->
+                        <div class="flex items-center space-x-2 sm:space-x-4">
+                            <h1
+                                class="text-xs min-[360px]:text-sm min-[400px]:text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold text-gray-800 dark:text-white leading-tight tracking-tight">
+                                Smart Group Evaluator
+                            </h1>
+    
+                            <button id="themeToggle"
+                                class="p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
+                                aria-label="Toggle theme">
+                                <i class="fas fa-moon text-sm sm:text-base"></i>
+                            </button>
+                        </div>
+    
+                        <!-- Right side buttons -->
+                        <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+                            <!-- Sidebar toggle for small screens -->
+                            <button id="sidebarToggle"
+                                class="text-gray-600 dark:text-gray-300 focus:outline-none md:hidden flex-shrink-0"
+                                aria-label="Toggle sidebar">
+                                <i class="fas fa-bars text-lg sm:text-xl"></i>
+                            </button>
+    
+                            <!-- User info and other buttons -->
+                            <div id="userInfo" class="text-sm text-gray-600 dark:text-gray-300"></div>
+    
+                            <!-- Login button with responsive text -->
+                            <button id="headerLoginBtn"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center space-x-1 flex-shrink-0 text-xs sm:text-sm">
+                                <i class="fas fa-sign-in-alt sm:hidden text-xs"></i>
+                                <span class="sm:inline">লগইন</span>
+                            </button>
+    
+                            <!-- Logout button with responsive text -->
+                            <button id="logoutBtn"
+                                class="bg-red-600 hover:bg-red-700 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center space-x-1 flex-shrink-0 text-xs sm:text-sm">
+                                <i class="fas fa-sign-out-alt sm:hidden text-xs"></i>
+                                <span class="sm:inline">লগআউট</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="page-content">
+                <!-- Dashboard section -->
+                <div id="page-dashboard" class="page space-y-6">
+                    <!-- Stats Summary -->
+                    <div id="statsSummary"
+                        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-6 auto-rows-[minmax(100px,auto)]">
+                        <!-- Summary cards will go here -->
+                    </div>
+
+                    <!-- একাডেমিক গ্রুপ -->
+                    <div id="academicGroupStatsList" class="p-1 shadow-lg rounded-xl"></div>
+
+                    <!-- শীর্ষ গ্রুপসমূহ -->
+                    <div class="top-groups-section max-w-6xl mx-auto px-4 py-2">
+                        <!-- Title -->
+                        <div class="text-center">
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-8">
+                                ফলাফলের শীর্ষে ৩ গ্রুপ:
+                            </h3>
+                        </div>
+
+                        <!-- Top Groups Container -->
+                        <div id="topGroupsContainer">
+                            <!-- Top groups cards will be injected here -->
+                        </div>
+                    </div>
+
+                    <!-- গ্রুপ র‌্যাঙ্কিং -->
+                    <div class="groups-ranking-section">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">গ্রুপ র‌্যাঙ্কিং- সকল মূল্যায়ন পরীক্ষার গড় নম্বরের ভিত্তিতে
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="groupsRankingList" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Groups Management section -->
+                <div id="page-groups" class="page hidden privet-only">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-4">গ্রুপ তৈরি করুন</h3>
+                        <div class="flex gap-2">
+                            <input id="groupNameInput" type="text" placeholder="গ্রুপের নাম লিখুন"
+                                class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700"
+                                maxlength="50" />
+                            <button id="addGroupBtn"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">গ্রুপ
+                                যোগ করুন</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">গ্রুপ তালিকা</h3>
+                        <div id="groupsList" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- Add Members section -->
+                <div id="page-members" class="page hidden">
+                    <!-- New Student Form -->
+                    <div
+                        class="mb-6 p-6 rounded-xl shadow-md bg-green-50 dark:bg-gray-800 transition-colors font-sans">
+
+                        <div
+                            class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">CSV থেকে শিক্ষার্থী
+                                ইমপোর্ট</h3>
+
+                            <!-- CSV ফাইল সিলেক্ট -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                                    CSV ফাইল নির্বাচন করুন
+                                </label>
+                                <input type="file" id="csvFileInput" accept=".csv"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                                <p id="csvFileName" class="text-sm text-gray-500 mt-2"></p>
+                            </div>
+
+                            <!-- একশন বাটন -->
+                            <div class="flex gap-3">
+                                <button id="downloadTemplateBtn"
+                                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-download mr-2"></i>টেমপ্লেট ডাউনলোড
+                                </button>
+
+                                <button id="processImportBtn"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-upload mr-2"></i>ইমপোর্ট প্রসেস করুন
+                                </button>
+                            </div>
+
+                            <!-- নির্দেশিকা -->
+                            <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <h4 class="font-medium text-blue-800 dark:text-blue-300 mb-2">ইমপোর্ট নির্দেশিকা:
+                                </h4>
+                                <ul
+                                    class="text-sm text-blue-700 dark:text-blue-400 list-disc list-inside space-y-1">
+                                    <li>CSV ফাইলের প্রথম লাইন হেডার হিসেবে ব্যবহার করুন</li>
+                                    <li>আবশ্যক ফিল্ড: নাম, রোল, লিঙ্গ, একাডেমিক গ্রুপ, সেশন</li>
+                                    <li>বাংলা টেমপ্লেট ডাউনলোড করে ব্যবহার করুন</li>
+                                    <li>UTF-8 encoding ব্যবহার করুন বাংলা সাপোর্টের জন্য</li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+                        <h3
+                            class="text-xl md:text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100 border-l-4 border-blue-500 pl-4">
+                            নতুন শিক্ষার্থী যোগ করুন:
+                        </h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                            <!-- নাম -->
+                            <div>
+                                <label
+                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">নাম*</label>
+                                <input id="studentNameInput" type="text"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                    maxlength="100" />
+                            </div>
+
+                            <!-- রোল -->
+                            <div>
+                                <label
+                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">রোল*</label>
+                                <input id="studentRollInput" type="text"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                    maxlength="20" />
+                            </div>
+
+                            <!-- লিঙ্গ -->
+                            <div>
+                                <label
+                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">লিঙ্গ*</label>
+                                <select id="studentGenderInput"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                                    <option value="ছেলে">ছেলে</option>
+                                    <option value="মেয়ে">মেয়ে</option>
+                                </select>
+                            </div>
+
+                            <!-- গ্রুপ -->
+                            <div>
+                                <label
+                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">গ্রুপ*</label>
+                                <select id="studentGroupInput"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"></select>
+                            </div>
+
+                            <!-- যোগাযোগ -->
+                            <div>
+                                <label
+                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">যোগাযোগ</label>
+                                <input id="studentContactInput" type="text"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                    maxlength="100" />
+                            </div>
+
+                            <!-- একাডেমিক গ্রুপ -->
+                            <div>
+                                <label
+                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">একাডেমিক
+                                    গ্রুপ*</label>
+                                <input id="studentAcademicGroupInput" type="text"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                    maxlength="50" />
+                            </div>
+
+                            <!-- সেশন -->
+                            <div>
+                                <label
+                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">সেশন*</label>
+                                <input id="studentSessionInput" type="text"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                    maxlength="20" />
+                            </div>
+
+                            <!-- দায়িত্ব -->
+                            <div>
+                                <label
+                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">দায়িত্ব</label>
+                                <select id="studentRoleInput"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                                    <option value="">কোনোটি না</option>
+                                    <option value="team-leader">টিম লিডার</option>
+                                    <option value="time-keeper">টাইম কিপার</option>
+                                    <option value="reporter">রিপোর্টার</option>
+                                    <option value="resource-manager">রিসোর্স ম্যানেজার</option>
+                                    <option value="peace-maker">পিস মেকার</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button id="addStudentBtn"
+                            class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            শিক্ষার্থী যোগ করুন
+                        </button>
+                    </div>
+
+                    <!-- Student Filter Section -->
+                    <div
+                        class="mb-6 p-6 rounded-xl shadow-md bg-blue-50 dark:bg-gray-800 transition-colors font-sans">
+                        <h3
+                            class="text-xl md:text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100 border-l-4 border-blue-500 pl-4">
+                            শিক্ষার্থী ফিল্টার করুন:
+                        </h3>
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <!-- গ্রুপ ফিল্টার -->
+                            <select id="membersFilterGroup"
+                                class="w-full md:w-1/3 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none transition">
+                                <option value="">সকল গ্রুপ</option>
+                            </select>
+
+                            <!-- সার্চ ইনপুট -->
+                            <input id="studentSearchInput" type="text" placeholder="শিক্ষার্থী খুঁজুন..."
+                                class="flex-1 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none transition" />
+                        </div>
+                    </div>
+
+                    <div id="studentsList" class="space-y-3"></div>
+                </div>
+
+                <!-- Group Members section-->
+                <div id="page-group-members" class="page hidden">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-4">গ্রুপ সদস্য ব্যবস্থাপনা ও ফিল্টার</h3>
+                        <div class="flex gap-4 mb-4">
+                            <select id="groupMembersGroupSelect"
+                                class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700">
+                                <option value="">সকল গ্রুপ</option>
+                            </select>
+                        </div>
+                        <div id="groupMembersList" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- All Students section -->
+                <div id="page-all-students" class="page hidden">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-4">সকল শিক্ষার্থী (প্রতিটি গ্রুপ ভিন্ন রংয়ে)</h3>
+                        <div class="flex flex-col md:flex-row gap-4 mb-4">
+                            <select id="cardsFilterGroup"
+                                class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700">
+                                <option value="">সকল গ্রুপ</option>
+                            </select>
+                            <input id="allStudentsSearchInput" type="text" placeholder="শিক্ষার্থী খুঁজুন..."
+                                class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700" />
+                        </div>
+                        <div id="allStudentsCards"
+                            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+                    </div>
+                </div>
+
+                <!--Student Ranking section-->
+                <div id="page-student-ranking" class="page hidden">
+                    <div class="mb-6  mx-auto">
+                        <!-- Ranking Rules Card -->
+                        <div
+                            class="rounded-3xl border-2 border-green-200 dark:border-green-600
+                                  bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600
+                                  dark:from-green-600 dark:via-emerald-700 dark:to-teal-800
+                                  shadow-2xl hover:shadow-green-200/50 dark:hover:shadow-green-800/50
+                                  text-white text-center transform transition-all duration-500 
+                                  hover:-translate-y-1 hover:scale-[1.02] backdrop-blur-sm relative overflow-hidden group p-6">
+
+                            <!-- Animated Background Elements -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
+                                    -skew-x-12 group-hover:skew-x-12 transition-transform duration-1000"></div>
+                            <div
+                                class="absolute -top-4 -left-4 w-8 h-8 bg-white/20 rounded-full group-hover:scale-150 transition-transform duration-500">
+                            </div>
+                            <div
+                                class="absolute -bottom-4 -right-4 w-12 h-12 bg-white/15 rounded-full group-hover:scale-150 transition-transform duration-700">
+                            </div>
+
+
+                            <!-- Ranking Rules Text -->
+                            <p class="text-sm sm:text-lg font-medium leading-relaxed tracking-wide
+                                   drop-shadow-md">
+                                <span class="font-bold text-white/95">র‌্যাঙ্কিং নিয়ম:</span><br class="sm:hidden">
+                                <span class="text-white/90">কমপক্ষে ২টি মূল্যায়ন/পরীক্ষায় অংশগ্রহন করা
+                                    শিক্ষার্থীদের মধ্যে</span><br>
+                                <span class="text-white/90">গড় নম্বর বেশি হলে র‌্যাঙ্কিং হবে যদি ফলাফল সমান হয় তবে
+                                    বেশি মূল্যায়নকারী/পরীক্ষায় অংশগ্রহনকারী র‌্যাঙ্ক হবে</span>
+                            </p>
+                        </div>
+
+                        <!-- Header with Refresh -->
+                        <div class="flex justify-between items-center my-6">
+                            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">শিক্ষার্থী র‌্যাঙ্কিং
+                            </h3>
+                            <button id="refreshRanking"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                                <i class="fas fa-sync-alt mr-2"></i> রিফ্রেশ
+                            </button>
+                        </div>
+
+                        <!-- Student Ranking List -->
+                        <div id="studentRankingList" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <!--Group Student Analysis section-->
+                <div id="page-group-analysis" class="page hidden ">
+                    <div class="">
+                        <!-- print 3 part-->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4  mb-2">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">রিপোর্ট এক্সপোর্ট
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <button onclick="smartEvaluator.generateGroupAnalysisPDF()"
+                                    class="flex items-center justify-center p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors group">
+                                    <div class="text-center">
+                                        <i class="fas fa-file-pdf text-red-500 text-2xl mb-2"></i>
+                                        <div class="font-semibold text-red-700 dark:text-red-300">সমস্ত গ্রুপ PDF
+                                        </div>
+                                        <div class="text-sm text-red-600 dark:text-red-400">A4 সাইজের সম্পূর্ণ
+                                            রিপোর্ট</div>
+                                    </div>
+                                </button>
+
+                                <button onclick="smartEvaluator.generateSelectedGroupPDF()"
+                                    class="flex items-center justify-center p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors group">
+                                    <div class="text-center">
+                                        <i class="fas fa-download text-blue-500 text-2xl mb-2"></i>
+                                        <div class="font-semibold text-blue-700 dark:text-blue-300">নির্বাচিত গ্রুপ
+                                            PDF</div>
+                                        <div class="text-sm text-blue-600 dark:text-blue-400">বিশেষ গ্রুপ বিশ্লেষণ
+                                        </div>
+                                    </div>
+                                </button>
+
+                                <button onclick="smartEvaluator.printGroupAnalysis()"
+                                    class="flex items-center justify-center p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors group">
+                                    <div class="text-center">
+                                        <i class="fas fa-print text-green-500 text-2xl mb-2"></i>
+                                        <div class="font-semibold text-green-700 dark:text-green-300">প্রিন্ট
+                                            রিপোর্ট</div>
+                                        <div class="text-sm text-green-600 dark:text-green-400">সরাসরি প্রিন্ট করুন
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- A4 page result part-->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm ">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-red-100 p-5 rounded-xl">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                                        গ্রুপ নির্বাচন করুন
+                                    </label>
+                                    <select id="analysisGroupSelect"" class=" w-full border border-gray-300
+                                        dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                                        <option value="">সকল গ্রুপ</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-end">
+                                    <button id="updateAnalysisBtn"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
+                                        ফলাফল দেখুন
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="groupAnalysisDetails" class="mt-2">
+                                <!-- Analysis content will be loaded here -->
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+                <!--Grapical Data Analysis section-->
+                <div id="page-graph-analysis" class="page hidden">
+                    <div class="container mx-auto px-4">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800 dark:text-white ">গ্রাফ এনালাইসিস</h2>
+                            <p class="text-gray-600 dark:text-gray-400">গ্রুপভিত্তিক পারফরম্যান্স বিশ্লেষণ</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+                            <div class="chart-container" style="position: relative; height: 400px;">
+                                <canvas id="graph-analysis-chart"></canvas>
+                            </div>
+                        </div>
+
+                        <div id="graph-analysis-details" class="hidden"></div>
+
+                        <div
+                            class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-yellow-600 mt-1 mr-3"></i>
+                                <div>
+                                    <h4 class="font-semibold text-yellow-800 dark:text-yellow-200 m-2">ব্যবহার
+                                        নির্দেশিকা</h4>
+                                    <p class="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
+                                        বার চার্টের উপর ক্লিক করে প্রতিটি গ্রুপের বিস্তারিত তথ্য দেখুন। প্রতিটি বার
+                                        গ্রুপের গড় স্কোর, সর্বোচ্চ স্কোর এবং সর্বনিম্ন স্কোর প্রদর্শন করে।
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Task section-->
+                <div id="page-tasks" class="page hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">টাস্ক ব্যবস্থাপনা</h2>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm mb-6">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">নতুন টাস্ক যোগ করুন
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">টাস্ক
+                                        নাম</label>
+                                    <input id="taskNameInput" type="text"
+                                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white"
+                                        placeholder="টাস্কের নাম লিখুন">
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">সর্বোচ্চ
+                                        স্কোর</label>
+                                    <input id="taskMaxScoreInput" type="number"
+                                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white"
+                                        placeholder="১০০">
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label
+                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">বিবরণ</label>
+                                <textarea id="taskDescriptionInput"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white"
+                                    placeholder="টাস্কের বিবরণ লিখুন" rows="3"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label
+                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">তারিখ</label>
+                                <input id="taskDateInput" type="date"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <button id="addTaskBtn"
+                                class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors">
+                                টাস্ক যোগ করুন
+                            </button>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">সমস্ত টাস্ক</h3>
+                            <div id="tasksList" class="space-y-4">
+                                <!-- Tasks will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Evaluation section-->
+                <div id="page-evaluation" class="page hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">মূল্যায়ন ব্যবস্থাপনা</h2>
+
+                        <!-- Evaluation Setup -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm mb-6">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">নতুন মূল্যায়ন শুরু
+                                করুন</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">টাস্ক
+                                        নির্বাচন করুন</label>
+                                    <select id="evaluationTaskSelect"
+                                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                                        <option value="">টাস্ক নির্বাচন করুন</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">গ্রুপ
+                                        নির্বাচন করুন</label>
+                                    <select id="evaluationGroupSelect"
+                                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                                        <option value="">গ্রুপ নির্বাচন করুন</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button id="startEvaluationBtn"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
+                                মূল্যায়ন শুরু করুন
+                            </button>
+                        </div>
+
+                        <!-- Evaluation Form (Hidden by default) -->
+                        <div id="evaluationForm" class="hidden">
+                            <!-- Evaluation form will be loaded here dynamically -->
+                        </div>
+
+                        <!-- Evaluation List -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">মূল্যায়ন তালিকা
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-100 dark:bg-gray-700">
+                                            <th
+                                                class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">
+                                                টাস্ক</th>
+                                            <th
+                                                class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">
+                                                গ্রুপ</th>
+                                            <th
+                                                class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">
+                                                তারিখ</th>
+                                            <th
+                                                class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">
+                                                মোট স্কোর</th>
+                                            <th
+                                                class="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-800 dark:text-white">
+                                                কার্যক্রম</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="evaluationListTable">
+                                        <!-- Evaluation list will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Group Policy section-->
+                <div id="page-group-policy" class="page hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">গ্রুপ নীতি ও নির্দেশিকা
+                        </h2>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                            <div id="policySections" class="space-y-4">
+                                <!-- Policy sections will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!--page export section-->
+                <div id="page-export" class="page">
+                    <div class="container mx-auto p-6">
+                        <!-- Header Section -->
+                        <div class="mb-8 text-center">
+                            <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-4">ডেটা এক্সপোর্ট</h2>
+                            <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                                বিভিন্ন ফরম্যাটে আপনার ডেটা ডাউনলোড করুন। রিয়েল-টাইম প্রগ্রেস এবং ফলাফল নিচে দেখানো
+                                হবে।
+                            </p>
+                        </div>
+
+                        <!-- Export Actions Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                            <!-- Quick Export Cards -->
+                            <div
+                                class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center mb-4">
+                                    <div
+                                        class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fas fa-file-csv text-blue-600 dark:text-blue-400 text-xl"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">CSV এক্সপোর্ট
+                                    </h3>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                                    CSV ফরম্যাটে ডেটা ডাউনলোড করুন (Excel, Google Sheets-এ ব্যবহারযোগ্য)
+                                </p>
+                                <div class="space-y-2">
+                                    <button onclick="smartEvaluator.exportStudentsCSV()"
+                                        class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                                        <i class="fas fa-user-graduate mr-2"></i>শিক্ষার্থী CSV
+                                    </button>
+                                    <button onclick="smartEvaluator.exportGroupsCSV()"
+                                        class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                                        <i class="fas fa-users mr-2"></i>গ্রুপ CSV
+                                    </button>
+                                    <button onclick="smartEvaluator.exportEvaluationsCSV()"
+                                        class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                                        <i class="fas fa-chart-bar mr-2"></i>মূল্যায়ন CSV
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Advanced Export Cards -->
+                            <div
+                                class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center mb-4">
+                                    <div
+                                        class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mr-4">
+                                        <i
+                                            class="fas fa-file-archive text-purple-600 dark:text-purple-400 text-xl"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">এডভান্সড
+                                        এক্সপোর্ট</h3>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                                    সমস্ত ডেটা একসাথে ডাউনলোড করুন (ব্যাকআপ এবং বিশ্লেষণের জন্য)
+                                </p>
+                                <div class="space-y-2">
+                                    <button onclick="smartEvaluator.exportAllData()"
+                                        class="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                                        <i class="fas fa-database mr-2"></i>সমস্ত ডেটা (JSON)
+                                    </button>
+                                    <button onclick="smartEvaluator.exportAllDataAsZip()"
+                                        class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                                        <i class="fas fa-file-archive mr-2"></i>সমস্ত ডেটা (ZIP)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Report Export Cards -->
+                            <div
+                                class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center mb-4">
+                                    <div
+                                        class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fas fa-file-pdf text-red-600 dark:text-red-400 text-xl"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">রিপোর্ট
+                                        এক্সপোর্ট</h3>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                                    পেশাদার রিপোর্ট এবং বিশ্লেষণ PDF ফরম্যাটে ডাউনলোড করুন
+                                </p>
+                                <div class="space-y-2">
+                                    <button onclick="smartEvaluator.exportAnalysisPDF()"
+                                        class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                                        <i class="fas fa-file-pdf mr-2"></i>বিশ্লেষণ রিপোর্ট (PDF)
+                                    </button>
+                                    <button onclick="smartEvaluator.exportGroupAnalysisPDF()"
+                                        class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                                        <i class="fas fa-chart-pie mr-2"></i>গ্রুপ বিশ্লেষণ (PDF)
+                                    </button>
+                                    <button onclick="smartEvaluator.printGroupAnalysis()"
+                                        class="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                                        <i class="fas fa-print mr-2"></i>প্রিন্ট রিপোর্ট
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Real-time Export Output Section -->
+                        <div
+                            class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                                <h3 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center">
+                                    <i class="fas fa-history mr-3 text-blue-500"></i>
+                                    এক্সপোর্ট স্ট্যাটাস ও ফলাফল
+                                </h3>
+                            </div>
+
+                            <div class="p-6">
+                                <!-- Initial State -->
+                                <div id="exportInitialState" class="text-center py-8">
+                                    <div class="text-gray-400 mb-4">
+                                        <i class="fas fa-cloud-download-alt text-5xl"></i>
+                                    </div>
+                                    <h4 class="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                        এক্সপোর্ট স্ট্যাটাস
+                                    </h4>
+                                    <p class="text-gray-500 dark:text-gray-500">
+                                        উপরের বাটন ক্লিক করে এক্সপোর্ট শুরু করুন। রিয়েল-টাইম প্রগ্রেস এখানে দেখানো
+                                        হবে।
+                                    </p>
+                                </div>
+
+                                <!-- Progress Section -->
+                                <div id="exportProgressSection" class="hidden">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span id="exportProgressText"
+                                            class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            প্রস্তুত হচ্ছে...
+                                        </span>
+                                        <span id="exportProgressPercent"
+                                            class="text-sm font-medium text-blue-600 dark:text-blue-400">
+                                            0%
+                                        </span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4">
+                                        <div id="exportProgressBar"
+                                            class="bg-blue-500 h-3 rounded-full transition-all duration-300 ease-in-out"
+                                            style="width: 0%"></div>
+                                    </div>
+                                    <div id="exportProgressDetails"
+                                        class="text-sm text-gray-600 dark:text-gray-400">
+                                        <!-- Dynamic progress details will appear here -->
+                                    </div>
+                                </div>
+
+                                <!-- Results Section -->
+                                <div id="exportResultsSection" class="hidden">
+                                    <div
+                                        class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
+                                            <div>
+                                                <h4 id="exportSuccessTitle"
+                                                    class="font-semibold text-green-800 dark:text-green-200">
+                                                    এক্সপোর্ট সফল!
+                                                </h4>
+                                                <p id="exportSuccessMessage"
+                                                    class="text-green-700 dark:text-green-300 text-sm">
+                                                    আপনার ফাইল সফলভাবে ডাউনলোড হয়েছে।
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Export Statistics -->
+                                    <div id="exportStats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                        <!-- Stats will be dynamically populated -->
+                                    </div>
+
+                                    <!-- Recent Exports History -->
+                                    <div id="exportHistory" class="mt-6">
+                                        <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">সাম্প্রতিক
+                                            এক্সপোর্ট</h5>
+                                        <div id="exportHistoryList" class="space-y-2">
+                                            <!-- Export history items will appear here -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Error Section -->
+                                <div id="exportErrorSection" class="hidden">
+                                    <div
+                                        class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-exclamation-triangle text-red-500 text-xl mr-3"></i>
+                                            <div>
+                                                <h4 id="exportErrorTitle"
+                                                    class="font-semibold text-red-800 dark:text-red-200">
+                                                    এক্সপোর্ট ব্যর্থ
+                                                </h4>
+                                                <p id="exportErrorMessage"
+                                                    class="text-red-700 dark:text-red-300 text-sm">
+                                                    এক্সপোর্ট প্রক্রিয়ায় সমস্যা হয়েছে।
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Export Preview Section -->
+                                <div id="exportPreviewSection" class="hidden mt-6">
+                                    <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">ডেটা প্রিভিউ
+                                    </h5>
+                                    <div id="exportPreviewContent"
+                                        class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 max-h-60 overflow-y-auto">
+                                        <!-- Preview content will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Stats Cards -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400"
+                                    id="totalStudentsCount">0</div>
+                                <div class="text-sm text-blue-700 dark:text-blue-300">মোট শিক্ষার্থী</div>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-green-600 dark:text-green-400"
+                                    id="totalGroupsCount">0</div>
+                                <div class="text-sm text-green-700 dark:text-green-300">মোট গ্রুপ</div>
+                            </div>
+                            <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400"
+                                    id="totalEvaluationsCount">0</div>
+                                <div class="text-sm text-purple-700 dark:text-purple-300">মোট মূল্যায়ন</div>
+                            </div>
+                            <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-orange-600 dark:text-orange-400"
+                                    id="lastExportTime">-</div>
+                                <div class="text-sm text-orange-700 dark:text-orange-300">সর্বশেষ এক্সপোর্ট</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Management section -->
+                <div id="page-admin-management" class="page hidden">
+                    <div class="container mx-auto px-4 py-8">
+                        <!-- Header Section -->
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">অ্যাডমিন ম্যানেজমেন্ট
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-400">সকল অ্যাডমিন ও ব্যবহারকারী পরিচালনা করুন</p>
+                        </div>
+
+                        <!-- Statistics Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                            <div
+                                class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center">
+                                    <div
+                                        class="p-3 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-4">
+                                        <i class="fas fa-users text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">মোট ব্যবহারকারী</p>
+                                        <p class="text-2xl font-bold text-gray-800 dark:text-white" id="totalUsers">
+                                            0</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center">
+                                    <div
+                                        class="p-3 rounded-lg bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 mr-4">
+                                        <i class="fas fa-user-shield text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">সুপার অ্যাডমিন</p>
+                                        <p class="text-2xl font-bold text-gray-800 dark:text-white"
+                                            id="superAdminCount">0</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center">
+                                    <div
+                                        class="p-3 rounded-lg bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 mr-4">
+                                        <i class="fas fa-user-cog text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">সাধারণ অ্যাডমিন</p>
+                                        <p class="text-2xl font-bold text-gray-800 dark:text-white" id="adminCount">
+                                            0</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center">
+                                    <div
+                                        class="p-3 rounded-lg bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-400 mr-4">
+                                        <i class="fas fa-user text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">সাধারণ ব্যবহারকারী</p>
+                                        <p class="text-2xl font-bold text-gray-800 dark:text-white" id="userCount">0
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Controls Section -->
+                        <div
+                            class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div class="flex-1">
+                                    <div class="relative">
+                                        <input type="text" id="adminSearchInput"
+                                            placeholder="ইমেইল বা টাইপ দ্বারা সার্চ করুন..."
+                                            class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button id="addAdminBtn"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors flex items-center space-x-2">
+                                        <i class="fas fa-plus"></i>
+                                        <span>নতুন অ্যাডমিন যোগ করুন</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Admins Table -->
+                        <div
+                            class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <div id="adminManagementContent">
+                                <!-- Dynamic content will be loaded here -->
+                                <div class="text-center py-12">
+                                    <div class="text-gray-400 mb-4">
+                                        <i class="fas fa-users text-4xl"></i>
+                                    </div>
+                                    <p class="text-gray-500 dark:text-gray-400">লোড হচ্ছে...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Permissions Guide -->
+                        <div
+                            class="mt-8 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
+                            <h3
+                                class="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-4 flex items-center">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                পারমিশন গাইড
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                                <div class="flex items-start space-x-2">
+                                    <i class="fas fa-eye text-green-500 mt-1"></i>
+                                    <div>
+                                        <span class="font-medium text-yellow-800 dark:text-yellow-200">রিড:</span>
+                                        <p class="text-yellow-700 dark:text-yellow-300">ডেটা দেখার পারমিশন</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-2">
+                                    <i class="fas fa-plus text-blue-500 mt-1"></i>
+                                    <div>
+                                        <span class="font-medium text-yellow-800 dark:text-yellow-200">রাইট:</span>
+                                        <p class="text-yellow-700 dark:text-yellow-300">নতুন ডেটা যোগ করার পারমিশন
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-2">
+                                    <i class="fas fa-edit text-purple-500 mt-1"></i>
+                                    <div>
+                                        <span class="font-medium text-yellow-800 dark:text-yellow-200">এডিট:</span>
+                                        <p class="text-yellow-700 dark:text-yellow-300">ডেটা সম্পাদনার পারমিশন</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-2">
+                                    <i class="fas fa-trash text-red-500 mt-1"></i>
+                                    <div>
+                                        <span class="font-medium text-yellow-800 dark:text-yellow-200">ডিলিট:</span>
+                                        <p class="text-yellow-700 dark:text-yellow-300">ডেটা ডিলিট করার পারমিশন</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </main>
+        </div>
+
+        <!-- Mobile Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    </div>
+
+    <script>
+        // Sidebar Toggle Functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-open');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('sidebar-open');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // Nav button active state
+        document.querySelectorAll('.nav-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Close sidebar on mobile after selection
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('sidebar-open');
+                    sidebarOverlay.classList.remove('active');
+                }
+            });
+        });
+
+        // Dark mode toggle (demo functionality)
+        document.querySelector('.fa-moon').closest('.header-btn').addEventListener('click', function() {
+            document.body.classList.toggle('dark');
+            const icon = this.querySelector('i');
+            if (document.body.classList.contains('dark')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+    </script>
+</body>
+</html>

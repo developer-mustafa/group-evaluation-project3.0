@@ -711,99 +711,9 @@ this.ALL_PAGES = [...this.PUBLIC_PAGES, ...this.PRIVATE_PAGES];
    
 
 
-//toast msg part
-showToast(message, type = "info") {
-    const toast = document.getElementById('toast');
-    const toastBox = document.getElementById('toastBox');
-    const toastMessage = document.getElementById('toastMessage');
-    const toastIcon = document.getElementById('toastIcon');
-
-    if (!toast || !toastBox || !toastMessage || !toastIcon) return;
-
-    // Clear any existing timeout
-    if (this.toastTimeout) {
-        clearTimeout(this.toastTimeout);
-        this.toastTimeout = null;
-    }
-
-    // Set message
-    toastMessage.textContent = message;
-
-    // Reset classes and set base styles
-    toastBox.className = "text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 min-w-[300px] max-w-[400px] border-l-4 backdrop-filter backdrop-blur-sm bg-opacity-90";
-    toastIcon.className = "fas text-xl";
-
-    // Set type-specific styles
-    switch (type) {
-        case "success":
-            toastBox.classList.add("bg-green-500", "border-green-400");
-            toastIcon.classList.add("fa-check-circle");
-            break;
-        case "warning":
-            toastBox.classList.add("bg-orange-500", "border-orange-400");
-            toastIcon.classList.add("fa-exclamation-triangle");
-            break;
-        case "error":
-            toastBox.classList.add("bg-red-500", "border-red-400");
-            toastIcon.classList.add("fa-times-circle");
-            break;
-        case "info":
-            toastBox.classList.add("bg-blue-500", "border-blue-400");
-            toastIcon.classList.add("fa-info-circle");
-            break;
-        default:
-            toastBox.classList.add("bg-gray-500", "border-gray-400");
-            toastIcon.classList.add("fa-info-circle");
-    }
-
-    // 🔽🔽🔽 এখানে top ভ্যালু পরিবর্তন করুন 🔽🔽🔽
-    // Set toast position (more below)
-    toast.className = "fixed top-48 right-6 z-[9999] transition-all duration-500 transform opacity-0";
-    // top-24 (96px) → top-32 (128px) → top-40 (160px) → top-48 (192px)
-
-    // Show toast with animation
-    setTimeout(() => {
-        toast.classList.remove("hidden", "translate-x-full", "opacity-0");
-        toast.classList.add("translate-x-0", "opacity-100");
-    }, 100);
-
-    // Auto hide after 7 seconds
-    this.toastTimeout = setTimeout(() => {
-        this.hideToast();
-    }, 7000);
-}
-
-hideToast() {
-    const toast = document.getElementById('toast');
-    if (toast) {
-        // Clear the auto-hide timeout
-        if (this.toastTimeout) {
-            clearTimeout(this.toastTimeout);
-            this.toastTimeout = null;
-        }
-        
-        // Hide animation
-        toast.classList.add("translate-x-full", "opacity-0");
-        setTimeout(() => {
-            toast.classList.add("hidden");
-            toast.classList.remove("translate-x-0", "opacity-100");
-        }, 500);
-    }
-}
-
-// Optional: Immediate hide method
-hideToastImmediately() {
-    if (this.toastTimeout) {
-        clearTimeout(this.toastTimeout);
-        this.toastTimeout = null;
-    }
     
-    const toast = document.getElementById('toast');
-    if (toast) {
-        toast.classList.add("hidden");
-        toast.classList.remove("translate-x-0", "opacity-100", "translate-x-full");
-    }
-}
+
+
 
     
     async handleLogout() {
@@ -2018,7 +1928,7 @@ renderAdminManagement() {
         // Auto hide after 4 seconds
         setTimeout(() => {
             this.hideToast();
-        }, 4000);
+        }, 7000);
     }
 
     hideToast() {

@@ -302,100 +302,151 @@ h6 { font-size: var(--text-base); }
 
 /* ===== LAYOUT CONTAINERS ===== */
 .app-container {
-  display: flex;
+ 
   min-height: 100vh;
   width: 100%;
   background: var(--background);
+  overflow-y: scroll;
 }
 
 .sidebar {
-  position: fixed;
-  top: 85px;
-  left: 0;
-  bottom: 0; /* 👈 ensures full height within viewport */
-  width: 220px;
-  padding: 2px;
-  flex-shrink: 0;
-  background: var(--card);
-  border-right: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
-  overflow-y: auto; /* 👈 enables vertical scroll */
-  overflow-x: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 90;
+ width: 20vw;
+ position: fixed;
+
+ 
 }
 
-
 .main-content {
-  width: 100%;
+
+  margin-left: 20vw;
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: end;
-  min-height: 100vh;
-  overflow: hidden;
+  min-height: calc(100vh - 85px);
+  overflow-y: scroll;
+  overflow-x: hidden;
   background: var(--background);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .page-content {
   flex: 1;
-  width: 84%;
+  width: 80vw;
   overflow-y: auto;
-  padding: var(--space-8);
+  padding: var(--space-4);
   background: var(--background);
 }
 
 /* ===== SIDEBAR TOGGLE STYLES ===== */
-#sidebarToggle {
-  display: none;
-}
-
-#closeSidebar {
-  display: none;
-}
-
-/* Mobile styles */
 @media (max-width: 992px) {
-  .sidebar {
-    width: 280px;
-    left: -280px;
-    top: 0;
-    height: 100vh;
-    z-index: 100;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
+  .app-body {
+    margin-top: 85px;
+    min-height: calc(100vh - 85px);
   }
   
+.page-content {
+  flex: 1;
+  width: 100%;
+
+  /* Open state */
   .sidebar.sidebar-open {
     transform: translateX(0);
     left: 0;
   }
-  
-  .main-content.sidebar-open::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99;
-    backdrop-filter: blur(2px);
+
+  .main-content {
+
+    margin-left: 0;}
+
+  /* Sidebar content wrapper */
+  .sidebar nav {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
   }
-  
+
+  .main-content {
+    width: 80vw;
+    margin-left: 0;
+  }
+
   .page-content {
     width: 100%;
     padding: var(--space-4);
   }
-  
+
   #sidebarToggle {
     display: block;
   }
-  
+
   #closeSidebar {
     display: block;
   }
+}
+}
+
+
+
+/* Fix for mobile header */
+@media (max-width: 992px) {
+  header {
+    height: auto;
+    min-height: 85px;
+  }
+  
+  .app-body {
+    margin-top: auto; /* Let content flow naturally */
+    min-height: calc(100vh - 85px);
+  }
+
+  .main-content{
+    margin-left: 0;
+  }
+}
+
+
+
+
+/* Navigation button styles */
+.nav-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  color: #6b7280;
+  font-weight: 500;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.nav-btn:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.nav-btn.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.dark .nav-btn:hover {
+  background-color: #374151;
+  color: #f9fafb;
+}
+
+.dark .nav-btn.active {
+  background-color: #1e40af;
+  color: white;
+}
+
+
+.page.active {
+  display: block;
 }
 
 /* ===== DASHBOARD GRID LAYOUT ===== */
@@ -406,20 +457,7 @@ h6 { font-size: var(--text-base); }
   grid-auto-rows: minmax(100px, auto);
 }
 
-.stats-grid {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--space-6);
-  margin-bottom: var(--space-8);
-}
 
-.content-grid {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: var(--space-6);
-}
 
 .task-stats-section {
   grid-column: 9 / -1;
@@ -1693,9 +1731,10 @@ header {
     left: -280px;
     top: 0;
     height: 100vh;
-    z-index: 100;
+    z-index: 1000;
     transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
+    overflow-y: scroll;
   }
   
   .sidebar.sidebar-open {
@@ -2377,11 +2416,7 @@ body.user-logged-in-admin .nav-btn.disabled-nav {
   font-weight: 500;
 }
 
-#toastBox {
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
+
 
 /* Smooth slide-in animation from right */
 @keyframes slideInFromRight {
@@ -2463,25 +2498,12 @@ body.user-logged-in-admin .nav-btn.disabled-nav {
 
 /* Ensure toast appears below header */
 header {
-  z-index: 10000; /* Header should have higher z-index */
+  z-index: 100; /* Header should have higher z-index */
 }
 
 #toast {
   z-index: 9999; /* Toast should be just below header */
 }
-
-
-/* Ensure your header has proper z-index */
-header, .header, [class*="header"] {
-  position: relative;
-  z-index: 10000 !important;
-}
-
-/* Body should have relative positioning */
-body {
-  position: relative;
-}
-
 
 
 /* Toast styles */
@@ -2514,6 +2536,7 @@ body {
 
 #toast {
   animation: slideInFromRight 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  top:20vh;
 }
 
 /* Progress bar */
@@ -2565,3 +2588,5 @@ body {
       animation: slideInFromRightMobile 0.4s ease-out;
   }
 }
+
+
