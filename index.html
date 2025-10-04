@@ -68,16 +68,23 @@
 </head>
 
 <body class="bg-gray-50 dark:bg-darkBg text-gray-800 dark:text-gray-200 transition-colors duration-300">
-    <!-- Toast Notification -->
-    <div id="toast"
-        class="fixed bottom-0 right-6 z-50 hidden transition-all duration-500 transform translate-y-4 opacity-0">
-        <div id="toastBox"
-            class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 min-w-[200px]">
-            <i id="toastIcon" class="fas fa-check-circle text-xl"></i>
-            <span id="toastMessage" class="font-medium flex-1">Operation successful</span>
-            <button onclick="hideToast()" class="ml-2 text-white hover:text-gray-200 focus:outline-none">✖</button>
-        </div>
+
+
+<!-- Toast Notification -->
+<!-- Toast Notification -->
+<div id="toast"
+    class="fixed top-48 right-6 z-[9999] hidden transition-all duration-500 transform translate-x-full opacity-0">
+    <div id="toastBox"
+        class="text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 min-w-[300px] max-w-[400px] border-l-4 backdrop-filter backdrop-blur-sm bg-opacity-90">
+        <i id="toastIcon" class="fas fa-check-circle text-xl"></i>
+        <span id="toastMessage" class="font-medium flex-1 text-sm"></span>
+        <button onclick="smartEvaluator.hideToast()" class="ml-2 text-white hover:text-gray-200 focus:outline-none transition-colors">
+            <i class="fas fa-times"></i>
+        </button>
     </div>
+</div>
+
+
 
     <!-- Authentication Modal -->
     <div id="authModal" class="modal">
@@ -435,8 +442,47 @@
                     <!-- Add Members section -->
                     <div id="page-members" class="page hidden">
                         <!-- New Student Form -->
-                        <div
-                            class="mb-6 p-6 rounded-xl shadow-md bg-green-50 dark:bg-gray-800 transition-colors font-sans">
+                        <div class="mb-6 p-6 rounded-xl shadow-md bg-green-50 dark:bg-gray-800 transition-colors font-sans">
+
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+                                <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">CSV থেকে শিক্ষার্থী ইমপোর্ট</h3>
+                                
+                                <!-- CSV ফাইল সিলেক্ট -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                                        CSV ফাইল নির্বাচন করুন
+                                    </label>
+                                    <input type="file" id="csvFileInput" accept=".csv" 
+                                           class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                                    <p id="csvFileName" class="text-sm text-gray-500 mt-2"></p>
+                                </div>
+                            
+                                <!-- একশন বাটন -->
+                                <div class="flex gap-3">
+                                    <button id="downloadTemplateBtn" 
+                                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-download mr-2"></i>টেমপ্লেট ডাউনলোড
+                                    </button>
+                                    
+                                    <button id="processImportBtn" 
+                                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-upload mr-2"></i>ইমপোর্ট প্রসেস করুন
+                                    </button>
+                                </div>
+                            
+                                <!-- নির্দেশিকা -->
+                                <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                    <h4 class="font-medium text-blue-800 dark:text-blue-300 mb-2">ইমপোর্ট নির্দেশিকা:</h4>
+                                    <ul class="text-sm text-blue-700 dark:text-blue-400 list-disc list-inside space-y-1">
+                                        <li>CSV ফাইলের প্রথম লাইন হেডার হিসেবে ব্যবহার করুন</li>
+                                        <li>আবশ্যক ফিল্ড: নাম, রোল, লিঙ্গ, একাডেমিক গ্রুপ, সেশন</li>
+                                        <li>বাংলা টেমপ্লেট ডাউনলোড করে ব্যবহার করুন</li>
+                                        <li>UTF-8 encoding ব্যবহার করুন বাংলা সাপোর্টের জন্য</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
                             <h3
                                 class="text-xl md:text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100 border-l-4 border-blue-500 pl-4">
                                 নতুন শিক্ষার্থী যোগ করুন:
@@ -1329,6 +1375,9 @@
                 });
             });
         });
+
+
+        
     </script>
 </body>
 

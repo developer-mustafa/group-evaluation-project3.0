@@ -168,6 +168,7 @@ class SmartGroupEvaluator {
         this.currentChart = null;
         this.isInitialized = false;
         this.authModalShown = false;
+        this.toastTimeout = null
 
         this.state = {
             groups: [],
@@ -277,6 +278,9 @@ this.ALL_PAGES = [...this.PUBLIC_PAGES, ...this.PRIVATE_PAGES];
 
         this.init();
     }
+
+   
+
 
     createDebouncer(delay) {
         let timeoutId;
@@ -560,7 +564,9 @@ this.ALL_PAGES = [...this.PUBLIC_PAGES, ...this.PRIVATE_PAGES];
 
         // CSV Operations
         this.addListener(this.dom.importStudentsBtn, "click", () => this.importCSV());
-        this.addListener(this.dom.processImportBtn, "click", () => this.processCSVImport());
+        // this.addListener(this.dom.processImportBtn, "click", () => this.processCSVImport());
+        this.addListener(this.dom.processImportBtn, "click", () => this.processCSVImportWithBengali());
+        
         this.addListener(this.dom.csvFileInput, "change", (e) => this.handleCSVFileSelect(e));
         this.addListener(this.dom.downloadTemplateBtn, "click", () => this.downloadCSVTemplate());
 
@@ -702,65 +708,104 @@ this.ALL_PAGES = [...this.PUBLIC_PAGES, ...this.PRIVATE_PAGES];
         }
     }
 
+   
 
-    showToast(message, type = "info") {
-        const toast = this.dom.toast;
-        const toastMessage = this.dom.toastMessage;
-    
-        if (!toast || !toastMessage) return;
-    
-        // Set message and style based on type
-        toastMessage.textContent = message;
-    
-        // Remove existing classes and add new ones
-        toast.className = "toast fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 transition-all duration-300";
-    
-        // Enhanced color coding based on requirements
-        switch (type) {
-            case "success":
-                // Green for login, logout, data addition
-                toast.classList.add("bg-green-500", "text-white");
-                break;
-            case "warning":
-                // Orange for data updates
-                toast.classList.add("bg-orange-500", "text-white");
-                break;
-            case "error":
-                // Red for errors and deletions
-                toast.classList.add("bg-red-500", "text-white");
-                break;
-            case "info":
-                // Blue for general information
-                toast.classList.add("bg-blue-500", "text-white");
-                break;
-            default:
-                toast.classList.add("bg-gray-500", "text-white");
-        }
-    
-        // Add appropriate icon
-        let icon = "fas fa-info-circle";
-        switch (type) {
-            case "success": icon = "fas fa-check-circle"; break;
-            case "warning": icon = "fas fa-exclamation-triangle"; break;
-            case "error": icon = "fas fa-times-circle"; break;
-            case "info": icon = "fas fa-info-circle"; break;
-        }
-    
-        toast.innerHTML = `
-            <i class="${icon}"></i>
-            <span id="toastMessage">${message}</span>
-        `;
-    
-        // Show toast with animation
-        toast.classList.remove("hidden", "opacity-0", "translate-x-full");
-        toast.classList.add("flex", "opacity-100", "translate-x-0");
-    
-        // Auto hide after 4 seconds
-        setTimeout(() => {
-            this.hideToast();
-        }, 4000);
+
+//toast msg part
+showToast(message, type = "info") {
+    const toast = document.getElementById('toast');
+    const toastBox = document.getElementById('toastBox');
+    const toastMessage = document.getElementById('toastMessage');
+    const toastIcon = document.getElementById('toastIcon');
+
+    if (!toast || !toastBox || !toastMessage || !toastIcon) return;
+
+    // Clear any existing timeout
+    if (this.toastTimeout) {
+        clearTimeout(this.toastTimeout);
+        this.toastTimeout = null;
     }
 
+    // Set message
+    toastMessage.textContent = message;
+
+    // Reset classes and set base styles
+    toastBox.className = "text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 min-w-[300px] max-w-[400px] border-l-4 backdrop-filter backdrop-blur-sm bg-opacity-90";
+    toastIcon.className = "fas text-xl";
+
+    // Set type-specific styles
+    switch (type) {
+        case "success":
+            toastBox.classList.add("bg-green-500", "border-green-400");
+            toastIcon.classList.add("fa-check-circle");
+            break;
+        case "warning":
+            toastBox.classList.add("bg-orange-500", "border-orange-400");
+            toastIcon.classList.add("fa-exclamation-triangle");
+            break;
+        case "error":
+            toastBox.classList.add("bg-red-500", "border-red-400");
+            toastIcon.classList.add("fa-times-circle");
+            break;
+        case "info":
+            toastBox.classList.add("bg-blue-500", "border-blue-400");
+            toastIcon.classList.add("fa-info-circle");
+            break;
+        default:
+            toastBox.classList.add("bg-gray-500", "border-gray-400");
+            toastIcon.classList.add("fa-info-circle");
+    }
+
+    // 🔽🔽🔽 এখানে top ভ্যালু পরিবর্তন করুন 🔽🔽🔽
+    // Set toast position (more below)
+    toast.className = "fixed top-48 right-6 z-[9999] transition-all duration-500 transform opacity-0";
+    // top-24 (96px) → top-32 (128px) → top-40 (160px) → top-48 (192px)
+
+    // Show toast with animation
+    setTimeout(() => {
+        toast.classList.remove("hidden", "translate-x-full", "opacity-0");
+        toast.classList.add("translate-x-0", "opacity-100");
+    }, 100);
+
+    // Auto hide after 7 seconds
+    this.toastTimeout = setTimeout(() => {
+        this.hideToast();
+    }, 7000);
+}
+
+hideToast() {
+    const toast = document.getElementById('toast');
+    if (toast) {
+        // Clear the auto-hide timeout
+        if (this.toastTimeout) {
+            clearTimeout(this.toastTimeout);
+            this.toastTimeout = null;
+        }
+        
+        // Hide animation
+        toast.classList.add("translate-x-full", "opacity-0");
+        setTimeout(() => {
+            toast.classList.add("hidden");
+            toast.classList.remove("translate-x-0", "opacity-100");
+        }, 500);
+    }
+}
+
+// Optional: Immediate hide method
+hideToastImmediately() {
+    if (this.toastTimeout) {
+        clearTimeout(this.toastTimeout);
+        this.toastTimeout = null;
+    }
+    
+    const toast = document.getElementById('toast');
+    if (toast) {
+        toast.classList.add("hidden");
+        toast.classList.remove("translate-x-0", "opacity-100", "translate-x-full");
+    }
+}
+
+    
     async handleLogout() {
         try {
             // Firebase থেকে logout করুন
@@ -2722,35 +2767,49 @@ renderAdminManagement() {
     // ===============================
 // ENHANCED CSV IMPORT/EXPORT WITH BENGALI SUPPORT
 // ===============================
-
 async processCSVImportWithBengali() {
     if (!this.csvImportData || this.csvImportData.length === 0) {
         this.showToast("প্রথমে CSV ফাইল নির্বাচন করুন", "error");
         return;
     }
 
-    this.showLoading("শিক্ষার্থী ডেটা ইমপোর্ট হচ্ছে...");
+    this.showLoading("শিক্ষার্থী ডেটা ভ্যালিডেশন এবং ইমপোর্ট হচ্ছে...");
     try {
         let successCount = 0;
         let errorCount = 0;
         const errors = [];
+        const importedRolls = new Set(); // Track rolls from current import for duplicate detection
 
+        // First pass: Validate all data before importing any
+        const validationResults = await this.validateAllCSVData(this.csvImportData);
+        
+        if (validationResults.hasErrors) {
+            this.showValidationErrors(validationResults.errors, validationResults.duplicates);
+            this.hideLoading();
+            return;
+        }
+
+        // Second pass: Import valid data
         for (const [index, studentData] of this.csvImportData.entries()) {
+            const rowNumber = index + 2; // +2 because header is row 1
+            
             try {
-                // Validate required fields
-                if (!studentData.name || !studentData.roll || !studentData.gender || !studentData.academicGroup || !studentData.session) {
-                    errors.push(`সারি ${index + 2}: প্রয়োজনীয় ফিল্ড খালি`);
+                // Final duplicate check right before import
+                const isDuplicate = await this.checkStudentUniqueness(
+                    studentData.roll, 
+                    studentData.academicGroup
+                );
+                
+                if (isDuplicate) {
+                    errors.push(`সারি ${rowNumber}: রোল "${studentData.roll}" ও একাডেমিক গ্রুপ "${studentData.academicGroup}" এর শিক্ষার্থী ইতিমধ্যে ডাটাবেজে আছে`);
                     errorCount++;
                     continue;
                 }
 
-                // Check uniqueness
-                const isDuplicate = await this.checkStudentUniqueness(
-                    studentData.roll,
-                    studentData.academicGroup
-                );
-                if (isDuplicate) {
-                    errors.push(`সারি ${index + 2}: এই রোল ও একাডেমিক গ্রুপের শিক্ষার্থী ইতিমধ্যে আছে`);
+                // Check for duplicate within the same CSV file
+                const uniqueKey = `${studentData.roll}_${studentData.academicGroup}`;
+                if (importedRolls.has(uniqueKey)) {
+                    errors.push(`সারি ${rowNumber}: রোল "${studentData.roll}" ও একাডেমিক গ্রুপ "${studentData.academicGroup}" এই CSV ফাইলে ডুপ্লিকেট আছে`);
                     errorCount++;
                     continue;
                 }
@@ -2766,9 +2825,12 @@ async processCSVImportWithBengali() {
                     role: studentData.role || "",
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 });
+                
+                importedRolls.add(uniqueKey);
                 successCount++;
+                
             } catch (error) {
-                errors.push(`সারি ${index + 2}: ${error.message}`);
+                errors.push(`সারি ${rowNumber}: সার্ভার এরর - ${error.message}`);
                 errorCount++;
                 console.error("Error importing student:", error);
             }
@@ -2783,20 +2845,286 @@ async processCSVImportWithBengali() {
         if (this.dom.csvFileName) this.dom.csvFileName.textContent = "";
 
         // Show detailed results
-        if (errors.length > 0) {
-            this.showImportResults(successCount, errorCount, errors);
-        } else {
-            this.showToast(
-                `ইমপোর্ট সম্পন্ন: ${successCount} টি ডেটা সফলভাবে যোগ করা হয়েছে`,
-                "success"
-            );
-        }
+        this.showImportResultsWithDetails(successCount, errorCount, errors);
+
     } catch (error) {
-        this.showToast("ইমপোর্ট ব্যর্থ: " + error.message, "error");
+        console.error("Import process error:", error);
+        this.showToast("ইমপোর্ট প্রসেসে সমস্যা: " + error.message, "error");
     } finally {
         this.hideLoading();
     }
 }
+
+// Comprehensive validation method
+async validateAllCSVData(csvData) {
+    const errors = [];
+    const duplicates = [];
+    const rollAcademicMap = new Map();
+    const validationResults = {
+        hasErrors: false,
+        errors: [],
+        duplicates: []
+    };
+
+    for (const [index, studentData] of csvData.entries()) {
+        const rowNumber = index + 2;
+        const rowErrors = [];
+
+        // Required field validation
+        if (!studentData.name || studentData.name.trim() === '') {
+            rowErrors.push("নাম প্রয়োজন");
+        }
+        
+        if (!studentData.roll || studentData.roll.trim() === '') {
+            rowErrors.push("রোল প্রয়োজন");
+        }
+        
+        if (!studentData.gender || studentData.gender.trim() === '') {
+            rowErrors.push("লিঙ্গ প্রয়োজন");
+        }
+        
+        if (!studentData.academicGroup || studentData.academicGroup.trim() === '') {
+            rowErrors.push("একাডেমিক গ্রুপ প্রয়োজন");
+        }
+        
+        if (!studentData.session || studentData.session.trim() === '') {
+            rowErrors.push("সেশন প্রয়োজন");
+        }
+
+        // Data format validation
+        if (studentData.name && studentData.name.length > 100) {
+            rowErrors.push("নাম ১০০ অক্ষরের বেশি হতে পারবে না");
+        }
+        
+        if (studentData.roll && studentData.roll.length > 20) {
+            rowErrors.push("রোল ২০ অক্ষরের বেশি হতে পারবে না");
+        }
+        
+        if (studentData.gender && !['ছেলে', 'মেয়ে'].includes(studentData.gender)) {
+            rowErrors.push("লিঙ্গ শুধুমাত্র 'ছেলে' বা 'মেয়ে' হতে পারে");
+        }
+
+        // Duplicate validation within CSV
+        if (studentData.roll && studentData.academicGroup) {
+            const uniqueKey = `${studentData.roll}_${studentData.academicGroup}`;
+            if (rollAcademicMap.has(uniqueKey)) {
+                const firstOccurrence = rollAcademicMap.get(uniqueKey);
+                duplicates.push({
+                    row: rowNumber,
+                    roll: studentData.roll,
+                    academicGroup: studentData.academicGroup,
+                    firstOccurrence: firstOccurrence
+                });
+            } else {
+                rollAcademicMap.set(uniqueKey, rowNumber);
+            }
+        }
+
+        // Database duplicate check
+        if (studentData.roll && studentData.academicGroup) {
+            try {
+                const isDuplicate = await this.checkStudentUniqueness(
+                    studentData.roll, 
+                    studentData.academicGroup
+                );
+                if (isDuplicate) {
+                    rowErrors.push(`রোল "${studentData.roll}" ও একাডেমিক গ্রুপ "${studentData.academicGroup}" ডাটাবেজে ইতিমধ্যে আছে`);
+                }
+            } catch (dbError) {
+                rowErrors.push("ডাটাবেস চেক করতে সমস্যা");
+            }
+        }
+
+        if (rowErrors.length > 0) {
+            errors.push({
+                row: rowNumber,
+                student: studentData,
+                errors: rowErrors
+            });
+        }
+    }
+
+    validationResults.errors = errors;
+    validationResults.duplicates = duplicates;
+    validationResults.hasErrors = errors.length > 0 || duplicates.length > 0;
+    
+    return validationResults;
+}
+
+// Enhanced duplicate checking method
+async checkStudentUniqueness(roll, academicGroup, excludeId = null) {
+    try {
+        // First check in current state (cached data)
+        const existingInState = this.state.students.find(s => 
+            s.roll === roll && 
+            s.academicGroup === academicGroup &&
+            (!excludeId || s.id !== excludeId)
+        );
+        
+        if (existingInState) {
+            return true;
+        }
+
+        // Double check with database for certainty
+        const query = db
+            .collection("students")
+            .where("roll", "==", roll.trim())
+            .where("academicGroup", "==", academicGroup.trim());
+        
+        const snap = await query.get();
+        const existsInDB = !snap.empty && snap.docs.some((doc) => 
+            !excludeId || doc.id !== excludeId
+        );
+
+        return existsInDB;
+    } catch (error) {
+        console.error("Error checking student uniqueness:", error);
+        throw new Error("ডুপ্লিকেট চেক করতে সমস্যা");
+    }
+}
+
+// Enhanced error display method
+showValidationErrors(errors, duplicates) {
+    let errorMessage = "ভ্যালিডেশন এরর পাওয়া গেছে:\n\n";
+    
+    // Show field validation errors
+    if (errors.length > 0) {
+        errorMessage += "📋 ফিল্ড ভ্যালিডেশন এরর:\n";
+        errors.forEach(error => {
+            errorMessage += `• সারি ${error.row}: ${error.student.name || 'নাম নেই'} (রোল: ${error.student.roll || 'নেই'}) - ${error.errors.join(', ')}\n`;
+        });
+        errorMessage += "\n";
+    }
+
+    // Show duplicate errors within CSV
+    if (duplicates.length > 0) {
+        errorMessage += "⚠️ CSV ফাইলে ডুপ্লিকেট:\n";
+        duplicates.forEach(dup => {
+            errorMessage += `• সারি ${dup.row}: রোল "${dup.roll}" ও গ্রুপ "${dup.academicGroup}" পূর্বে সারি ${dup.firstOccurrence} এ আছে\n`;
+        });
+        errorMessage += "\n";
+    }
+
+    errorMessage += "দয়া করে CSV ফাইল সংশোধন করে আবার চেষ্টা করুন।";
+
+    this.showToast(errorMessage, "error");
+}
+
+// Detailed results display
+showImportResultsWithDetails(successCount, errorCount, errors) {
+    if (errorCount === 0) {
+        this.showToast(
+            `ইমপোর্ট সম্পূর্ণ! ${successCount} টি শিক্ষার্থী সফলভাবে যোগ করা হয়েছে`,
+            "success"
+        );
+        return;
+    }
+
+    const resultsHTML = `
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">ইমপোর্ট ফলাফল</h3>
+                </div>
+                
+                <div class="p-6">
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg text-center">
+                            <div class="text-green-600 dark:text-green-400 font-semibold">সফল</div>
+                            <div class="text-2xl font-bold text-green-700 dark:text-green-300">${successCount}</div>
+                        </div>
+                        <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg text-center">
+                            <div class="text-red-600 dark:text-red-400 font-semibold">ব্যর্থ</div>
+                            <div class="text-2xl font-bold text-red-700 dark:text-red-300">${errorCount}</div>
+                        </div>
+                        <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-center">
+                            <div class="text-blue-600 dark:text-blue-400 font-semibold">মোট</div>
+                            <div class="text-2xl font-bold text-blue-700 dark:text-blue-300">${successCount + errorCount}</div>
+                        </div>
+                    </div>
+
+                    <!-- Error Details -->
+                    ${errors.length > 0 ? `
+                        <div class="mb-4">
+                            <h4 class="font-semibold mb-3 text-gray-700 dark:text-gray-300">এরর বিবরণ:</h4>
+                            <div class="bg-red-50 dark:bg-red-900/10 rounded-lg p-4 max-h-60 overflow-y-auto">
+                                ${errors.map(error => `
+                                    <div class="text-sm text-red-600 dark:text-red-400 mb-2 p-2 bg-red-100 dark:bg-red-900/20 rounded">
+                                        <strong>${error}</strong>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Success Details -->
+                    ${successCount > 0 ? `
+                        <div class="bg-green-50 dark:bg-green-900/10 rounded-lg p-4">
+                            <p class="text-green-700 dark:text-green-300 text-sm">
+                                ✅ ${successCount} টি শিক্ষার্থী সফলভাবে ইমপোর্ট হয়েছে। ডাটা অটোমেটিকালি রিফ্রেশ হয়েছে।
+                            </p>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                    <button 
+                        onclick="this.closest('.fixed').remove()"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+                    >
+                        বন্ধ করুন
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const modal = document.createElement('div');
+    modal.innerHTML = resultsHTML;
+    document.body.appendChild(modal);
+}
+
+// Enhanced CSV template with validation rules
+downloadCSVTemplate() {
+    const headers = ["নাম", "রোল", "লিঙ্গ", "গ্রুপ", "যোগাযোগ", "একাডেমিক গ্রুপ", "সেশন", "দায়িত্ব"];
+    
+    const exampleData = [
+        ["রহিম আহমেদ", "2024001", "ছেলে", "গ্রুপ-এ", "rahim@example.com", "বিজ্ঞান", "২০২৩-২৪", "team-leader"],
+        ["সালমা খাতুন", "2024002", "মেয়ে", "গ্রুপ-বি", "salma@example.com", "মানবিক", "২০২৩-২৪", "reporter"]
+    ];
+
+    const validationRules = [
+        "ইমপোর্ট নির্দেশিকা:",
+        "1. রোল এবং একাডেমিক গ্রুপ ইউনিক হতে হবে (ডুপ্লিকেট 허용 না)",
+        "2. আবশ্যক ফিল্ড: নাম, রোল, লিঙ্গ, একাডেমিক গ্রুপ, সেশন",
+        "3. লিঙ্গ শুধুমাত্র 'ছেলে' বা 'মেয়ে' হতে পারে",
+        "4. নাম সর্বোচ্চ ১০০ অক্ষর",
+        "5. রোল সর্বোচ্চ ২০ অক্ষর",
+        "6. UTF-8 encoding ব্যবহার করুন"
+    ];
+
+    const BOM = "\uFEFF";
+    let csvContent = BOM;
+    
+    // Add validation rules as comments
+    csvContent += validationRules.map(rule => `# ${rule}`).join('\n') + '\n\n';
+    
+    // Add headers and data
+    csvContent += [headers, ...exampleData]
+        .map(row => 
+            row.map(cell => `"${cell}"`).join(',')
+        )
+        .join('\n');
+
+    const blob = new Blob([csvContent], { 
+        type: "text/csv;charset=utf-8;" 
+    });
+    
+    this.downloadBlob(blob, "শিক্ষার্থী_ইমপোর্ট_টেমপ্লেট_নির্দেশিকা.csv");
+    this.showToast("টেমপ্লেট ডাউনলোড成功! নির্দেশিকা পড়ুন", "success");
+}
+
 
 showImportResults(successCount, errorCount, errors) {
     const resultsHTML = `
@@ -6283,39 +6611,42 @@ quickUpdateRole(studentId) {
  // ===============================
 // ENHANCED CSV IMPORT WITH BENGALI SUPPORT
 // ===============================
-
 handleCSVFileSelect(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Validate file type
+    // File validation
     if (!file.name.toLowerCase().endsWith('.csv')) {
         this.showToast("শুধুমাত্র CSV ফাইল সাপোর্টেড", "error");
         return;
     }
 
-    const fileName = this.dom.csvFileName;
-    if (fileName) fileName.textContent = file.name;
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        this.showToast("ফাইল সাইজ 5MB এর বেশি হতে পারবে না", "error");
+        return;
+    }
 
+    this.dom.csvFileName.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+    
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
-            const csvData = e.target.result;
-            // Remove BOM if present for UTF-8 files
-            const cleanData = csvData.replace(/^\uFEFF/, '');
-            this.csvImportData = this.parseCSV(cleanData);
+            this.showLoading("CSV ফাইল পড়া হচ্ছে...");
             
-            if (this.csvImportData && this.csvImportData.length > 0) {
-                this.showToast(`CSV ফাইল লোড成功: ${this.csvImportData.length} টি রেকর্ড`, "success");
-                
-                // Show preview
-                this.showCSVPreview(this.csvImportData);
-            } else {
-                this.showToast("CSV ফাইলে কোনো ডেটা পাওয়া যায়নি", "error");
+            let csvText = e.target.result;
+            
+            // Handle BOM for UTF-8
+            if (csvText.charCodeAt(0) === 0xFEFF) {
+                csvText = csvText.substring(1);
             }
+            
+            this.parseCSVData(csvText);
+            
         } catch (error) {
             console.error("CSV parsing error:", error);
-            this.showToast("CSV পার্স করতে সমস্যা: " + error.message, "error");
+            this.showToast("CSV ফাইল পড়তে সমস্যা: " + error.message, "error");
+        } finally {
+            this.hideLoading();
         }
     };
     
@@ -6324,6 +6655,61 @@ handleCSVFileSelect(event) {
     };
     
     reader.readAsText(file, 'UTF-8');
+}
+parseCSVData(csvText) {
+    // Use Papa Parse or simple parsing for Bangla CSV
+    const lines = csvText.split('\n').filter(line => line.trim());
+    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+    
+    this.csvImportData = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+        const values = this.parseCSVLine(lines[i]);
+        const studentData = {};
+        
+        headers.forEach((header, index) => {
+            studentData[header] = values[index] ? values[index].replace(/"/g, '').trim() : '';
+        });
+        
+        // Map to your student structure
+        const mappedData = {
+            name: studentData['নাম'] || studentData['name'] || '',
+            roll: studentData['রোল'] || studentData['roll'] || '',
+            gender: studentData['লিঙ্গ'] || studentData['gender'] || '',
+            groupId: studentData['গ্রুপ'] || studentData['group'] || '',
+            contact: studentData['যোগাযোগ'] || studentData['contact'] || '',
+            academicGroup: studentData['একাডেমিক গ্রুপ'] || studentData['academicGroup'] || '',
+            session: studentData['সেশন'] || studentData['session'] || '',
+            role: studentData['দায়িত্ব'] || studentData['role'] || ''
+        };
+        
+        this.csvImportData.push(mappedData);
+    }
+    
+    this.showToast(`${this.csvImportData.length} টি শিক্ষার্থীর ডেটা লোড হয়েছে`, "success");
+}
+
+parseCSVLine(line) {
+    // Simple CSV parser that handles quotes and commas
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            values.push(current);
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    values.push(current);
+    
+    return values;
 }
 
 parseCSV(csvText) {
@@ -6621,26 +7007,34 @@ async processCSVImport() {
     }
 
     downloadCSVTemplate() {
-        const headers = [
-            "name",
-            "roll",
-            "gender",
-            "groupId",
-            "contact",
-            "academicGroup",
-            "session",
-            "role",
+        const headers = ["নাম", "রোল", "লিঙ্গ", "গ্রুপ", "যোগাযোগ", "একাডেমিক গ্রুপ", "সেশন", "দায়িত্ব"];
+        const exampleRow = [
+            "রহিম আহমেদ",
+            "2024001", 
+            "ছেলে",
+            "গ্রুপ-এ",
+            "rahim@example.com",
+            "বিজ্ঞান",
+            "২০২৩-২৪",
+            "team-leader"
         ];
-        const template = [headers.join(",")].join("\n");
-
-        const blob = new Blob([template], { type: "text/csv" });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "students_template.csv";
-        a.click();
-        window.URL.revokeObjectURL(url);
+        
+        const BOM = "\uFEFF";
+        const csvContent = BOM + [headers, exampleRow]
+            .map((row) => 
+                row.map((cell) => `"${cell}"`).join(',')
+            )
+            .join('\n');
+        
+        const blob = new Blob([csvContent], { 
+            type: "text/csv;charset=utf-8;" 
+        });
+        
+        this.downloadBlob(blob, "শিক্ষার্থী_ইমপোর্ট_টেমপ্লেট.csv");
+        this.showToast("CSV টেমপ্লেট ডাউনলোড成功", "success");
     }
+
+    
 
  // ===============================
 // ENHANCED EXPORT FUNCTIONALITY
@@ -6696,34 +7090,42 @@ async exportAllData() {
     }
 }
 
+// Enhanced export method with proper Bangla headers
 async exportStudentsCSV() {
-    this.showLoading("শিক্ষার্থী ডেটা CSV তৈরি হচ্ছে...");
+    this.showLoading("শিক্ষার্থী ডেটা এক্সপোর্ট হচ্ছে...");
     try {
+        // Bangla headers
         const headers = ["নাম", "রোল", "লিঙ্গ", "গ্রুপ", "যোগাযোগ", "একাডেমিক গ্রুপ", "সেশন", "দায়িত্ব"];
         
         const csvData = this.state.students.map((student) => {
             const group = this.state.groups.find((g) => g.id === student.groupId);
             return [
-                `"${student.name}"`,
-                `"${student.roll}"`,
-                `"${student.gender}"`,
-                `"${group?.name || ""}"`,
-                `"${student.contact || ""}"`,
-                `"${student.academicGroup || ""}"`,
-                `"${student.session || ""}"`,
-                `"${this.roleNames[student.role] || student.role || ""}"`
+                student.name || '',
+                student.roll || '',
+                student.gender || '',
+                group?.name || '',
+                student.contact || '',
+                student.academicGroup || '',
+                student.session || '',
+                this.roleNames[student.role] || student.role || '',
             ];
         });
 
-        // Add BOM for UTF-8 and Bengali support
+        // Add UTF-8 BOM for Bangla support
         const BOM = "\uFEFF";
         const csvContent = BOM + [headers, ...csvData]
-            .map(row => row.join(','))
+            .map((row) => 
+                row.map((cell) => 
+                    `"${String(cell).replace(/"/g, '""')}"`
+                ).join(',')
+            )
             .join('\n');
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        this.downloadBlob(blob, "শিক্ষার্থী_তালিকা.csv");
+        const blob = new Blob([csvContent], { 
+            type: "text/csv;charset=utf-8;" 
+        });
         
+        this.downloadBlob(blob, "শিক্ষার্থী_তালিকা.csv");
         this.showToast("শিক্ষার্থী ডেটা CSV হিসেবে এক্সপোর্ট成功", "success");
     } catch (error) {
         this.showToast("এক্সপোর্ট ব্যর্থ: " + error.message, "error");
@@ -6988,26 +7390,16 @@ formatFileSize(bytes) {
 
 // Enhanced downloadBlob
 downloadBlob(blob, filename) {
-    try {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-
-        this.showToast(`ফাইল ডাউনলোড শুরু হয়েছে: ${filename}`, 'success');
-
-        setTimeout(() => {
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        }, 800);
-    } catch (error) {
-        console.error('Download error:', error);
-        this.showExportError('ডাউনলোড ব্যর্থ', 'ফাইল ডাউনলোড করতে সমস্যা হচ্ছে।');
-    }
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
 }
-
 // Export Groups CSV
 async exportGroupsCSV() {
     this.showLoading('গ্রুপ ডেটা CSV তৈরি হচ্ছে...');

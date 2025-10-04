@@ -2365,3 +2365,203 @@ body.user-logged-in-admin .nav-btn.disabled-nav {
       page-break-after: always;
   }
 }
+
+
+
+
+/* টোস্ট ম্যাসেজ*/
+
+/* Toast styles */
+#toast {
+  font-family: 'Hind Siliguri', 'SolaimanLipi', sans-serif;
+  font-weight: 500;
+}
+
+#toastBox {
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Smooth slide-in animation from right */
+@keyframes slideInFromRight {
+  0% {
+      opacity: 0;
+      transform: translateX(100%);
+  }
+  60% {
+      opacity: 1;
+      transform: translateX(-10px);
+  }
+  100% {
+      opacity: 1;
+      transform: translateX(0);
+  }
+}
+
+#toast {
+  animation: slideInFromRight 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Progress bar */
+#toastBox::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.5);
+  width: 100%;
+  animation: toastProgress 7s linear forwards;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+@keyframes toastProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  #toast {
+      top: 20px;
+      left: 4px;
+      right: 4px;
+      transform: none !important;
+  }
+  
+  #toastBox {
+      min-width: auto;
+      max-width: none;
+      width: 100%;
+  }
+  
+  @keyframes slideInFromRightMobile {
+      0% {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+      100% {
+          opacity: 1;
+          transform: translateY(0);
+      }
+  }
+  
+  #toast {
+      animation: slideInFromRightMobile 0.4s ease-out;
+  }
+}
+
+/* Hover effect for desktop */
+@media (min-width: 641px) {
+  #toast:hover {
+      transform: translateX(-5px);
+      transition: transform 0.3s ease;
+  }
+}
+
+/* Ensure toast appears below header */
+header {
+  z-index: 10000; /* Header should have higher z-index */
+}
+
+#toast {
+  z-index: 9999; /* Toast should be just below header */
+}
+
+
+/* Ensure your header has proper z-index */
+header, .header, [class*="header"] {
+  position: relative;
+  z-index: 10000 !important;
+}
+
+/* Body should have relative positioning */
+body {
+  position: relative;
+}
+
+
+
+/* Toast styles */
+#toast {
+  font-family: 'Hind Siliguri', 'SolaimanLipi', sans-serif;
+  font-weight: 500;
+}
+
+#toastBox {
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Smooth slide-in animation from right */
+@keyframes slideInFromRight {
+  0% {
+      opacity: 0;
+      transform: translateX(100%);
+  }
+  60% {
+      opacity: 1;
+      transform: translateX(-10px);
+  }
+  100% {
+      opacity: 1;
+      transform: translateX(0);
+  }
+}
+
+#toast {
+  animation: slideInFromRight 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Progress bar */
+#toastBox::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.5);
+  width: 100%;
+  animation: toastProgress 7s linear forwards;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+@keyframes toastProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  #toast {
+      top: 20px;
+      left: 4px;
+      right: 4px;
+      transform: none !important;
+  }
+  
+  #toastBox {
+      min-width: auto;
+      max-width: none;
+      width: 100%;
+  }
+  
+  @keyframes slideInFromRightMobile {
+      0% {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+      100% {
+          opacity: 1;
+          transform: translateY(0);
+      }
+  }
+  
+  #toast {
+      animation: slideInFromRightMobile 0.4s ease-out;
+  }
+}
