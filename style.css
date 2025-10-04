@@ -309,20 +309,22 @@ h6 { font-size: var(--text-base); }
 }
 
 .sidebar {
+  position: fixed;
+  top: 85px;
+  left: 0;
+  bottom: 0; /* 👈 ensures full height within viewport */
   width: 220px;
   padding: 2px;
   flex-shrink: 0;
-  height: 100vh;
-  overflow-y: auto;
   background: var(--card);
   border-right: 1px solid var(--border);
   box-shadow: var(--shadow-md);
+  overflow-y: auto; /* 👈 enables vertical scroll */
+  overflow-x: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: fixed;
-  top: 85px;
-  left: 0; /* default desktop view */
   z-index: 90;
 }
+
 
 .main-content {
   width: 100%;
@@ -2262,3 +2264,104 @@ body.user-logged-in-admin .nav-btn.disabled-nav {
 
 
 
+/* Toast message animations */
+.toast {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Chart container responsive */
+.chart-container {
+  position: relative;
+  height: 400px;
+  width: 100%;
+}
+
+/* Role management styles */
+.role-select {
+  min-width: 180px;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+      display: none !important;
+  }
+  
+  .print-break {
+      page-break-after: always;
+  }
+}
+
+/* Graph analysis responsive */
+@media (max-width: 768px) {
+  .chart-container {
+      height: 300px;
+  }
+}
+
+
+
+/* Enhanced Toast Styles */
+.toast {
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.toast.warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.toast.error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.toast.info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+/* Graph Analysis Styles */
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.dark .chart-container {
+  background: #1f2937;
+}
+
+/* Role Management Styles */
+.role-select {
+  transition: all 0.2s ease;
+}
+
+.role-select:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.quick-update-btn {
+  transition: all 0.2s ease;
+}
+
+.quick-update-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+      display: none !important;
+  }
+  
+  .print-break {
+      page-break-after: always;
+  }
+}
