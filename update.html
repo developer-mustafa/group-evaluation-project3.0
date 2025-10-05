@@ -7,7 +7,8 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- <link rel="stylesheet" href="style.css"> -->
+
+    <link rel="stylesheet" href="style.css">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -152,6 +153,8 @@
         .member-role-badge.team-leader {
             background-color: #3b82f6;
             color: white;
+            
+            
         }
         
         .member-role-badge.time-keeper {
@@ -185,6 +188,7 @@
         /* Toast notifications */
         .toast {
             z-index: 100;
+          
         }
         
         /* Modal backdrop */
@@ -350,92 +354,75 @@
     <div class="flex flex-1 pt-16">
         <!-- Sidebar -->
         <aside id="sidebar" class="fixed top-16 left-0 bottom-0 w-64 bg-white dark:bg-gray-800 shadow-lg z-30 mobile-sidebar lg:translate-x-0 transition-transform duration-300 sidebar-scrollbar overflow-y-auto">
-            <nav class="p-4">
-                <ul class="space-y-2">
-                    <!-- Public Pages -->
-                    <li>
-                        <button data-page="dashboard" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-tachometer-alt w-5 text-center"></i>
-                            <span>ড্যাশবোর্ড</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button data-page="all-students" class="nav-btn  w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-user-graduate w-5 text-center"></i>
-                            <span>সকল শিক্ষার্থী</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button data-page="student-ranking" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-trophy w-5 text-center"></i>
-                            <span>শিক্ষার্থী র‌্যাঙ্কিং</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button data-page="group-analysis" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-chart-bar w-5 text-center"></i>
-                            <span>গ্রুপ বিশ্লেষণ</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button data-page="graph-analysis" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-chart-line w-5 text-center"></i>
-                            <span>গ্রাফ বিশ্লেষণ</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button data-page="group-policy" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-book w-5 text-center"></i>
-                            <span>গ্রুপ পলিসি</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button data-page="export" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-file-export w-5 text-center"></i>
-                            <span>এক্সপোর্ট</span>
-                        </button>
-                    </li>
-                    
-                    <!-- Private Pages (Only for logged in users) -->
-                    <li class="private-tab">
-                        <button data-page="groups" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-layer-group w-5 text-center"></i>
-                            <span>গ্রুপ ব্যবস্থাপনা</span>
-                        </button>
-                    </li>
-                    <li class="private-tab">
-                        <button data-page="members" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-users w-5 text-center"></i>
-                            <span>সদস্য ব্যবস্থাপনা</span>
-                        </button>
-                    </li>
-                    <li class="private-tab">
-                        <button data-page="group-members" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-user-friends w-5 text-center"></i>
-                            <span>গ্রুপ সদস্য</span>
-                        </button>
-                    </li>
-                    <li class="private-tab">
-                        <button data-page="tasks" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-tasks w-5 text-center"></i>
-                            <span>টাস্ক ব্যবস্থাপনা</span>
-                        </button>
-                    </li>
-                    <li class="private-tab">
-                        <button data-page="evaluation" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-clipboard-check w-5 text-center"></i>
-                            <span>মূল্যায়ন</span>
-                        </button>
-                    </li>
-                    
-                    <!-- Admin Management (Only for super-admin) -->
-                    <li class="private-tab">
-                        <button data-page="admin-management" class="nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3">
-                            <i class="fas fa-user-shield w-5 text-center"></i>
-                            <span>অ্যাডমিন ব্যবস্থাপনা</span>
-                        </button>
-                    </li>
-                </ul>
+            <nav class="space-y-1 sm:space-y-2 p-4">
+                <!-- Public Tabs -->
+                <button data-page="dashboard" class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active text-sm sm:text-base">
+                    <i class="fas fa-tachometer-alt w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>ড্যাশবোর্ড</span>
+                </button>
+                
+                <button data-page="all-students" class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm sm:text-base">
+                    <i class="fas fa-user-graduate w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>সকল শিক্ষার্থী</span>
+                </button>
+                
+                <button data-page="student-ranking" class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm sm:text-base">
+                    <i class="fas fa-trophy w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>র‌্যাঙ্কিং</span>
+                </button>
+                
+                <button data-page="group-analysis" class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm sm:text-base">
+                    <i class="fas fa-chart-bar w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>গ্রুপ বিশ্লেষণ</span>
+                </button>
+                
+                <button data-page="graph-analysis" class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm sm:text-base">
+                    <i class="fas fa-chart-line w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>গ্রাফ বিশ্লেষণ</span>
+                </button>
+
+                <!-- Private Tabs (Require Login) -->
+                <button data-page="groups" class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled-nav text-sm sm:text-base">
+                    <i class="fas fa-layer-group w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>গ্রুপ ম্যানেজমেন্ট</span>
+                </button>
+                
+                <button data-page="members" class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled-nav text-sm sm:text-base">
+                    <i class="fas fa-users w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>সদস্য ম্যানেজমেন্ট</span>
+                </button>
+                
+                <button data-page="group-members" class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled-nav text-sm sm:text-base">
+                    <i class="fas fa-user-friends w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>গ্রুপ সদস্য</span>
+                </button>
+                
+                <button data-page="tasks" class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled-nav text-sm sm:text-base">
+                    <i class="fas fa-tasks w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>টাস্ক ম্যানেজমেন্ট</span>
+                </button>
+                
+                <button data-page="evaluation" class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled-nav text-sm sm:text-base">
+                    <i class="fas fa-clipboard-check w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>মূল্যায়ন</span>
+                </button>
+
+                <!-- Policy & Export (Public) -->
+                <button data-page="group-policy" class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm sm:text-base">
+                    <i class="fas fa-book w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>গ্রুপ পলিসি</span>
+                </button>
+                
+                <button data-page="export" class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm sm:text-base">
+                    <i class="fas fa-file-export w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>এক্সপোর্ট</span>
+                </button>
+
+                <!-- Admin Management (Super Admin Only) -->
+                <button data-page="admin-management" class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled-nav text-sm sm:text-base">
+                    <i class="fas fa-user-shield w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>অ্যাডমিন ম্যানেজমেন্ট</span>
+                </button>
             </nav>
         </aside>
 
@@ -478,7 +465,7 @@
                 <div class="groups-ranking-section">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">গ্রুপ র‌্যাঙ্কিং- সকল মূল্যায়ন পরীক্ষার গড় নম্বরের ভিত্তিতে
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-8 text-center">গ্রুপ র‌্যাঙ্কিং- সকল মূল্যায়ন পরীক্ষার গড় নম্বরের ভিত্তিতে
                             </h3>
                         </div>
                         <div class="card-body">
@@ -491,7 +478,6 @@
             <!-- Groups Management section -->
             <div id="page-groups" class="page hidden privet-only">
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-4">গ্রুপ তৈরি করুন</h3>
                     <div class="flex gap-2">
                         <input id="groupNameInput" type="text" placeholder="গ্রুপের নাম লিখুন"
                             class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700"
@@ -502,7 +488,7 @@
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">গ্রুপ তালিকা</h3>
+                    <h3 class="text-lg font-semibold mb-4">গ্রুপ তালিকা হালনাগাদ ও ডিলেট প্যানেল:</h3>
                     <div id="groupsList" class="space-y-3"></div>
                 </div>
             </div>
@@ -684,7 +670,7 @@
             <!-- All Students section -->
             <div id="page-all-students" class="page hidden">
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-4">সকল শিক্ষার্থী (প্রতিটি গ্রুপ ভিন্ন রংয়ে)</h3>
+                    <h3 class="text-lg font-semibold mb-4">সকল শিক্ষার্থী (প্রতিটি গ্রুপ ভিন্ন রঙে)</h3>
                     <div class="flex flex-col md:flex-row gap-4 mb-4">
                         <select id="cardsFilterGroup"
                             class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700">
@@ -700,7 +686,7 @@
 
             <!--Student Ranking section-->
             <div id="page-student-ranking" class="page hidden">
-                <div class="mb-6 max-w-4xl mx-auto">
+                <div class="mb-6  mx-auto">
                     <!-- Ranking Rules Card -->
                     <div
                         class="rounded-3xl border-2 border-green-200 dark:border-green-600
@@ -734,8 +720,7 @@
 
                     <!-- Header with Refresh -->
                     <div class="flex justify-between items-center my-6">
-                        <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">শিক্ষার্থী র‌্যাঙ্কিং
-                        </h3>
+                        
                         <button id="refreshRanking"
                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
                             <i class="fas fa-sync-alt mr-2"></i> রিফ্রেশ
@@ -824,10 +809,7 @@
             <!--Grapical Data Analysis section-->
             <div id="page-graph-analysis" class="page hidden">
                 <div class="container mx-auto px-4">
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white ">গ্রাফ এনালাইসিস</h2>
-                        <p class="text-gray-600 dark:text-gray-400">গ্রুপভিত্তিক পারফরম্যান্স বিশ্লেষণ</p>
-                    </div>
+                   
 
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
                         <div class="chart-container" style="position: relative; height: 400px;">
@@ -841,7 +823,7 @@
                         class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
                         <div class="flex items-start">
                             <i class="fas fa-info-circle text-yellow-600 mt-1 mr-3"></i>
-                            <div>
+                            <div class="mt-2">
                                 <h4 class="font-semibold text-yellow-800 dark:text-yellow-200 m-2">ব্যবহার
                                     নির্দেশিকা</h4>
                                 <p class="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
@@ -857,7 +839,6 @@
             <!--Task section-->
             <div id="page-tasks" class="page hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">টাস্ক ব্যবস্থাপনা</h2>
                     <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm mb-6">
                         <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">নতুন টাস্ক যোগ করুন
                         </h3>
@@ -899,7 +880,7 @@
                     </div>
 
                     <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                        <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">সমস্ত টাস্ক</h3>
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">সকল টাস্ক তালিকা:</h3>
                         <div id="tasksList" class="space-y-4">
                             <!-- Tasks will be loaded here -->
                         </div>
@@ -910,8 +891,7 @@
             <!--Evaluation section-->
             <div id="page-evaluation" class="page hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">মূল্যায়ন ব্যবস্থাপনা</h2>
-
+                 
                     <!-- Evaluation Setup -->
                     <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm mb-6">
                         <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">নতুন মূল্যায়ন শুরু
@@ -942,13 +922,9 @@
                         </button>
                     </div>
 
-                    <!-- Evaluation Form (Hidden by default) -->
-                    <div id="evaluationForm" class="hidden">
-                        <!-- Evaluation form will be loaded here dynamically -->
-                    </div>
 
-                    <!-- Evaluation List -->
-                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                      <!-- Evaluation List -->
+                      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
                         <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">মূল্যায়ন তালিকা
                         </h3>
                         <div class="overflow-x-auto">
@@ -978,13 +954,18 @@
                             </table>
                         </div>
                     </div>
+                    <!-- Evaluation Form (Hidden by default) -->
+                    <div id="evaluationForm" class="hidden">
+                        <!-- Evaluation form will be loaded here dynamically -->
+                    </div>
+
+                  
                 </div>
             </div>
 
             <!--Group Policy section-->
             <div id="page-group-policy" class="page hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">গ্রুপ নীতি ও নির্দেশিকা
                     </h2>
                     <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
                         <div id="policySections" class="space-y-4">
@@ -997,14 +978,9 @@
 
             <!--page export section-->
             <div id="page-export" class="page">
-                    <div class="container mx-auto p-6">
+                    <div class="container mx-auto">
                         <!-- Header Section -->
-                        <div class="mb-8 text-center">
-                            <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-4">ডেটা এক্সপোর্ট</h2>
-                            <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                                বিভিন্ন ফরম্যাটে আপনার ডেটা ডাউনলোড করুন। রিয়েল-টাইম প্রগ্রেস এবং ফলাফল নিচে দেখানো হবে।
-                            </p>
-                        </div>
+                       
                 
                         <!-- Export Actions Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -1210,10 +1186,10 @@
 
             <!-- Admin Management section -->
             <div id="page-admin-management" class="page hidden">
-                <div class="container mx-auto px-4 py-8">
+                <div class="container mx-auto px-4 ">
                     <!-- Header Section -->
                     <div class="mb-8">
-                        <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">অ্যাডমিন ম্যানেজমেন্ট
+                     
                         </h2>
                         <p class="text-gray-600 dark:text-gray-400">সকল অ্যাডমিন ও ব্যবহারকারী পরিচালনা করুন</p>
                     </div>
@@ -1364,6 +1340,12 @@
         </main>
     </div>
 
+
+
+
+
+    <!-- Modal area start  -->
+
     <!-- Mobile Menu Overlay -->
     <div id="mobileMenuOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden hidden mobile-menu-overlay"></div>
 
@@ -1427,25 +1409,193 @@
         </div>
     </div>
 
-    <!-- Other Modals (Logout, Delete, Edit, etc.) would be included here -->
-    <div id="logoutModal" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center hidden">
-        <!-- Logout modal content -->
+    <!-- Logout Modal -->
+    <div id="logoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">লগআউট নিশ্চিতকরণ</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">আপনি কি নিশ্চিত যে আপনি লগআউট করতে চান?</p>
+            <div class="flex justify-end space-x-3">
+                <button id="cancelLogout" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                    বাতিল
+                </button>
+                <button id="confirmLogout" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+                    লগআউট
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">ডিলিট নিশ্চিতকরণ</h3>
+            <p id="deleteModalText" class="text-gray-600 dark:text-gray-400 mb-6">আপনি কি নিশ্চিত যে আপনি এই আইটেমটি ডিলিট করতে চান?</p>
+            <div class="flex justify-end space-x-3">
+                <button id="cancelDelete" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                    বাতিল
+                </button>
+                <button id="confirmDelete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+                    ডিলিট
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="editModalTitle" class="text-xl font-bold text-gray-800 dark:text-white">সম্পাদনা</h3>
+                <button id="cancelEdit" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="editModalContent" class="space-y-4">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button id="saveEdit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+                    সেভ
+                </button>
+            </div>
+        </div>
     </div>
     
-    <div id="deleteModal" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center hidden">
-        <!-- Delete modal content -->
+  <!-- Admin Management Modal -->
+  <div id="adminModal" class="modal hidden">
+    <div class="modal-content max-w-md">
+        <h3 id="adminModalTitle" class="text-lg font-semibold mb-4">নতুন অ্যাডমিন</h3>
+        <form id="adminModalContent" onsubmit="return false">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">ইমেইল</label>
+                    <input id="adminEmail" type="email"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700"
+                        placeholder="অ্যাডমিনের ইমেইল" autocomplete="username">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">পাসওয়ার্ড</label>
+                    <input id="adminPassword" type="password"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700"
+                        placeholder="পাসওয়ার্ড (ন্যূনতম ৬ অক্ষর)" autocomplete="current-password">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">অ্যাডমিন টাইপ</label>
+                    <select id="adminTypeSelect"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700">
+                        <option value="admin">সাধারণ অ্যাডমিন</option>
+                        <option value="super-admin">সুপার অ্যাডমিন</option>
+                    </select>
+                </div>
+
+                <!-- Permissions Section in Admin Modal -->
+                <div id="permissionsSection" class="mb-4 hidden">
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">পারমিশন</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="permissionRead"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked disabled>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">ডেটা দেখুন</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="permissionWrite"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">নতুন ডেটা যোগ করুন</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="permissionEdit"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">ডেটা এডিট করুন</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="permissionDelete"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">ডেটা ডিলিট করুন</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="modal-footer">
+            <button id="cancelAdmin" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded-lg">বাতিল</button>
+            <button id="saveAdmin" class="px-4 py-2 bg-blue-600 text-white rounded-lg">সংরক্ষণ করুন</button>
+        </div>
     </div>
-    
-    <div id="editModal" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center hidden">
-        <!-- Edit modal content -->
-    </div>
-    
-    <div id="adminModal" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center hidden">
-        <!-- Admin modal content -->
-    </div>
+</div>
 
 
 
+<!-- Group Details Modal -->
+    <div id="groupDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="groupDetailsTitle" class="text-xl font-bold text-gray-800 dark:text-white">গ্রুপ বিস্তারিত</h3>
+                <button id="closeGroupDetails" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="groupDetailsContent">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Management Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="adminModalTitle" class="text-xl font-bold text-gray-800 dark:text-white">অ্যাডমিন ম্যানেজমেন্ট</h3>
+                <button id="cancelAdmin" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="adminModalContent" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">ইমেইল</label>
+                    <input type="email" id="adminEmail" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">পাসওয়ার্ড</label>
+                    <input type="password" id="adminPassword" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">অ্যাডমিন টাইপ</label>
+                    <select id="adminTypeSelect" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                        <option value="super-admin">সুপার অ্যাডমিন</option>
+                        <option value="admin">সাধারণ অ্যাডমিন</option>
+                        <option value="user">সাধারণ ব্যবহারকারী</option>
+                    </select>
+                </div>
+                <div id="permissionsSection" class="hidden">
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">পারমিশন</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="permissionRead" class="rounded border-gray-300">
+                            <span class="text-gray-700 dark:text-gray-300">রিড</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="permissionWrite" class="rounded border-gray-300">
+                            <span class="text-gray-700 dark:text-gray-300">রাইট</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="permissionEdit" class="rounded border-gray-300">
+                            <span class="text-gray-700 dark:text-gray-300">এডিট</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="permissionDelete" class="rounded border-gray-300">
+                            <span class="text-gray-700 dark:text-gray-300">ডিলিট</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button id="saveAdmin" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+                    সেভ
+                </button>
+            </div>
+        </div>
+    </div>
+ <!-- Modal area end  -->
 
     <script>
            const firebaseConfig = {
