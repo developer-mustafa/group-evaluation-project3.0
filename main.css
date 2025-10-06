@@ -1,0 +1,467 @@
+:root {
+  --sidebar-width: 13rem;
+  --header-height: 4rem;
+}
+
+/* Hide scrollbar for sidebar */
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 10px;
+}
+
+/* Mobile menu overlay */
+.mobile-menu-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+/* Custom animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease forwards;
+}
+
+/* Glass effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dark .progress-bar {
+  background-color: #4b5563;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* Rank badges */
+.rank-1 {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: white;
+}
+
+.rank-2 {
+  background: linear-gradient(135deg, #9ca3af, #6b7280);
+  color: white;
+}
+
+.rank-3 {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: white;
+}
+
+.rank-other {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+.dark .rank-other {
+  background: #4b5563;
+  color: #d1d5db;
+}
+
+/* Role badges */
+.member-role-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.member-role-badge.team-leader {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.member-role-badge.time-keeper {
+  background-color: #10b981;
+  color: white;
+}
+
+.member-role-badge.reporter {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.member-role-badge.resource-manager {
+  background-color: #8b5cf6;
+  color: white;
+}
+
+.member-role-badge.peace-maker {
+  background-color: #ec4899;
+  color: white;
+}
+
+/* Disabled navigation */
+.disabled-nav {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* Toast notifications */
+.toast {
+  z-index: 100;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+/* Responsive table */
+.responsive-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Custom scrollbar for tables */
+.table-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.table-scrollbar::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.dark .table-scrollbar::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark .table-scrollbar::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .mobile-sidebar {
+    transform: translateX(-100%);
+  }
+
+  .mobile-sidebar.active {
+    transform: translateX(0);
+  }
+
+  .page-content {
+    margin-left: 0;
+  }
+
+  .mobile-header {
+    height: var(--header-height);
+  }
+}
+
+@media (min-width: 769px) {
+  .page-content {
+    margin-left: var(--sidebar-width);
+  }
+}
+.nav-btn {
+  background-color: transparent;
+  color: inherit;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 10s linear infinite;
+}
+
+.modal-content {
+  animation: modalEnter 0.5s ease-out forwards;
+}
+
+@keyframes modalEnter {
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Developer section styling */
+.developer-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.dark .developer-section {
+  background: linear-gradient(135deg, #4c51bf 0%, #7e22ce 100%);
+}
+
+/* Skill badges */
+.skill-badge {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* WhatsApp button */
+.whatsapp-btn {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+}
+
+
+ /* Custom Animations */
+ @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
+    50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Button Animations */
+#developerInfoBtn {
+    animation: glow 3s ease-in-out infinite;
+}
+
+#developerInfoBtn:hover {
+    animation: glow 1s ease-in-out infinite;
+}
+
+.group:hover .ripple {
+    animation: ripple 0.6s ease-out;
+}
+
+/* Responsive Text Sizes */
+@media (max-width: 640px) {
+    #developerInfoBtn {
+        padding: 0.75rem 1rem;
+    }
+    #developerInfoBtn .text-sm {
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #developerInfoBtn {
+        padding: 0.6rem 0.8rem;
+    }
+    #developerInfoBtn .text-sm {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 360px) {
+    #developerInfoBtn {
+        padding: 0.5rem 0.7rem;
+    }
+    #developerInfoBtn .text-sm {
+        font-size: 0.75rem;
+    }
+}
+
+
+
+
+
+
+
+/* Rank Badge Styles */
+.rank-1 {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+.rank-2 {
+    background: linear-gradient(135deg, #9ca3af, #6b7280, #4b5563);
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.4);
+}
+
+.rank-3 {
+    background: linear-gradient(135deg, #f97316, #ea580c, #c2410c);
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+}
+
+.rank-other {
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    color: #4b5563;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dark .rank-other {
+    background: linear-gradient(135deg, #4b5563, #374151);
+    color: #d1d5db;
+}
+
+/* Progress Circle Animation */
+.group-ranking-card:hover .rank-indicator div {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+/* Smooth transitions */
+.group-ranking-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .group-ranking-card .grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .group-ranking-card .text-lg {
+        font-size: 0.875rem;
+    }
+    
+    .rank-indicator .w-12 {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .student-ranking-card .grid-cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Chart Container Responsive Styles */
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chart-container {
+        height: 250px;
+    }
+}
+
+/* Chart Canvas Styles */
+canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}

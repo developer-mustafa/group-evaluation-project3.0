@@ -1,473 +1,260 @@
 <!DOCTYPE html>
-<html lang="bn" class="dark">
+<html lang="bn" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Group Evaluator - Responsive Layout</title>
+    <title>স্মার্ট ইভ্যালুয়েটর</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#3b82f6",
-                        secondary: "#10b981",
-                        accent: "#f59e0b",
-                        darkBg: "#0f172a",
-                        darkCard: "#1e293b",
-                    },
-                },
-            },
-        };
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bengali Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* Custom scrollbar for sidebar */
-        .sidebar-scroll {
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 #f1f5f9;
+        * {
+            font-family: 'Hind Siliguri', 'SolaimanLipi', sans-serif;
         }
         
-        .sidebar-scroll::-webkit-scrollbar {
-            width: 6px;
+        /* Modal scroll lock */
+        body.modal-open {
+            overflow: hidden;
         }
         
-        .sidebar-scroll::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 3px;
+        /* Smooth animations */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.9);
         }
         
-        .sidebar-scroll::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.3s, transform 0.3s;
         }
         
-        .dark .sidebar-scroll::-webkit-scrollbar-track {
-            background: #334155;
-        }
-        
-        .dark .sidebar-scroll::-webkit-scrollbar-thumb {
-            background: #475569;
-        }
-        
-        /* Sidebar animation */
-        .sidebar {
-            transition: transform 0.3s ease-in-out;
-        }
-        
-        /* Mobile bottom navigation */
-        .bottom-nav {
-            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
-        /* Active navigation item */
-        .nav-item.active {
-            background-color: #3b82f6;
+        /* Developer info section styling */
+        .developer-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
         
-        .dark .nav-item.active {
-            background-color: #1e40af;
+        .dark .developer-section {
+            background: linear-gradient(135deg, #4c51bf 0%, #7e22ce 100%);
         }
         
-        /* Responsive layout */
-        @media (min-width: 768px) {
-            .app-container {
-                display: grid;
-                grid-template-columns: 280px 1fr;
-                height: calc(100vh - 80px);
-            }
-            
-            .sidebar {
-                transform: translateX(0) !important;
-                height: 100%;
-                overflow-y: auto;
-            }
-            
-            .main-content {
-                height: 100%;
-                overflow-y: auto;
-            }
-            
-            .bottom-nav {
-                display: none;
-            }
+        /* WhatsApp group button animation */
+        .whatsapp-btn {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            transition: all 0.3s ease;
         }
         
-        @media (max-width: 767px) {
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 280px;
-                height: 100%;
-                z-index: 40;
-                transform: translateX(-100%);
-                background-color: white;
+        .whatsapp-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+        }
+        
+        /* Profile image styling */
+        .profile-image {
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark .profile-image {
+            border-color: #374151;
+        }
+        
+        /* Skill badges */
+        .skill-badge {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Responsive text sizes */
+        @media (max-width: 640px) {
+            .header-title {
+                font-size: 1.1rem;
             }
             
-            .dark .sidebar {
-                background-color: #1e293b;
-            }
-            
-            .sidebar-open {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                width: 100%;
-            }
-            
-            .overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 30;
-                display: none;
-            }
-            
-            .overlay.active {
-                display: block;
+            .header-buttons {
+                font-size: 0.8rem;
             }
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-darkBg text-gray-800 dark:text-gray-200 transition-colors duration-300">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen transition-colors duration-300">
     <!-- Header -->
-    <header class="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
-        <div class="container mx-auto px-4 py-3">
-            <div class="flex justify-between items-center">
-                <!-- Logo and title section -->
-                <div class="flex items-center space-x-4">
-                    <h1 class="text-xl font-bold text-gray-800 dark:text-white">Smart Group Evaluator</h1>
-                    <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                        <i class="fas fa-moon"></i>
-                    </button>
+    <header class="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-sm z-40 mobile-header flex items-center justify-between px-4 py-3">
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuButton" class="lg:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        
+        <!-- App Title -->
+        <div class="flex items-center space-x-2 md:space-x-3">
+            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                <i class="fas fa-users text-white"></i>
+            </div>
+            <h1 class="header-title text-lg md:text-xl font-bold text-gray-800 dark:text-white">স্মার্ট ইভ্যালুয়েটর</h1>
+        </div>
+        
+        <!-- User Actions -->
+        <div class="flex items-center space-x-2 md:space-x-3">
+            <!-- Developer Info Button -->
+            <button id="developerInfoBtn" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="সফটওয়্যার নির্মাতা তথ্য">
+                <i class="fas fa-code text-lg"></i>
+            </button>
+            
+            <!-- WhatsApp Group Button -->
+            <a href="https://chat.whatsapp.com/YOUR_GROUP_LINK" target="_blank" class="whatsapp-btn p-2 rounded-lg text-white flex items-center space-x-1 md:space-x-2 header-buttons">
+                <i class="fab fa-whatsapp text-lg"></i>
+                <span class="hidden sm:inline">গ্রুপ জয়েন</span>
+            </a>
+            
+            <!-- Theme Toggle -->
+            <button id="themeToggle" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-moon text-lg"></i>
+            </button>
+            
+            <!-- User Info / Login -->
+            <div class="flex items-center space-x-2">
+                <div id="userInfo" class="text-right hidden md:block">
+                    <div class="text-xs text-gray-500 dark:text-gray-400">সাধারণ ব্যবহারকারী</div>
                 </div>
-
-                <!-- Time display -->
-                <div id="timeDisplay" class="text-sm font-medium text-gray-600 dark:text-gray-300"></div>
-
-                <!-- Right side buttons -->
-                <div class="flex items-center space-x-4">
-                    <!-- Sidebar toggle for small screens -->
-                    <button id="sidebarToggle" class="text-gray-600 dark:text-gray-300 focus:outline-none md:hidden" aria-label="Toggle sidebar">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-
-                    <!-- User info -->
-                    <div id="userInfo" class="text-sm text-gray-600 dark:text-gray-300"></div>
-
-                    <!-- Login/Logout buttons -->
-                    <button id="headerLoginBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                        লগইন
-                    </button>
-                    <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors hidden">
-                        লগআউট
-                    </button>
-                </div>
+                <button id="headerLoginBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg transition-colors flex items-center space-x-1 md:space-x-2 header-buttons">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span class="hidden sm:inline">লগইন</span>
+                </button>
+                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg transition-colors flex items-center space-x-1 md:space-x-2 header-buttons hidden">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="hidden sm:inline">লগআউট</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Overlay for mobile sidebar -->
-    <div id="overlay" class="overlay"></div>
-
-    <!-- App Container -->
-    <div class="app-container">
-        <!-- Sidebar for desktop -->
-        <div id="sidebar" class="sidebar bg-white dark:bg-gray-800 shadow-lg sidebar-scroll">
-            <div class="flex justify-between items-center p-4 md:hidden border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold">মেনু</h2>
-                <button id="closeSidebar" class="text-gray-600 dark:text-gray-300">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            <nav class="p-4 space-y-2">
-                <button class="nav-btn active w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="dashboard">
-                    <i class="fas fa-tachometer-alt mr-3"></i>ড্যাশবোর্ড
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="groups">
-                    <i class="fas fa-layer-group mr-3"></i>গ্রুপ ব্যবস্থাপনা
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="members">
-                    <i class="fas fa-user-plus mr-3"></i>সদস্য যোগ করুন
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="group-members">
-                    <i class="fas fa-users mr-3"></i>গ্রুপ সদস্য
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="all-students">
-                    <i class="fas fa-user-graduate mr-3"></i>সকল শিক্ষার্থী
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="student-ranking">
-                    <i class="fas fa-trophy mr-3"></i>শিক্ষার্থী র‌্যাঙ্কিং
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="group-analysis">
-                    <i class="fas fa-chart-bar mr-3"></i>গ্রুপ বিশ্লেষণ
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="graph-analysis">
-                    <i class="fas fa-chart-bar mr-3"></i>গ্রাফ এনালাইসিস
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="tasks">
-                    <i class="fas fa-tasks mr-3"></i>টাস্ক ব্যবস্থাপনা
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="evaluation">
-                    <i class="fas fa-clipboard-check mr-3"></i>মূল্যায়ন
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="group-policy">
-                    <i class="fas fa-book mr-3"></i>গ্রুপ নীতি
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="export">
-                    <i class="fas fa-file-export mr-3"></i>এক্সপোর্ট
-                </button>
-                <button class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-page="admin-management">
-                    <i class="fas fa-user-shield mr-3"></i>অ্যাডমিন কন্ট্রোল
-                </button>
-            </nav>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content bg-gray-50 dark:bg-darkBg">
-            <!-- Page content will be loaded here -->
-            <div class="p-6">
-                <div id="page-dashboard" class="page">
-                    <h2 class="text-2xl font-bold mb-6">ড্যাশবোর্ড</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-4">
-                                    <i class="fas fa-users text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">মোট শিক্ষার্থী</p>
-                                    <p class="text-2xl font-bold text-gray-800 dark:text-white">125</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-lg bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 mr-4">
-                                    <i class="fas fa-layer-group text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">মোট গ্রুপ</p>
-                                    <p class="text-2xl font-bold text-gray-800 dark:text-white">12</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-lg bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 mr-4">
-                                    <i class="fas fa-chart-bar text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">মোট মূল্যায়ন</p>
-                                    <p class="text-2xl font-bold text-gray-800 dark:text-white">45</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-lg bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-400 mr-4">
-                                    <i class="fas fa-trophy text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">সর্বোচ্চ স্কোর</p>
-                                    <p class="text-2xl font-bold text-gray-800 dark:text-white">98%</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                        <h3 class="text-lg font-semibold mb-4">সাম্প্রতিক কার্যক্রম</h3>
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white mr-3">
-                                        <i class="fas fa-user-plus"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium">নতুন শিক্ষার্থী যোগ করা হয়েছে</p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">আহমেদ হাসান - গ্রুপ A</p>
-                                    </div>
-                                </div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">২ ঘন্টা আগে</span>
-                            </div>
-                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white mr-3">
-                                        <i class="fas fa-clipboard-check"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium">মূল্যায়ন সম্পন্ন হয়েছে</p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">গ্রুপ B - প্রজেক্ট উপস্থাপনা</p>
-                                    </div>
-                                </div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">১ দিন আগে</span>
-                            </div>
-                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white mr-3">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium">গ্রুপ বিশ্লেষণ আপডেট করা হয়েছে</p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">সকল গ্রুপের পারফরম্যান্স ডেটা</p>
-                                    </div>
-                                </div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">২ দিন আগে</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Other pages will be hidden by default -->
-                <div id="page-groups" class="page hidden">
-                    <h2 class="text-2xl font-bold mb-6">গ্রুপ ব্যবস্থাপনা</h2>
-                    <!-- Groups management content -->
-                </div>
-                
-                <div id="page-members" class="page hidden">
-                    <h2 class="text-2xl font-bold mb-6">সদস্য যোগ করুন</h2>
-                    <!-- Add members content -->
-                </div>
-                
-                <!-- More pages would be added here -->
+    <!-- Main Content Area -->
+    <main class="pt-16 min-h-screen">
+        <!-- Your main app content goes here -->
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">ড্যাশবোর্ড</h2>
+                <p class="text-gray-600 dark:text-gray-300">আপনার অ্যাপ্লিকেশনের মূল কন্টেন্ট এখানে থাকবে</p>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Bottom Navigation for Mobile -->
-    <div class="bottom-nav fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 md:hidden z-30">
-        <div class="flex justify-around items-center py-2">
-            <button class="nav-item flex flex-col items-center p-2 rounded-lg active" data-page="dashboard">
-                <i class="fas fa-tachometer-alt mb-1"></i>
-                <span class="text-xs">ড্যাশবোর্ড</span>
-            </button>
-            <button class="nav-item flex flex-col items-center p-2 rounded-lg" data-page="groups">
-                <i class="fas fa-layer-group mb-1"></i>
-                <span class="text-xs">গ্রুপ</span>
-            </button>
-            <button class="nav-item flex flex-col items-center p-2 rounded-lg" data-page="members">
-                <i class="fas fa-user-plus mb-1"></i>
-                <span class="text-xs">সদস্য</span>
-            </button>
-            <button class="nav-item flex flex-col items-center p-2 rounded-lg" data-page="all-students">
-                <i class="fas fa-user-graduate mb-1"></i>
-                <span class="text-xs">শিক্ষার্থী</span>
-            </button>
-            <button id="moreMenuBtn" class="nav-item flex flex-col items-center p-2 rounded-lg">
-                <i class="fas fa-ellipsis-h mb-1"></i>
-                <span class="text-xs">আরও</span>
-            </button>
-        </div>
-    </div>
-
+  
     <script>
-        // Time display functionality
-        function updateTime() {
-            const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                timeZone: 'Asia/Dhaka'
-            };
-            const timeString = now.toLocaleDateString('bn-BD', options);
-            document.getElementById('timeDisplay').textContent = timeString;
+        class SmartEvaluatorUI {
+            constructor() {
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.applySavedTheme();
+            }
+            
+            setupEventListeners() {
+                // Theme Toggle
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    this.toggleTheme();
+                });
+                
+                // Developer Modal
+                document.getElementById('developerInfoBtn').addEventListener('click', () => {
+                    this.openDeveloperModal();
+                });
+                
+                document.getElementById('closeDeveloperModal').addEventListener('click', () => {
+                    this.closeDeveloperModal();
+                });
+                
+                // Close modal when clicking outside
+                document.getElementById('developerModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'developerModal') {
+                        this.closeDeveloperModal();
+                    }
+                });
+                
+                // Close modal with Escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeDeveloperModal();
+                    }
+                });
+                
+                // Mobile Menu Button
+                document.getElementById('mobileMenuButton').addEventListener('click', () => {
+                    this.toggleMobileMenu();
+                });
+            }
+            
+            toggleTheme() {
+                const isDark = document.documentElement.classList.contains('dark');
+                const themeIcon = document.getElementById('themeToggle').querySelector('i');
+                
+                if (isDark) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.className = 'fas fa-moon text-lg';
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.className = 'fas fa-sun text-lg';
+                }
+            }
+            
+            applySavedTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                const themeIcon = document.getElementById('themeToggle').querySelector('i');
+                
+                if (savedTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    themeIcon.className = 'fas fa-sun text-lg';
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    themeIcon.className = 'fas fa-moon text-lg';
+                }
+            }
+            
+            openDeveloperModal() {
+                const modal = document.getElementById('developerModal');
+                modal.classList.remove('hidden');
+                document.body.classList.add('modal-open');
+                
+                // Add animation
+                setTimeout(() => {
+                    modal.classList.add('modal-enter-active');
+                }, 10);
+            }
+            
+            closeDeveloperModal() {
+                const modal = document.getElementById('developerModal');
+                modal.classList.remove('modal-enter-active');
+                
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    document.body.classList.remove('modal-open');
+                }, 300);
+            }
+            
+            toggleMobileMenu() {
+                // Add your mobile menu toggle logic here
+                console.log('Mobile menu toggled');
+                // You can implement a sidebar or dropdown menu here
+            }
         }
         
-        // Update time immediately and then every second
-        updateTime();
-        setInterval(updateTime, 1000);
-        
-        // Theme toggle functionality
-        document.getElementById('themeToggle').addEventListener('click', function() {
-            document.documentElement.classList.toggle('dark');
-            const icon = this.querySelector('i');
-            if (document.documentElement.classList.contains('dark')) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            } else {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            }
-        });
-        
-        // Sidebar functionality
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const closeSidebar = document.getElementById('closeSidebar');
-        const overlay = document.getElementById('overlay');
-        
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.add('sidebar-open');
-            overlay.classList.add('active');
-        });
-        
-        closeSidebar.addEventListener('click', function() {
-            sidebar.classList.remove('sidebar-open');
-            overlay.classList.remove('active');
-        });
-        
-        overlay.addEventListener('click', function() {
-            sidebar.classList.remove('sidebar-open');
-            overlay.classList.remove('active');
-        });
-        
-        // Navigation functionality
-        const navButtons = document.querySelectorAll('.nav-btn, .nav-item');
-        const pages = document.querySelectorAll('.page');
-        
-        navButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const targetPage = this.getAttribute('data-page');
-                
-                // Update active states
-                navButtons.forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                this.classList.add('active');
-                
-                // Show target page
-                pages.forEach(page => {
-                    page.classList.add('hidden');
-                });
-                document.getElementById(`page-${targetPage}`).classList.remove('hidden');
-                
-                // Close sidebar on mobile after navigation
-                if (window.innerWidth < 768) {
-                    sidebar.classList.remove('sidebar-open');
-                    overlay.classList.remove('active');
-                }
-            });
-        });
-        
-        // More menu functionality for mobile
-        const moreMenuBtn = document.getElementById('moreMenuBtn');
-        moreMenuBtn.addEventListener('click', function() {
-            sidebar.classList.add('sidebar-open');
-            overlay.classList.add('active');
-        });
-        
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 768) {
-                sidebar.classList.remove('sidebar-open');
-                overlay.classList.remove('active');
-            }
+        // Initialize the UI when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new SmartEvaluatorUI();
         });
     </script>
-
-<!-- <script src="/app.js"></script> -->
 </body>
 </html>
