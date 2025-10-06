@@ -1,320 +1,198 @@
-:root {
-  --sidebar-width: 13rem;
-  --header-height: 4rem;
+/* =============================================
+   CSS VARIABLES (Design Tokens)
+   ============================================= */
+   :root {
+    /* Layout Dimensions */
+    --sidebar-width: 13rem;
+    --header-height: 4rem;
+    
+    /* Color Palette - Light Theme */
+    --color-primary: 59 130 246; /* blue-500 */
+    --color-secondary: 139 92 246; /* violet-500 */
+    --color-success: 16 185 129; /* emerald-500 */
+    --color-warning: 245 158 11; /* amber-500 */
+    --color-danger: 239 68 68; /* red-500 */
+    
+    /* Color Palette - Dark Theme */
+    --color-dark-bg: 15 23 42; /* slate-900 */
+    --color-dark-surface: 30 41 59; /* slate-800 */
+    
+    /* Animation Timings */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
 }
 
-/* Hide scrollbar for sidebar */
+/* =============================================
+   SCROLLBAR STYLES
+   ============================================= */
+
+/* Sidebar Scrollbar */
 .sidebar-scrollbar::-webkit-scrollbar {
-  width: 4px;
+    width: 4px;
 }
 
 .sidebar-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 .sidebar-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.5);
-  border-radius: 10px;
+    background: rgba(156, 163, 175, 0.5);
+    border-radius: 10px;
 }
 
-/* Mobile menu overlay */
-.mobile-menu-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-/* Smooth transitions */
-.transition-all {
-  transition: all 0.3s ease;
-}
-
-/* Custom animations */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-in {
-  animation: slideIn 0.5s ease forwards;
-}
-
-/* Glass effect */
-.glass-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.dark .glass-card {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Card hover effect */
-.card-hover {
-  transition: all 0.3s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-/* Progress bar */
-.progress-bar {
-  height: 8px;
-  background-color: #e5e7eb;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.dark .progress-bar {
-  background-color: #4b5563;
-}
-
-.progress-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-/* Rank badges */
-.rank-1 {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: white;
-}
-
-.rank-2 {
-  background: linear-gradient(135deg, #9ca3af, #6b7280);
-  color: white;
-}
-
-.rank-3 {
-  background: linear-gradient(135deg, #d97706, #b45309);
-  color: white;
-}
-
-.rank-other {
-  background: #e5e7eb;
-  color: #4b5563;
-}
-
-.dark .rank-other {
-  background: #4b5563;
-  color: #d1d5db;
-}
-
-/* Role badges */
-.member-role-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.member-role-badge.team-leader {
-  background-color: #3b82f6;
-  color: white;
-}
-
-.member-role-badge.time-keeper {
-  background-color: #10b981;
-  color: white;
-}
-
-.member-role-badge.reporter {
-  background-color: #f59e0b;
-  color: white;
-}
-
-.member-role-badge.resource-manager {
-  background-color: #8b5cf6;
-  color: white;
-}
-
-.member-role-badge.peace-maker {
-  background-color: #ec4899;
-  color: white;
-}
-
-/* Disabled navigation */
-.disabled-nav {
-  opacity: 0.5;
-  pointer-events: none;
-  cursor: not-allowed;
-}
-
-/* Toast notifications */
-.toast {
-  z-index: 100;
-}
-
-/* Modal backdrop */
-.modal-backdrop {
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-/* Responsive table */
-.responsive-table {
-  width: 100%;
-  overflow-x: auto;
-}
-
-/* Custom scrollbar for tables */
+/* Table Scrollbar */
 .table-scrollbar::-webkit-scrollbar {
-  height: 6px;
+    height: 6px;
 }
 
 .table-scrollbar::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+    background: #f1f1f1;
+    border-radius: 10px;
 }
 
 .table-scrollbar::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 10px;
+    background: #c1c1c1;
+    border-radius: 10px;
 }
 
 .dark .table-scrollbar::-webkit-scrollbar-track {
-  background: #374151;
+    background: #374151;
 }
 
 .dark .table-scrollbar::-webkit-scrollbar-thumb {
-  background: #6b7280;
+    background: #6b7280;
 }
 
-/* Loading spinner */
-.loading-spinner {
-  border: 3px solid #f3f4f6;
-  border-top: 3px solid #3b82f6;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: spin 1s linear infinite;
+/* =============================================
+   BASE STYLES & UTILITIES
+   ============================================= */
+
+/* Smooth Transitions Utility */
+.transition-all {
+    transition: all var(--transition-normal);
 }
 
+.transition-fast {
+    transition: all var(--transition-fast);
+}
+
+.transition-slow {
+    transition: all var(--transition-slow);
+}
+
+/* Display Utilities */
+.hidden {
+    display: none !important;
+}
+
+/* Rotation Utilities */
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* Disabled State */
+.disabled-nav {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+/* =============================================
+   ANIMATIONS & KEYFRAMES
+   ============================================= */
+
+/* Slide In Animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Spin Animations */
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Mobile responsive adjustments */
-@media (max-width: 768px) {
-  .mobile-sidebar {
-    transform: translateX(-100%);
-  }
-
-  .mobile-sidebar.active {
-    transform: translateX(0);
-  }
-
-  .page-content {
-    margin-left: 0;
-  }
-
-  .mobile-header {
-    height: var(--header-height);
-  }
-}
-
-@media (min-width: 769px) {
-  .page-content {
-    margin-left: var(--sidebar-width);
-  }
-}
-.nav-btn {
-  background-color: transparent;
-  color: inherit;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  cursor: pointer;
-  border: none;
-  outline: none;
-}
-
-@keyframes pulse-slow {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-.animate-pulse-slow {
-  animation: pulse-slow 3s ease-in-out infinite;
+/* Pulse Animations */
+@keyframes pulse-slow {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 10s linear infinite;
+/* Glow Animations */
+@keyframes glow-shadow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+    }
 }
 
-.modal-content {
-  animation: modalEnter 0.5s ease-out forwards;
+@keyframes glow-opacity {
+    0%, 100% {
+        opacity: 0.4;
+        filter: blur(1px);
+    }
+    50% {
+        opacity: 0.7;
+        filter: blur(3px);
+    }
 }
 
-@keyframes modalEnter {
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+/* Float Animation */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
 }
 
-/* Developer section styling */
-.developer-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.dark .developer-section {
-  background: linear-gradient(135deg, #4c51bf 0%, #7e22ce 100%);
-}
-
-/* Skill badges */
-.skill-badge {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* WhatsApp button */
-.whatsapp-btn {
-  background: linear-gradient(135deg, #25d366, #128c7e);
-}
-
-
- /* Custom Animations */
- @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-3px); }
-}
-
-@keyframes glow {
-    0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
-    50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
-}
-
+/* Ripple Animation */
 @keyframes ripple {
     to {
         transform: scale(4);
@@ -322,66 +200,160 @@
     }
 }
 
-/* Button Animations */
-#developerInfoBtn {
-    animation: glow 3s ease-in-out infinite;
-}
-
-#developerInfoBtn:hover {
-    animation: glow 1s ease-in-out infinite;
-}
-
-.group:hover .ripple {
-    animation: ripple 0.6s ease-out;
-}
-
-/* Responsive Text Sizes */
-@media (max-width: 640px) {
-    #developerInfoBtn {
-        padding: 0.75rem 1rem;
+/* Modal Enter Animation */
+@keyframes modalEnter {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
     }
-    #developerInfoBtn .text-sm {
-        font-size: 0.875rem;
+    to {
+        transform: scale(1);
+        opacity: 1;
     }
 }
 
-@media (max-width: 480px) {
-    #developerInfoBtn {
-        padding: 0.6rem 0.8rem;
-    }
-    #developerInfoBtn .text-sm {
-        font-size: 0.8rem;
-    }
+/* Animation Utility Classes */
+.animate-slide-in {
+    animation: slideIn 0.5s ease forwards;
 }
 
-@media (max-width: 360px) {
-    #developerInfoBtn {
-        padding: 0.5rem 0.7rem;
-    }
-    #developerInfoBtn .text-sm {
-        font-size: 0.75rem;
-    }
+.animate-fadeIn {
+    animation: fadeIn 0.8s ease-out forwards;
 }
 
+.animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+}
 
+.animate-spin-slow {
+    animation: spin-slow 10s linear infinite;
+}
 
+.animate-glow-shadow {
+    animation: glow-shadow 3s ease-in-out infinite;
+}
 
+.animate-glow-opacity {
+    animation: glow-opacity 3s ease-in-out infinite;
+}
 
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
 
+/* =============================================
+   COMPONENT STYLES
+   ============================================= */
 
-/* Rank Badge Styles */
+/* ----------------------------
+   Layout Components
+   ---------------------------- */
+
+/* Mobile Menu Overlay */
+.mobile-menu-overlay {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    animation: modalEnter 0.5s ease-out forwards;
+}
+
+/* ----------------------------
+   Card Components
+   ---------------------------- */
+
+/* Glass Card Effect */
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-xl);
+}
+
+.dark .glass-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Card Hover Effects */
+.card-hover {
+    transition: all var(--transition-normal);
+}
+
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Group Ranking Card */
+.group-ranking-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.group-ranking-card:hover .rank-indicator div {
+    transform: scale(1.1);
+    transition: transform var(--transition-normal);
+}
+
+/* ----------------------------
+   Progress Components
+   ---------------------------- */
+
+/* Progress Bar */
+.progress-bar {
+    height: 8px;
+    background-color: #e5e7eb;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.dark .progress-bar {
+    background-color: #4b5563;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    transition: width var(--transition-slow);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    border: 3px solid #f3f4f6;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+
+/* ----------------------------
+   Badge Components
+   ---------------------------- */
+
+/* Rank Badges */
 .rank-1 {
     background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+    color: white;
     box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
 }
 
 .rank-2 {
     background: linear-gradient(135deg, #9ca3af, #6b7280, #4b5563);
+    color: white;
     box-shadow: 0 4px 15px rgba(107, 114, 128, 0.4);
 }
 
 .rank-3 {
     background: linear-gradient(135deg, #f97316, #ea580c, #c2410c);
+    color: white;
     box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
 }
 
@@ -396,19 +368,139 @@
     color: #d1d5db;
 }
 
-/* Progress Circle Animation */
-.group-ranking-card:hover .rank-indicator div {
-    transform: scale(1.1);
-    transition: transform 0.3s ease;
+/* Role Badges */
+.member-role-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
 }
 
-/* Smooth transitions */
-.group-ranking-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.member-role-badge.team-leader {
+    background-color: #3b82f6;
+    color: white;
 }
 
-/* Mobile Responsive */
+.member-role-badge.time-keeper {
+    background-color: #10b981;
+    color: white;
+}
+
+.member-role-badge.reporter {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.member-role-badge.resource-manager {
+    background-color: #8b5cf6;
+    color: white;
+}
+
+.member-role-badge.peace-maker {
+    background-color: #ec4899;
+    color: white;
+}
+
+/* Skill Badges */
+.skill-badge {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ----------------------------
+   Button Components
+   ---------------------------- */
+
+/* Navigation Button */
+.nav-btn {
+    background-color: transparent;
+    color: inherit;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+/* WhatsApp Button */
+.whatsapp-btn {
+    background: linear-gradient(135deg, #25d366, #128c7e);
+}
+
+/* Developer Info Button */
+#developerInfoBtn {
+    animation: glow-shadow 3s ease-in-out infinite;
+}
+
+#developerInfoBtn:hover {
+    animation: glow-shadow 1s ease-in-out infinite;
+}
+
+/* Ripple Effect */
+.group:hover .ripple {
+    animation: ripple 0.6s ease-out;
+}
+
+/* ----------------------------
+   Special Sections
+   ---------------------------- */
+
+/* Developer Section */
+.developer-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.dark .developer-section {
+    background: linear-gradient(135deg, #4c51bf 0%, #7e22ce 100%);
+}
+
+/* Graph Analysis */
+.graph-analysis-container {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Toast Notifications */
+.toast {
+    z-index: 100;
+}
+
+/* Responsive Table Container */
+.responsive-table {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* =============================================
+   RESPONSIVE DESIGN
+   ============================================= */
+
+/* ----------------------------
+   Mobile Devices (≤ 768px)
+   ---------------------------- */
 @media (max-width: 768px) {
+    /* Sidebar */
+    .mobile-sidebar {
+        transform: translateX(-100%);
+        transition: transform var(--transition-normal);
+    }
+    
+    .mobile-sidebar.active {
+        transform: translateX(0);
+    }
+    
+    /* Layout */
+    .page-content {
+        margin-left: 0;
+    }
+    
+    .mobile-header {
+        height: var(--header-height);
+    }
+    
+    /* Group Ranking Cards */
     .group-ranking-card .grid-cols-3 {
         grid-template-columns: repeat(3, 1fr);
         gap: 0.5rem;
@@ -422,46 +514,131 @@
         width: 2.5rem;
         height: 2.5rem;
     }
-}
-
-@media (max-width: 768px) {
+    
+    /* Student Ranking Cards */
     .student-ranking-card .grid-cols-4 {
         grid-template-columns: repeat(2, 1fr);
     }
+    
+    /* Charts */
+    .chart-container {
+        height: 300px;
+    }
+    
+    /* Developer Button */
+    #developerInfoBtn {
+        padding: 0.75rem 1rem;
+    }
+    
+    #developerInfoBtn .text-sm {
+        font-size: 0.875rem;
+    }
 }
 
-/* Chart Container Responsive Styles */
+/* ----------------------------
+   Tablet Devices (769px+)
+   ---------------------------- */
+@media (min-width: 769px) {
+    .page-content {
+        margin-left: var(--sidebar-width);
+    }
+}
+
+/* ----------------------------
+   Small Mobile Devices (≤ 480px)
+   ---------------------------- */
+@media (max-width: 480px) {
+    /* Charts */
+    .chart-container {
+        height: 250px;
+    }
+    
+    /* Developer Button */
+    #developerInfoBtn {
+        padding: 0.6rem 0.8rem;
+    }
+    
+    #developerInfoBtn .text-sm {
+        font-size: 0.8rem;
+    }
+}
+
+
+
+/* =============================================
+   CHART & VISUALIZATION STYLES
+   ============================================= */
+
 .chart-container {
     position: relative;
     height: 400px;
     width: 100%;
 }
 
-@media (max-width: 768px) {
-    .chart-container {
-        height: 300px;
-    }
-}
-
-@media (max-width: 480px) {
-    .chart-container {
-        height: 250px;
-    }
-}
-
-/* Chart Canvas Styles */
+/* Ensure chart canvas is responsive */
 canvas {
     max-width: 100%;
     height: auto !important;
 }
 
-.chart-container {
-    position: relative;
-    width: 100%;
+/* =============================================
+   ROYAL COLOR GRADIENTS (Student Cards)
+   ============================================= */
+
+.bg-indigo-900\/90 { background-color: rgba(49, 46, 129, 0.9); }
+.bg-indigo-800\/90 { background-color: rgba(55, 48, 163, 0.9); }
+.bg-purple-900\/90 { background-color: rgba(76, 29, 149, 0.9); }
+.bg-purple-800\/90 { background-color: rgba(91, 33, 182, 0.9); }
+.bg-blue-900\/90 { background-color: rgba(30, 58, 138, 0.9); }
+.bg-blue-800\/90 { background-color: rgba(37, 99, 235, 0.9); }
+.bg-slate-900\/90 { background-color: rgba(15, 23, 42, 0.9); }
+.bg-slate-800\/90 { background-color: rgba(30, 41, 59, 0.9); }
+
+/* =============================================
+   ACCESSIBILITY & PERFORMANCE
+   ============================================= */
+
+/* Focus styles for better accessibility */
+.nav-btn:focus-visible,
+.skill-badge:focus-visible {
+    outline: 2px solid rgb(59 130 246);
+    outline-offset: 2px;
 }
 
-.glass-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .transition-all,
+    .transition-fast,
+    .transition-slow,
+    .card-hover,
+    .progress-fill,
+    .group-ranking-card,
+    .nav-btn {
+        transition: none;
+    }
+    
+    .animate-slide-in,
+    .animate-fadeIn,
+    .animate-pulse-slow,
+    .animate-spin-slow,
+    .animate-glow-shadow,
+    .animate-glow-opacity,
+    .animate-float,
+    .loading-spinner,
+    .modal-content {
+        animation: none;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .glass-card {
+        background: white;
+        border: 2px solid black;
+    }
+    
+    .dark .glass-card {
+        background: black;
+        border: 2px solid white;
+    }
 }

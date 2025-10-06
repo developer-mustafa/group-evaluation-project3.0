@@ -9,7 +9,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- <link rel="stylesheet" href="style.css"> -->
+    <link rel="stylesheet" href="main.css">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,19 +20,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 
-<!-- index.html ফাইলে নিশ্চিত করুন এই লাইব্রেরি গুলো আছে -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-<!-- Or from unpkg -->
-<script src="https://unpkg.com/chart.js@3.9.1/dist/chart.min.js"></script>
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsdelivr chart functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- JSZip for export functionality -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
@@ -43,25 +34,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
-    <link rel="stylesheet" href="main.css">
 
+    <script>
+        function debugGraphSystem() {
+            console.log("=== GRAPH SYSTEM DEBUG ===");
+            console.log("Graph Analysis System:", this.graphAnalysis);
+            console.log("Graph Content Element:", document.getElementById("graphAnalysisContent"));
+            console.log("Chart.js Available:", typeof Chart !== 'undefined');
+            console.log("Current Analysis:", this.currentAnalysis);
 
-<script>
-    function debugGraphSystem() {
-    console.log("=== GRAPH SYSTEM DEBUG ===");
-    console.log("Graph Analysis System:", this.graphAnalysis);
-    console.log("Graph Content Element:", document.getElementById("graphAnalysisContent"));
-    console.log("Chart.js Available:", typeof Chart !== 'undefined');
-    console.log("Current Analysis:", this.currentAnalysis);
-    
-    // Check if chart containers exist
-    const containers = ['analysisBarChart', 'analysisPieChart', 'analysisLineChart'];
-    containers.forEach(id => {
-        const element = document.getElementById(id);
-        console.log(`${id} exists:`, !!element);
-    });
-}
-</script>
+            // Check if chart containers exist
+            const containers = ['analysisBarChart', 'analysisPieChart', 'analysisLineChart'];
+            containers.forEach(id => {
+                const element = document.getElementById(id);
+                console.log(`${id} exists:`, !!element);
+            });
+        }
+    </script>
 
     <script>
         // Tailwind configuration
@@ -99,243 +88,197 @@
     <div id="toast" class="toast hidden">
         <div id="toastMessage" class="toast-message"></div>
     </div>
+    <header class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-3 sm:px-4 md:px-6 py-3
+    bg-white/30 dark:bg-gray-800/30 backdrop-blur-md border border-white/20 dark:border-white/10
+    shadow-md transition-colors duration-300">
 
-
-    <header
-    class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3
-           bg-white/30 dark:bg-gray-800/30 backdrop-blur-md border border-white/20 dark:border-white/10
-           shadow-md transition-colors duration-300">
     <!-- Mobile Menu Button -->
     <button id="mobileMenuButton"
         class="lg:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white/20 dark:hover:bg-gray-700/40 transition-colors">
-        <i class="fas fa-bars text-xl"></i>
+        <i class="fas fa-bars text-xl sm:text-2xl"></i>
     </button>
 
-   <!-- App Title -->
-   <div class="flex items-center space-x-2 md:space-x-3">
-          
-    <h1
-    class="hidden sm:flex items-center gap-2 text-xl md:text-2xl font-bold text-gray-800 dark:text-gray-100 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent tracking-wide transition-all duration-300 hover:scale-[1.03]">
-    
-    স্মার্ট ইভ্যালুয়েটর অ্যাপ
-    <span
-      class="ml-1 text-xs md:text-sm font-semibold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded-lg shadow-sm">
-      ৩.০
-    </span>
-  </h1>
-  
-</div>
-
-<!-- User Actions -->
-<div class="flex items-center space-x-2 md:space-x-3">
-    <!-- Developer Info Button -->
-    <button id="developerInfoBtn"
-        class="group particle-system  relative bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-6 py-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-105 overflow-hidden"
-        >
-        <!-- Continuous particles -->
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <!-- Animated Background Elements -->
-        <div
-            class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform group-hover:skew-x-12 transition-transform duration-1000">
-        </div>
-        <div
-            class="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse">
-        </div>
-
-        <!-- Floating Particles -->
-        <div class="absolute top-1 left-4 w-2 h-2 bg-white rounded-full opacity-60 group-hover:animate-bounce">
-        </div>
-        <div
-            class="absolute bottom-2 right-6 w-1 h-1 bg-white rounded-full opacity-40 group-hover:animate-ping">
-        </div>
-
-        <!-- Content Container -->
-        <div class="relative z-10 flex items-center justify-center space-x-3">
-            <!-- Animated Icon -->
-            <div class="relative">
-                <i class="fas fa-code text-lg group-hover:rotate-90 transition-transform duration-500"></i>
-                <div
-                    class="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full group-hover:animate-ping">
-                </div>
-            </div>
-
-            <!-- Text with Responsive Design -->
-            <div class="flex flex-col items-start">
-                <!-- Main Text - Shows on all screens -->
-                <span class="text-sm font-semibold leading-tight whitespace-nowrap">
-                    সফটওয়্যার নির্মাতা
-                </span>
-
-                <!-- Sub Text - Shows on medium screens and up -->
-                <span class="text-xs font-medium opacity-90 leading-tight whitespace-nowrap hidden sm:block">
-                    Developer Info
-                </span>
-            </div>
-
-            <!-- Animated Arrow - Shows on hover -->
-            <i
-                class="fas fa-chevron-right text-xs transform group-hover:translate-x-1 transition-transform duration-300 opacity-0 group-hover:opacity-100"></i>
-        </div>
-
-        <!-- Ripple Effect on Click -->
-        <div class="absolute inset-0 rounded-2xl overflow-hidden">
-            <div
-                class="ripple absolute bg-white rounded-full transform scale-0 opacity-40 group-active:scale-100 group-active:opacity-0 transition-all duration-600">
-            </div>
-        </div>
-    </button>
-
-    <!-- WhatsApp Group Button -->
-    <a href="https://chat.whatsapp.com/YOUR_GROUP_LINK" target="_blank"
-        class="whatsapp-btn py-2 px-6 rounded-2xl text-white flex items-center space-x-1 md:space-x-2 header-buttons">
-        <i class="fab fa-whatsapp text-lg"></i>
-        <span class="hidden sm:inline ">গ্রুপ জয়েন</span>
-    </a>
-
-    <!-- Theme Toggle -->
-    <button id="themeToggle"
-        class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ">
-        <i class="fas fa-moon text-xl"></i>
-    </button>
-
-    <!-- User Info / Login -->
-    <div class="flex items-center space-x-2">
-        <div id="userInfo" class="text-right hidden md:block">
-            <div class="text-xs text-gray-500 dark:text-gray-400">সাধারণ ব্যবহারকারী</div>
-        </div>
-        <button id="headerLoginBtn"
-            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg transition-colors flex items-center space-x-1 md:space-x-2 header-buttons">
-            <i class="fas fa-sign-in-alt"></i>
-            <span class="hidden sm:inline">লগইন</span>
-        </button>
-        <button id="logoutBtn"
-            class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg transition-colors flex items-center space-x-1 md:space-x-2 header-buttons hidden">
-            <i class="fas fa-sign-out-alt"></i>
-            <span class="hidden sm:inline">লগআউট</span>
-        </button>
+    <!-- App Logo / Title -->
+    <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+        <!-- Mobile: only logo -->
+        <!-- <img src="logo.pn" alt="Logo" class="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10"> -->
+         
+        <!-- Name: sm+ screens -->
+        <h1 class="hidden sm:flex items-center gap-2 text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-100 
+                   bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent tracking-wide transition-all duration-300">
+            স্মার্ট ইভ্যালুয়েটর
+            <span class="ml-1 text-xs sm:text-sm md:text-base font-semibold text-blue-700 dark:text-blue-300 
+                         bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded-lg shadow-sm">
+                ৩.০
+            </span>
+        </h1>
     </div>
-</div>
 
+    <!-- User Actions -->
+    <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 flex-nowrap">
 
-    </header>
+        <!-- Developer Info Button -->
+        <button id="developerInfoBtn"
+            class=" sm:flex group relative bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-3 sm:px-4 md:px-6 py-1 sm:py-2 md:py-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-105 overflow-hidden flex-shrink-0">
 
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform group-hover:skew-x-12 transition-transform duration-1000"></div>
 
+            <div class="relative z-10 flex items-center justify-center space-x-2 sm:space-x-3">
+                <i class="fas fa-code text-sm sm:text-base md:text-lg group-hover:rotate-90 transition-transform duration-500"></i>
+                <span class="text-xs sm:text-sm md:text-base font-semibold whitespace-nowrap">সফটওয়্যার নির্মাতা</span>
+            </div>
+        </button>
+
+        <!-- WhatsApp Button -->
+        <a href="https://chat.whatsapp.com/YOUR_GROUP_LINK" target="_blank"
+           class="flex items-center space-x-1 sm:space-x-2 bg-green-500 hover:bg-green-600 text-white p-2 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl transition-colors flex-shrink-0">
+            <i class="fab fa-whatsapp text-sm sm:text-base md:text-lg"></i>
+            <span class="hidden sm:inline text-xs sm:text-sm md:text-base lg:text-lg">গ্রুপে জয়েন</span>
+        </a>
+
+        <!-- Theme Toggle -->
+        <button id="themeToggle"
+            class="p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
+            <i class="fas fa-moon text-base sm:text-lg md:text-xl"></i>
+        </button>
+
+        <!-- Login / Logout -->
+        <div class="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+
+            <!-- User Info -->
+            <div id="userInfo" class="hidden sm:block text-right">
+                <div class="text-[9px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">সাধারণ ব্যবহারকারী</div>
+            </div>
+
+            <!-- Login Button -->
+            <button id="headerLoginBtn"
+                class="bg-blue-500 hover:bg-blue-600 text-white p-2 sm:px-4 sm:py-2 rounded-lg transition-colors flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                <i class="fas fa-sign-in-alt text-sm sm:text-base md:text-lg"></i>
+                <span class="hidden sm:inline text-xs sm:text-sm md:text-base lg:text-lg">লগইন</span>
+            </button>
+
+            <!-- Logout Button -->
+            <button id="logoutBtn"
+                class="bg-red-500 hover:bg-red-600 text-white p-2 sm:px-4 sm:py-2 rounded-lg transition-colors flex items-center space-x-1 sm:space-x-2 hidden sm:flex flex-shrink-0">
+                <i class="fas fa-sign-out-alt text-sm sm:text-base md:text-lg"></i>
+                <span class=" sm:inline text-xs sm:text-sm md:text-base lg:text-lg">লগআউট</span>
+            </button>
+
+        </div>
+    </div>
+</header>
 
     <!-- Main Container -->
     <div class="flex flex-1 pt-16">
         <!-- Sidebar -->
-     <!-- Sidebar -->
-     <aside id="sidebar"
-     class="fixed top-16 left-0 bottom-0 bg-white/30 dark:bg-gray-800/30 backdrop-blur-md shadow-lg z-30 mobile-sidebar lg:translate-x-0 transition-transform duration-300 sidebar-scrollbar overflow-y-auto rounded-r-2xl border-r border-white/20 dark:border-white/10">
-  <nav class="space-y-1 sm:space-y-2 p-4">
+        <!-- Sidebar -->
+        <aside id="sidebar"
+            class="fixed top-16 left-0 bottom-0 bg-white/30 dark:bg-gray-800/30 backdrop-blur-md shadow-lg z-30 mobile-sidebar lg:translate-x-0 transition-transform duration-300 sidebar-scrollbar overflow-y-auto rounded-r-2xl border-r border-white/20 dark:border-white/10">
+            <nav class="space-y-1 sm:space-y-2 p-4">
 
-      <!-- Public Tabs -->
-      <button data-page="dashboard"
-              class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <!-- Public Tabs -->
+                <button data-page="dashboard"
+                    class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-blue-500/20 dark:hover:bg-blue-600/30">
-          <i class="fas fa-tachometer-alt w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>ড্যাশবোর্ড</span>
-      </button>
+                    <i class="fas fa-tachometer-alt w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>ড্যাশবোর্ড</span>
+                </button>
 
-      <button data-page="all-students"
-              class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <button data-page="all-students"
+                    class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-green-500/20 dark:hover:bg-green-600/30">
-          <i class="fas fa-user-graduate w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>সকল শিক্ষার্থী কার্ড</span>
-      </button>
+                    <i class="fas fa-user-graduate w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>শিক্ষার্থী গ্রুপ কার্ড</span>
+                </button>
 
-      <button data-page="student-ranking"
-              class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <button data-page="student-ranking"
+                    class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-yellow-400/20 dark:hover:bg-yellow-500/30">
-          <i class="fas fa-trophy w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>শিক্ষার্থী র‌্যাঙ্কিং</span>
-      </button>
+                    <i class="fas fa-trophy w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>শিক্ষার্থী র‌্যাঙ্কিং</span>
+                </button>
 
-      <button data-page="group-analysis"
-              class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <button data-page="group-analysis"
+                    class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-purple-500/20 dark:hover:bg-purple-600/30">
-          <i class="fas fa-chart-bar w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>গ্রুপ ফলাফল সামারী</span>
-      </button>
+                    <i class="fas fa-chart-bar w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>ফলাফল রিপোর্ট কার্ড</span>
+                </button>
 
-      <button data-page="graph-analysis"
-              class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <button data-page="graph-analysis"
+                    class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-pink-500/20 dark:hover:bg-pink-600/30">
-          <i class="fas fa-chart-line w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>ফলাফল গ্রাফ বিশ্লেষণ</span>
-      </button>
+                    <i class="fas fa-chart-line w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>ফলাফল গ্রাফ বিশ্লেষণ</span>
+                </button>
 
-      <!-- Private Tabs -->
-      <button data-page="groups"
-              class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <!-- Private Tabs -->
+                <button data-page="groups"
+                    class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-red-500/20 dark:hover:bg-red-600/30 disabled-nav">
-          <i class="fas fa-layer-group w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>গ্রুপ ম্যানেজমেন্ট</span>
-      </button>
+                    <i class="fas fa-layer-group w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>গ্রুপের নাম এড</span>
+                </button>
 
-      <button data-page="members"
-              class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <button data-page="members"
+                    class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-indigo-500/20 dark:hover:bg-indigo-600/30 disabled-nav">
-          <i class="fas fa-users w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>সদস এড</span>
-      </button>
+                    <i class="fas fa-users w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>গ্রুপ সদস্য এড</span>
+                </button>
 
-      <button data-page="group-members"
-              class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <button data-page="group-members"
+                    class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-teal-500/20 dark:hover:bg-teal-600/30 disabled-nav">
-          <i class="fas fa-user-friends w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>গ্রুপ সদস্য</span>
-      </button>
+                    <i class="fas fa-user-friends w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>গ্রুপ দায়িত্ব ব্যবস্থাপনা</span>
+                </button>
 
-      <button data-page="tasks"
-              class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <button data-page="tasks"
+                    class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-orange-500/20 dark:hover:bg-orange-600/30 disabled-nav">
-          <i class="fas fa-tasks w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>টাস্ক ম্যানেজমেন্ট</span>
-      </button>
+                    <i class="fas fa-tasks w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>টাস্ক ম্যানেজমেন্ট</span>
+                </button>
 
-      <button data-page="evaluation"
-              class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <button data-page="evaluation"
+                    class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-cyan-500/20 dark:hover:bg-cyan-600/30 disabled-nav">
-          <i class="fas fa-clipboard-check w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>মূল্যায়ন</span>
-      </button>
+                    <i class="fas fa-clipboard-check w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>মূল্যায়ন</span>
+                </button>
 
-      <!-- Policy & Export (Public) -->
-      <button data-page="group-policy"
-              class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <!-- Policy & Export (Public) -->
+                <button data-page="group-policy"
+                    class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-fuchsia-500/20 dark:hover:bg-fuchsia-600/30">
-          <i class="fas fa-book w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>গ্রুপ পলিসি</span>
-      </button>
+                    <i class="fas fa-book w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>গ্রুপ পলিসি</span>
+                </button>
 
-      <button data-page="export"
-              class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <button data-page="export"
+                    class="nav-btn w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-lime-500/20 dark:hover:bg-lime-600/30">
-          <i class="fas fa-file-export w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>এক্সপোর্ট</span>
-      </button>
+                    <i class="fas fa-file-export w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>এক্সপোর্ট</span>
+                </button>
 
-      <!-- Admin Management (Super Admin Only) -->
-      <button data-page="admin-management"
-              class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
+                <!-- Admin Management (Super Admin Only) -->
+                <button data-page="admin-management"
+                    class="nav-btn private-tab w-full flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg text-gray-800 dark:text-gray-100 transition-all duration-300
                      backdrop-blur-md bg-white/20 dark:bg-gray-700/20 shadow hover:bg-rose-500/20 dark:hover:bg-rose-600/30 disabled-nav">
-          <i class="fas fa-user-shield w-4 sm:w-5 text-sm sm:text-base"></i>
-          <span>অ্যাডমিন ম্যানেজমেন্ট</span>
-      </button>
+                    <i class="fas fa-user-shield w-4 sm:w-5 text-sm sm:text-base"></i>
+                    <span>অ্যাডমিন ম্যানেজমেন্ট</span>
+                </button>
 
-  </nav>
-    </aside>
+            </nav>
+        </aside>
 
 
 
         <!-- Main Content -->
         <main class="flex-1 page-content transition-all duration-300 p-4 lg:p-6">
-         
+
 
             <!-- Pages Container -->
             <div id="appContainer" class="space-y-6 ">
@@ -352,7 +295,7 @@
 
                     <!-- শীর্ষ গ্রুপসমূহ -->
                     <div class="top-groups-section  mx-auto px-4 p-3">
-                      
+
 
                         <!-- Top Groups Container -->
                         <div id="topGroupsContainer">
@@ -376,6 +319,8 @@
                     </div>
                 </div>
 
+
+
                 <!-- Groups Management section -->
                 <div id="page-groups" class="page hidden p-4 privet-only">
                     <div class="mb-6">
@@ -394,170 +339,172 @@
                     </div>
                 </div>
 
-                <!-- Add Members section -->
-                <div id="page-members" class="page hidden p-4">
-                    <!-- New Student Form -->
-                    <div class="mb-6 p-6 rounded-xl shadow-md bg-green-50 dark:bg-gray-800 transition-colors font-sans">
+          <!-- Members Add Page -->
+<div id="page-members" class="page hidden">
+    <div class="container mx-auto p-6">
+        <!-- Page Header -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">শিক্ষার্থী ব্যবস্থাপনা</h2>
+            <p class="text-gray-600 dark:text-gray-400">শিক্ষার্থী যোগ করুন, সম্পাদনা করুন এবং ব্যবস্থাপনা করুন</p>
+        </div>
 
-                        <div
-                            class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
-                            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">CSV থেকে শিক্ষার্থী
-                                ইমপোর্ট</h3>
-
-                            <!-- CSV ফাইল সিলেক্ট -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                                    CSV ফাইল নির্বাচন করুন
-                                </label>
-                                <input type="file" id="csvFileInput" accept=".csv"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
-                                <p id="csvFileName" class="text-sm text-gray-500 mt-2"></p>
-                            </div>
-
-                            <!-- একশন বাটন -->
-                            <div class="flex gap-3">
-                                <button id="downloadTemplateBtn"
-                                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
-                                    <i class="fas fa-download mr-2"></i>টেমপ্লেট ডাউনলোড
-                                </button>
-
-                                <button id="processImportBtn"
-                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
-                                    <i class="fas fa-upload mr-2"></i>ইমপোর্ট প্রসেস করুন
-                                </button>
-                            </div>
-
-                            <!-- নির্দেশিকা -->
-                            <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                <h4 class="font-medium text-blue-800 dark:text-blue-300 mb-2">ইমপোর্ট নির্দেশিকা:</h4>
-                                <ul class="text-sm text-blue-700 dark:text-blue-400 list-disc list-inside space-y-1">
-                                    <li>CSV ফাইলের প্রথম লাইন হেডার হিসেবে ব্যবহার করুন</li>
-                                    <li>আবশ্যক ফিল্ড: নাম, রোল, লিঙ্গ, একাডেমিক গ্রুপ, সেশন</li>
-                                    <li>বাংলা টেমপ্লেট ডাউনলোড করে ব্যবহার করুন</li>
-                                    <li>UTF-8 encoding ব্যবহার করুন বাংলা সাপোর্টের জন্য</li>
-                                </ul>
-                            </div>
-                        </div>
-
-
-                        <h3
-                            class="text-xl md:text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100 border-l-4 border-blue-500 pl-4">
-                            নতুন শিক্ষার্থী যোগ করুন:
-                        </h3>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                            <!-- নাম -->
-                            <div>
-                                <label
-                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">নাম*</label>
-                                <input id="studentNameInput" type="text"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                    maxlength="100" />
-                            </div>
-
-                            <!-- রোল -->
-                            <div>
-                                <label
-                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">রোল*</label>
-                                <input id="studentRollInput" type="text"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                    maxlength="20" />
-                            </div>
-
-                            <!-- লিঙ্গ -->
-                            <div>
-                                <label
-                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">লিঙ্গ*</label>
-                                <select id="studentGenderInput"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none">
-                                    <option value="ছেলে">ছেলে</option>
-                                    <option value="মেয়ে">মেয়ে</option>
-                                </select>
-                            </div>
-
-                            <!-- গ্রুপ -->
-                            <div>
-                                <label
-                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">গ্রুপ*</label>
-                                <select id="studentGroupInput"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"></select>
-                            </div>
-
-                            <!-- যোগাযোগ -->
-                            <div>
-                                <label
-                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">যোগাযোগ</label>
-                                <input id="studentContactInput" type="text"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                    maxlength="100" />
-                            </div>
-
-                            <!-- একাডেমিক গ্রুপ -->
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">একাডেমিক
-                                    গ্রুপ*</label>
-                                <input id="studentAcademicGroupInput" type="text"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                    maxlength="50" />
-                            </div>
-
-                            <!-- সেশন -->
-                            <div>
-                                <label
-                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">সেশন*</label>
-                                <input id="studentSessionInput" type="text"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                    maxlength="20" />
-                            </div>
-
-                            <!-- দায়িত্ব -->
-                            <div>
-                                <label
-                                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">দায়িত্ব</label>
-                                <select id="studentRoleInput"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none">
-                                    <option value="">কোনোটি না</option>
-                                    <option value="team-leader">টিম লিডার</option>
-                                    <option value="time-keeper">টাইম কিপার</option>
-                                    <option value="reporter">রিপোর্টার</option>
-                                    <option value="resource-manager">রিসোর্স ম্যানেজার</option>
-                                    <option value="peace-maker">পিস মেকার</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <button id="addStudentBtn"
-                            class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400">
-                            শিক্ষার্থী যোগ করুন
-                        </button>
-                    </div>
-
-                    <!-- Student Filter Section -->
-                    <div class="mb-6 p-6 rounded-xl shadow-md bg-blue-50 dark:bg-gray-800 transition-colors font-sans">
-                        <h3
-                            class="text-xl md:text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100 border-l-4 border-blue-500 pl-4">
-                            শিক্ষার্থী ফিল্টার করুন:
-                        </h3>
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <!-- গ্রুপ ফিল্টার -->
-                            <select id="membersFilterGroup"
-                                class="w-full md:w-1/3 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none transition">
-                                <option value="">সকল গ্রুপ</option>
-                            </select>
-
-                            <!-- সার্চ ইনপুট -->
-                            <input id="studentSearchInput" type="text" placeholder="শিক্ষার্থী খুঁজুন..."
-                                class="flex-1 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none transition" />
-                        </div>
-                    </div>
-
-                    <div id="studentsList" class="space-y-3"></div>
+        <!-- Main Content -->
+        <div class="space-y-6">
+            <!-- CSV Import Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">CSV থেকে শিক্ষার্থী ইমপোর্ট</h3>
+                
+                <!-- CSV File Select -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        CSV ফাইল নির্বাচন করুন
+                    </label>
+                    <input type="file" id="csvFileInput" accept=".csv"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+                    <p id="csvFileName" class="text-sm text-gray-500 mt-2"></p>
                 </div>
 
+                <!-- Action Buttons -->
+                <div class="flex gap-3">
+                    <button id="downloadTemplateBtn"
+                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-download mr-2"></i>টেমপ্লেট ডাউনলোড
+                    </button>
+                    <button id="processImportBtn"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-upload mr-2"></i>ইমপোর্ট প্রসেস করুন
+                    </button>
+                </div>
+
+                <!-- Instructions -->
+                <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <h4 class="font-medium text-blue-800 dark:text-blue-300 mb-2">ইমপোর্ট নির্দেশিকা:</h4>
+                    <ul class="text-sm text-blue-700 dark:text-blue-400 list-disc list-inside space-y-1">
+                        <li>CSV ফাইলের প্রথম লাইন হেডার হিসেবে ব্যবহার করুন</li>
+                        <li>আবশ্যক ফিল্ড: নাম, রোল, লিঙ্গ, একাডেমিক গ্রুপ, সেশন</li>
+                        <li>বাংলা টেমপ্লেট ডাউনলোড করে ব্যবহার করুন</li>
+                        <li>UTF-8 encoding ব্যবহার করুন বাংলা সাপোর্টের জন্য</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Add Student Form -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">নতুন শিক্ষার্থী যোগ করুন</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <!-- Name -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">নাম*</label>
+                        <input id="studentNameInput" type="text"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            maxlength="100" />
+                    </div>
+
+                    <!-- Roll -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">রোল*</label>
+                        <input id="studentRollInput" type="text"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            maxlength="20" />
+                    </div>
+
+                    <!-- Gender -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">লিঙ্গ*</label>
+                        <select id="studentGenderInput"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="ছেলে">ছেলে</option>
+                            <option value="মেয়ে">মেয়ে</option>
+                        </select>
+                    </div>
+
+                    <!-- Group -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">গ্রুপ*</label>
+                        <select id="studentGroupInput"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">গ্রুপ নির্বাচন করুন</option>
+                        </select>
+                    </div>
+
+                    <!-- Contact -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">যোগাযোগ</label>
+                        <input id="studentContactInput" type="text"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            maxlength="100" />
+                    </div>
+
+                    <!-- Academic Group -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">একাডেমিক গ্রুপ*</label>
+                        <input id="studentAcademicGroupInput" type="text"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            maxlength="50" />
+                    </div>
+
+                    <!-- Session -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">সেশন*</label>
+                        <input id="studentSessionInput" type="text"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            maxlength="20" />
+                    </div>
+
+                    <!-- Role -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">দায়িত্ব</label>
+                        <select id="studentRoleInput"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">কোনোটি না</option>
+                            <option value="team-leader">টিম লিডার</option>
+                            <option value="time-keeper">টাইম কিপার</option>
+                            <option value="reporter">রিপোর্টার</option>
+                            <option value="resource-manager">রিসোর্স ম্যানেজার</option>
+                            <option value="peace-maker">পিস মেকার</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="addStudentBtn"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
+                    শিক্ষার্থী যোগ করুন
+                </button>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">শিক্ষার্থী ফিল্টার করুন</h3>
+                
+                <div class="flex flex-col md:flex-row gap-4">
+                    <!-- Group Filter -->
+                    <select id="membersFilterGroup"
+                        class="w-full md:w-1/3 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">সকল গ্রুপ</option>
+                    </select>
+
+                    <!-- Search Input -->
+                    <input id="studentSearchInput" type="text" placeholder="শিক্ষার্থী খুঁজুন..."
+                        class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                </div>
+            </div>
+
+            <!-- Students List -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">শিক্ষার্থী তালিকা</h3>
+                <div id="studentsList" class="space-y-3">
+                    <!-- Students will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                 <!-- Group Members section-->
                 <div id="page-group-members" class="page hidden p-4">
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold mb-4">গ্রুপ সদস্য ব্যবস্থাপনা ও ফিল্টার</h3>
+                        <button class="btn btn-success"></button>
                         <div class="flex gap-4 mb-4">
                             <select id="groupMembersGroupSelect"
                                 class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700">
@@ -609,19 +556,20 @@
 
 
                             <!-- Ranking Rules Text -->
-                            <p
-  class="text-base md:text-lg font-medium leading-relaxed tracking-wide
+                            <p class="text-base md:text-lg font-medium leading-relaxed tracking-wide
          text-white/90 dark:text-white/90 drop-shadow-md
          bg-gradient-to-r from-green-600/10 to-blue-600/10 dark:from-green-400/10 dark:to-blue-400/10
          p-4 md:p-6 rounded-2xl border border-white/10
-         backdrop-blur-sm shadow-sm transition-all duration-300 text-center md:text-left"
->
-  <span class="block font-bold text-white mb-2 text-lg md:text-xl">🏆 র‌্যাঙ্কিং নিয়ম:</span>
-  <span class="block">কমপক্ষে ২টি মূল্যায়ন/পরীক্ষায় অংশগ্রহণ করা শিক্ষার্থীদের মধ্যে</span>
-  <span class="block mt-1">
-    গড় নম্বর বেশি হলে র‌্যাঙ্কিং হবে, যদি ফলাফল সমান হয় তবে বেশি মূল্যায়নকারী/পরীক্ষায় অংশগ্রহণকারী র‌্যাঙ্ক হবে।
-  </span>
-</p>
+         backdrop-blur-sm shadow-sm transition-all duration-300 text-center md:text-left">
+                                <span class="block font-bold text-white mb-2 text-lg md:text-xl">🏆 র‌্যাঙ্কিং
+                                    নিয়ম:</span>
+                                <span class="block">কমপক্ষে ২টি মূল্যায়ন/পরীক্ষায় অংশগ্রহণ করা শিক্ষার্থীদের
+                                    মধ্যে</span>
+                                <span class="block mt-1">
+                                    গড় নম্বর বেশি হলে র‌্যাঙ্কিং হবে, যদি ফলাফল সমান হয় তবে বেশি মূল্যায়নকারী/পরীক্ষায়
+                                    অংশগ্রহণকারী র‌্যাঙ্ক হবে।
+                                </span>
+                            </p>
 
                         </div>
 
@@ -681,31 +629,29 @@
 
                         <!-- A4 page result part-->
                         <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm ">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-red-100 dark:bg-gray-800 dark:text-white p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-red-100 dark:bg-gray-800 dark:text-white p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-300">
                                 <!-- Select Group -->
                                 <div>
-                                  <label for="analysisGroupSelect" class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">
-                                    গ্রুপ নির্বাচন করুন
-                                  </label>
-                                  <select
-                                    id="analysisGroupSelect"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-400 focus:border-red-400 dark:bg-gray-700 dark:text-white transition duration-200"
-                                  >
-                                    <option value="">সকল গ্রুপ</option>
-                                  </select>
+                                    <label for="analysisGroupSelect"
+                                        class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">
+                                        গ্রুপ নির্বাচন করুন
+                                    </label>
+                                    <select id="analysisGroupSelect"
+                                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-400 focus:border-red-400 dark:bg-gray-700 dark:text-white transition duration-200">
+                                        <option value="">সকল গ্রুপ</option>
+                                    </select>
                                 </div>
-                              
+
                                 <!-- Button -->
                                 <div class="flex items-end justify-start md:justify-end">
-                                  <button
-                                    id="updateAnalysisBtn"
-                                    class="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow transition-colors duration-200"
-                                  >
-                                    ফলাফল দেখুন
-                                  </button>
+                                    <button id="updateAnalysisBtn"
+                                        class="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow transition-colors duration-200">
+                                        ফলাফল দেখুন
+                                    </button>
                                 </div>
-                              </div>
-                              
+                            </div>
+
 
                             <div id="groupAnalysisDetails" class="mt-2">
                                 <!-- Analysis content will be loaded here -->
@@ -782,8 +728,8 @@
                     <div class="mb-6">
 
 
-                           <!-- Evaluation List -->
-                           <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                        <!-- Evaluation List -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
                             <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">মূল্যায়ন তালিকা
                             </h3>
                             <div class="overflow-x-auto">
@@ -842,7 +788,7 @@
                         </div>
 
 
-                     
+
                         <!-- Evaluation Form (Hidden by default) -->
                         <div id="evaluationForm" class="hidden">
                             <!-- Evaluation form will be loaded here dynamically -->
@@ -959,116 +905,7 @@
                             </div>
                         </div>
 
-                        <!-- Real-time Export Output Section -->
-                        <div
-                            class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-                            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
-                                <h3 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center">
-                                    <i class="fas fa-history mr-3 text-blue-500"></i>
-                                    এক্সপোর্ট স্ট্যাটাস ও ফলাফল
-                                </h3>
-                            </div>
-
-                            <div class="p-6">
-                                <!-- Initial State -->
-                                <div id="exportInitialState" class="text-center py-8">
-                                    <div class="text-gray-400 mb-4">
-                                        <i class="fas fa-cloud-download-alt text-5xl"></i>
-                                    </div>
-                                    <h4 class="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">
-                                        এক্সপোর্ট স্ট্যাটাস
-                                    </h4>
-                                    <p class="text-gray-500 dark:text-gray-500">
-                                        উপরের বাটন ক্লিক করে এক্সপোর্ট শুরু করুন। রিয়েল-টাইম প্রগ্রেস এখানে দেখানো হবে।
-                                    </p>
-                                </div>
-
-                                <!-- Progress Section -->
-                                <div id="exportProgressSection" class="hidden">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span id="exportProgressText"
-                                            class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            প্রস্তুত হচ্ছে...
-                                        </span>
-                                        <span id="exportProgressPercent"
-                                            class="text-sm font-medium text-blue-600 dark:text-blue-400">
-                                            0%
-                                        </span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4">
-                                        <div id="exportProgressBar"
-                                            class="bg-blue-500 h-3 rounded-full transition-all duration-300 ease-in-out"
-                                            style="width: 0%"></div>
-                                    </div>
-                                    <div id="exportProgressDetails" class="text-sm text-gray-600 dark:text-gray-400">
-                                        <!-- Dynamic progress details will appear here -->
-                                    </div>
-                                </div>
-
-                                <!-- Results Section -->
-                                <div id="exportResultsSection" class="hidden">
-                                    <div
-                                        class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
-                                            <div>
-                                                <h4 id="exportSuccessTitle"
-                                                    class="font-semibold text-green-800 dark:text-green-200">
-                                                    এক্সপোর্ট সফল!
-                                                </h4>
-                                                <p id="exportSuccessMessage"
-                                                    class="text-green-700 dark:text-green-300 text-sm">
-                                                    আপনার ফাইল সফলভাবে ডাউনলোড হয়েছে।
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Export Statistics -->
-                                    <div id="exportStats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                        <!-- Stats will be dynamically populated -->
-                                    </div>
-
-                                    <!-- Recent Exports History -->
-                                    <div id="exportHistory" class="mt-6">
-                                        <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">সাম্প্রতিক
-                                            এক্সপোর্ট</h5>
-                                        <div id="exportHistoryList" class="space-y-2">
-                                            <!-- Export history items will appear here -->
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Error Section -->
-                                <div id="exportErrorSection" class="hidden">
-                                    <div
-                                        class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-exclamation-triangle text-red-500 text-xl mr-3"></i>
-                                            <div>
-                                                <h4 id="exportErrorTitle"
-                                                    class="font-semibold text-red-800 dark:text-red-200">
-                                                    এক্সপোর্ট ব্যর্থ
-                                                </h4>
-                                                <p id="exportErrorMessage"
-                                                    class="text-red-700 dark:text-red-300 text-sm">
-                                                    এক্সপোর্ট প্রক্রিয়ায় সমস্যা হয়েছে।
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Export Preview Section -->
-                                <div id="exportPreviewSection" class="hidden mt-6">
-                                    <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">ডেটা প্রিভিউ</h5>
-                                    <div id="exportPreviewContent"
-                                        class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 max-h-60 overflow-y-auto">
-                                        <!-- Preview content will appear here -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    
 
                         <!-- Quick Stats Cards -->
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
@@ -1734,7 +1571,7 @@
 
         // Initialize everything
         document.addEventListener('DOMContentLoaded', function () {
-           
+
             // Developer modal events
             const developerInfoBtn = document.getElementById('developerInfoBtn');
             if (developerInfoBtn) {
@@ -1792,8 +1629,24 @@
     <script src="ripple.js"></script>
 
 
+    <script>
+        // ===============================
+        // Event listener for role update + toast
+        // ===============================
+        document.addEventListener("change", function (e) {
+            if (e.target.classList.contains("role-select")) {
+                const studentId = e.target.dataset.studentId;
+                const newRole = e.target.value;
 
+                // Update in your state
+                smartEvaluator.updateStudentRole(studentId, newRole);
 
+                // Show toast
+                smartEvaluator.showToast(`নতুন দায়িত্ব দেওয়া হয়েছে: ${newRole}`);
+            }
+        });
+
+    </script>
 
 </body>
 

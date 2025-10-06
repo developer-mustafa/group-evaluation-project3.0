@@ -10,7 +10,7 @@ class CacheManager {
     const requiredPages = [
       "dashboard",
       "groups",
-      "members",
+      "members-add",
       "group-members",
       "all-students",
       "student-ranking",
@@ -167,9 +167,6 @@ class CacheManager {
   }
 }
 
-
-
-
 class SmartGroupEvaluator {
   constructor() {
     this.cache = new CacheManager();
@@ -182,6 +179,8 @@ class SmartGroupEvaluator {
     this.toastTimeout = null;
     this.barChart = null;
     this.pieChart = null;
+    this.renderStudentCards = this.renderStudentCards.bind(this);
+
 
     this.state = {
       groups: [],
@@ -194,7 +193,10 @@ class SmartGroupEvaluator {
 
     this.filters = {
       membersFilterGroupId: "",
+      memberGroupFilter: "",
       membersSearchTerm: "",
+      memberAcademicFilter: "",
+      memberSearchTerm: "",
       cardsFilterGroupId: "",
       cardsSearchTerm: "",
       groupMembersFilterGroupId: "",
@@ -215,7 +217,7 @@ class SmartGroupEvaluator {
 
     this.PRIVATE_PAGES = [
       "groups",
-      "members",
+      "members-add",
       "group-members",
       "tasks",
       "evaluation",
@@ -408,130 +410,187 @@ class SmartGroupEvaluator {
   }
 
   setupDOMReferences() {
+    const $ = (id) => document.getElementById(id) || null;
+  
     this.dom = {
+      // ===============================
       // Core DOM elements
-      headerLoginBtn: document.getElementById("headerLoginBtn"),
-      exportPage: document.getElementById("page-export"),
-      authModal: document.getElementById("authModal"),
-      appContainer: document.getElementById("appContainer"),
-      loginForm: document.getElementById("loginForm"),
-      registerForm: document.getElementById("registerForm"),
-      showRegister: document.getElementById("showRegister"),
-      showLogin: document.getElementById("showLogin"),
-      loginBtn: document.getElementById("loginBtn"),
-      registerBtn: document.getElementById("registerBtn"),
-      googleSignInBtn: document.getElementById("googleSignInBtn"),
-      logoutBtn: document.getElementById("logoutBtn"),
-      themeToggle: document.getElementById("themeToggle"),
-      pageTitle: document.getElementById("pageTitle"),
-      userInfo: document.getElementById("userInfo"),
-      adminManagementSection: document.getElementById("adminManagementSection"),
-
-      pages: document.querySelectorAll(".page"),
-      navBtns: document.querySelectorAll(".nav-btn"),
-
+      // ===============================
+      headerLoginBtn: $("headerLoginBtn"),
+      exportPage: $("page-export"),
+      authModal: $("authModal"),
+      appContainer: $("appContainer"),
+      loginForm: $("loginForm"),
+      registerForm: $("registerForm"),
+      showRegister: $("showRegister"),
+      showLogin: $("showLogin"),
+      loginBtn: $("loginBtn"),
+      registerBtn: $("registerBtn"),
+      googleSignInBtn: $("googleSignInBtn"),
+      logoutBtn: $("logoutBtn"),
+      themeToggle: $("themeToggle"),
+      pageTitle: $("pageTitle"),
+      userInfo: $("userInfo"),
+      adminManagementSection: $("adminManagementSection"),
+  
+      pages: document.querySelectorAll(".page") || [],
+      navBtns: document.querySelectorAll(".nav-btn") || [],
+  
+      // ===============================
+      // Members Page
+      // ===============================
+      studentsList: $("studentsList"),
+      studentSearchInput: $("studentSearchInput"),
+      membersFilterGroup: $("membersFilterGroup"),
+  
+      // ===============================
+      // Student Form
+      // ===============================
+      studentNameInput: $("studentNameInput"),
+      studentRollInput: $("studentRollInput"),
+      studentGenderInput: $("studentGenderInput"),
+      studentGroupInput: $("studentGroupInput"),
+      studentContactInput: $("studentContactInput"),
+      studentAcademicGroupInput: $("studentAcademicGroupInput"),
+      studentSessionInput: $("studentSessionInput"),
+      studentRoleInput: $("studentRoleInput"),
+      addStudentBtn: $("addStudentBtn"),
+  
+      // ===============================
+      // Members Management
+      // ===============================
+      membersAddContent: $("membersAddContent"),
+      memberManagementTableBody: $("memberManagementTableBody"),
+      memberManagementEmptyState: $("memberManagementEmptyState"),
+  
+      // ===============================
       // Modals
-      logoutModal: document.getElementById("logoutModal"),
-      cancelLogout: document.getElementById("cancelLogout"),
-      confirmLogout: document.getElementById("confirmLogout"),
-      deleteModal: document.getElementById("deleteModal"),
-      cancelDelete: document.getElementById("cancelDelete"),
-      confirmDelete: document.getElementById("confirmDelete"),
-      editModal: document.getElementById("editModal"),
-      cancelEdit: document.getElementById("cancelEdit"),
-      saveEdit: document.getElementById("saveEdit"),
-      editModalTitle: document.getElementById("editModalTitle"),
-      editModalContent: document.getElementById("editModalContent"),
-      deleteModalText: document.getElementById("deleteModalText"),
-      groupDetailsModal: document.getElementById("groupDetailsModal"),
-      groupDetailsTitle: document.getElementById("groupDetailsTitle"),
-      groupDetailsContent: document.getElementById("groupDetailsContent"),
-      closeGroupDetails: document.getElementById("closeGroupDetails"),
-      adminModal: document.getElementById("adminModal"),
-      adminModalTitle: document.getElementById("adminModalTitle"),
-      adminModalContent: document.getElementById("adminModalContent"),
-
+      // ===============================
+      logoutModal: $("logoutModal"),
+      cancelLogout: $("cancelLogout"),
+      confirmLogout: $("confirmLogout"),
+  
+      deleteModal: $("deleteModal"),
+      cancelDelete: $("cancelDelete"),
+      confirmDelete: $("confirmDelete"),
+      deleteModalText: $("deleteModalText"),
+  
+      editModal: $("editModal"),
+      cancelEdit: $("cancelEdit"),
+      saveEdit: $("saveEdit"),
+      editModalTitle: $("editModalTitle"),
+      editModalContent: $("editModalContent"),
+  
+      groupDetailsModal: $("groupDetailsModal"),
+      groupDetailsTitle: $("groupDetailsTitle"),
+      groupDetailsContent: $("groupDetailsContent"),
+      closeGroupDetails: $("closeGroupDetails"),
+  
+      adminModal: $("adminModal"),
+      adminModalTitle: $("adminModalTitle"),
+      adminModalContent: $("adminModalContent"),
+  
+      // ===============================
       // UI Elements
-      loadingOverlay: document.getElementById("loadingOverlay"),
-      toast: document.getElementById("toast"),
-      toastMessage: document.getElementById("toastMessage"),
-
-      // Form elements
-      groupNameInput: document.getElementById("groupNameInput"),
-      addGroupBtn: document.getElementById("addGroupBtn"),
-      groupsList: document.getElementById("groupsList"),
-      studentNameInput: document.getElementById("studentNameInput"),
-      studentRollInput: document.getElementById("studentRollInput"),
-      studentGenderInput: document.getElementById("studentGenderInput"),
-      studentGroupInput: document.getElementById("studentGroupInput"),
-      studentContactInput: document.getElementById("studentContactInput"),
-      studentAcademicGroupInput: document.getElementById(
-        "studentAcademicGroupInput"
-      ),
-      studentSessionInput: document.getElementById("studentSessionInput"),
-      studentRoleInput: document.getElementById("studentRoleInput"),
-      addStudentBtn: document.getElementById("addStudentBtn"),
-      studentsList: document.getElementById("studentsList"),
-      allStudentsCards: document.getElementById("allStudentsCards"),
-      tasksList: document.getElementById("tasksList"),
-      taskNameInput: document.getElementById("taskNameInput"),
-      taskDescriptionInput: document.getElementById("taskDescriptionInput"),
-      taskMaxScoreInput: document.getElementById("taskMaxScoreInput"),
-      taskDateInput: document.getElementById("taskDateInput"),
-      addTaskBtn: document.getElementById("addTaskBtn"),
-
-      evaluationTaskSelect: document.getElementById("evaluationTaskSelect"),
-      evaluationGroupSelect: document.getElementById("evaluationGroupSelect"),
-      startEvaluationBtn: document.getElementById("startEvaluationBtn"),
-      evaluationForm: document.getElementById("evaluationForm"),
-      csvFileInput: document.getElementById("csvFileInput"),
-      importStudentsBtn: document.getElementById("importStudentsBtn"),
-      processImportBtn: document.getElementById("processImportBtn"),
-      csvFileName: document.getElementById("csvFileName"),
-      downloadTemplateBtn: document.getElementById("downloadTemplateBtn"),
-      membersFilterGroup: document.getElementById("membersFilterGroup"),
-      studentSearchInput: document.getElementById("studentSearchInput"),
-      cardsFilterGroup: document.getElementById("cardsFilterGroup"),
-      allStudentsSearchInput: document.getElementById("allStudentsSearchInput"),
-      refreshRanking: document.getElementById("refreshRanking"),
-      studentRankingList: document.getElementById("studentRankingList"),
-      groupAnalysisChart: document.getElementById("groupAnalysisChart"),
-      policySections: document.getElementById("policySections"),
-      exportAllData: document.getElementById("exportAllData"),
-      exportStudentsCSV: document.getElementById("exportStudentsCSV"),
-      exportGroupsCSV: document.getElementById("exportGroupsCSV"),
-      exportEvaluationsCSV: document.getElementById("exportEvaluationsCSV"),
-      groupMembersGroupSelect: document.getElementById(
-        "groupMembersGroupSelect"
-      ),
-      groupMembersList: document.getElementById("groupMembersList"),
-
-      // ✅ Admin Management (fixed)
-      adminManagementContent: document.getElementById("adminManagementContent"),
-      addAdminBtn: document.getElementById("addAdminBtn"),
-      adminSearchInput: document.getElementById("adminSearchInput"),
-      adminEmail: document.getElementById("adminEmail"),
-      adminPassword: document.getElementById("adminPassword"),
-      adminTypeSelect: document.getElementById("adminTypeSelect"),
-      permissionsSection: document.getElementById("permissionsSection"),
-      permissionRead: document.getElementById("permissionRead"),
-      permissionWrite: document.getElementById("permissionWrite"),
-      permissionEdit: document.getElementById("permissionEdit"), // ✅ Missing line added
-      permissionDelete: document.getElementById("permissionDelete"),
-      cancelAdmin: document.getElementById("cancelAdmin"),
-      saveAdmin: document.getElementById("saveAdmin"),
-
-      // Evaluation List
-      evaluationListTable: document.getElementById("evaluationListTable"),
-
-      // Group Analysis
-      analysisGroupSelect: document.getElementById("analysisGroupSelect"),
-      updateAnalysisBtn: document.getElementById("updateAnalysisBtn"),
-      groupAnalysisDetails: document.getElementById("groupAnalysisDetails"),
+      // ===============================
+      loadingOverlay: $("loadingOverlay"),
+      toast: $("toast"),
+      toastMessage: $("toastMessage"),
+  
+      // ===============================
+      // Groups
+      // ===============================
+      groupNameInput: $("groupNameInput"),
+      addGroupBtn: $("addGroupBtn"),
+      groupsList: $("groupsList"),
+  
+      // ===============================
+      // Tasks
+      // ===============================
+      tasksList: $("tasksList"),
+      taskNameInput: $("taskNameInput"),
+      taskDescriptionInput: $("taskDescriptionInput"),
+      taskMaxScoreInput: $("taskMaxScoreInput"),
+      taskDateInput: $("taskDateInput"),
+      addTaskBtn: $("addTaskBtn"),
+  
+      // ===============================
+      // Evaluations
+      // ===============================
+      evaluationTaskSelect: $("evaluationTaskSelect"),
+      evaluationGroupSelect: $("evaluationGroupSelect"),
+      startEvaluationBtn: $("startEvaluationBtn"),
+      evaluationForm: $("evaluationForm"),
+      evaluationListTable: $("evaluationListTable"),
+  
+      // ===============================
+      // Import/Export
+      // ===============================
+      csvFileInput: $("csvFileInput"),
+      importStudentsBtn: $("importStudentsBtn"),
+      processImportBtn: $("processImportBtn"),
+      csvFileName: $("csvFileName"),
+      downloadTemplateBtn: $("downloadTemplateBtn"),
+      exportAllData: $("exportAllData"),
+      exportStudentsCSV: $("exportStudentsCSV"),
+      exportGroupsCSV: $("exportGroupsCSV"),
+      exportEvaluationsCSV: $("exportEvaluationsCSV"),
+  
+      // ===============================
+      // Ranking & Filters
+      // ===============================
+      cardsFilterGroup: $("cardsFilterGroup"),
+      allStudentsSearchInput: $("allStudentsSearchInput"),
+      allStudentsCards: $("allStudentsCards"),
+      refreshRanking: $("refreshRanking"),
+      studentRankingList: $("studentRankingList"),
+  
+      // ===============================
+      // Group Members & Analysis
+      // ===============================
+      groupMembersGroupSelect: $("groupMembersGroupSelect"),
+      groupMembersList: $("groupMembersList"),
+      analysisGroupSelect: $("analysisGroupSelect"),
+      updateAnalysisBtn: $("updateAnalysisBtn"),
+      groupAnalysisChart: $("groupAnalysisChart"),
+      groupAnalysisDetails: $("groupAnalysisDetails"),
+  
+      // ===============================
+      // Policy Sections
+      // ===============================
+      policySections: $("policySections"),
+  
+      // ===============================
+      // Admin Management
+      // ===============================
+      adminManagementContent: $("adminManagementContent"),
+      addAdminBtn: $("addAdminBtn"),
+      adminSearchInput: $("adminSearchInput"),
+      adminEmail: $("adminEmail"),
+      adminPassword: $("adminPassword"),
+      adminTypeSelect: $("adminTypeSelect"),
+      permissionsSection: $("permissionsSection"),
+      permissionRead: $("permissionRead"),
+      permissionWrite: $("permissionWrite"),
+      permissionEdit: $("permissionEdit"),
+      permissionDelete: $("permissionDelete"),
+      cancelAdmin: $("cancelAdmin"),
+      saveAdmin: $("saveAdmin"),
     };
   }
+  
+
 
   setupEventListeners() {
+    // Add these for members page
+    this.addListener(this.dom.studentSearchInput, "input", (e) => {
+      this.searchDebouncer(() => this.handleStudentSearch(e.target.value));
+    });
+
+    this.addListener(this.dom.membersFilterGroup, "change", (e) => {
+      this.handleMembersFilter(e.target.value);
+    });
+
     // Header login button
     this.addListener(this.dom.headerLoginBtn, "click", () =>
       this.showAuthModal()
@@ -1149,8 +1208,13 @@ class SmartGroupEvaluator {
         case "groups":
           this.renderGroups();
           break;
-        case "members":
-          this.renderStudentsList();
+        case "members-add":
+          if (!this.state.students || this.state.students.length === 0) {
+            await this.loadStudents();
+        }
+        this.populateGroupSelects();
+        this.renderStudentsList();
+      
           break;
         case "group-members":
           this.renderGroupMembers();
@@ -1798,109 +1862,6 @@ class SmartGroupEvaluator {
     `;
   }
 
-  renderAdminManagement() {
-    if (!this.dom.adminManagementContent) return;
-
-    const filteredAdmins = this.getFilteredAdmins();
-
-    this.dom.adminManagementContent.innerHTML = `
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse border border-gray-300 dark:border-gray-600">
-                    <thead>
-                        <tr class="bg-gray-100 dark:bg-gray-700">
-                            <th class="border border-gray-300 dark:border-gray-600 p-2">ইমেইল</th>
-                            <th class="border border-gray-300 dark:border-gray-600 p-2">টাইপ</th>
-                            <th class="border border-gray-300 dark:border-gray-600 p-2">পারমিশন</th>
-                            <th class="border border-gray-300 dark:border-gray-600 p-2">কার্যক্রম</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filteredAdmins
-                          .map(
-                            (admin) => `
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                <td class="border border-gray-300 dark:border-gray-600 p-2">${
-                                  admin.email
-                                }</td>
-                                <td class="border border-gray-300 dark:border-gray-600 p-2">
-                                    <span class="px-2 py-1 rounded text-xs ${
-                                      admin.type === "super-admin"
-                                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                                        : admin.type === "admin"
-                                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                                        : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                    }">
-                                        ${
-                                          admin.type === "super-admin"
-                                            ? "সুপার অ্যাডমিন"
-                                            : admin.type === "admin"
-                                            ? "সাধারণ অ্যাডমিন"
-                                            : "সাধারণ ব্যবহারকারী"
-                                        }
-                                    </span>
-                                </td>
-                                <td class="border border-gray-300 dark:border-gray-600 p-2">
-                                    <div class="flex flex-wrap gap-1">
-                                        <span class="px-2 py-1 rounded text-xs ${
-                                          admin.permissions?.read
-                                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                        }">
-                                            রিড
-                                        </span>
-                                        <span class="px-2 py-1 rounded text-xs ${
-                                          admin.permissions?.write
-                                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                        }">
-                                            রাইট
-                                        </span>
-                                        <span class="px-2 py-1 rounded text-xs ${
-                                          admin.permissions?.edit
-                                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                        }">
-                                            এডিট
-                                        </span>
-                                        <span class="px-2 py-1 rounded text-xs ${
-                                          admin.permissions?.delete
-                                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                        }">
-                                            ডিলিট
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="border border-gray-300 dark:border-gray-600 p-2">
-                                    <div class="flex gap-2">
-                                        <button onclick="smartEvaluator.showAdminModal(${JSON.stringify(
-                                          admin
-                                        ).replace(/"/g, "&quot;")})" 
-                                                class="edit-admin-btn px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-lg text-sm hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors">
-                                            সম্পাদনা
-                                        </button>
-                                        ${
-                                          admin.id !== this.currentUser?.uid
-                                            ? `
-                                                <button onclick="smartEvaluator.deleteAdmin('${admin.id}')" 
-                                                        class="delete-admin-btn px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-lg text-sm hover:bg-red-200 dark:hover:bg-red-800 transition-colors">
-                                                    ডিলিট
-                                                </button>
-                                            `
-                                            : ""
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        `
-                          )
-                          .join("")}
-                    </tbody>
-                </table>
-            </div>
-        `;
-  }
-
   async deleteAdmin(id) {
     // Check if current user is super-admin
     if (this.currentUserData?.type !== "super-admin") {
@@ -2233,28 +2194,37 @@ class SmartGroupEvaluator {
 
   async loadStudents() {
     try {
-      const cacheKey = "students_data";
-      const cached = this.cache.get(cacheKey);
+        const cacheKey = "students_data";
+        const cached = this.cache.get(cacheKey);
 
-      if (!cached) {
-        const snap = await db.collection("students").orderBy("name").get();
-        this.state.students = snap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        this.cache.set(cacheKey, this.state.students);
-      } else {
-        this.state.students = cached;
-      }
+        if (!cached) {
+            console.log("Loading students from Firestore...");
+            const snap = await db.collection("students").orderBy("name").get();
+            this.state.students = snap.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            this.cache.set(cacheKey, this.state.students);
+            console.log(`Loaded ${this.state.students.length} students from Firestore`);
+        } else {
+            this.state.students = cached;
+            console.log(`Loaded ${this.state.students.length} students from cache`);
+        }
 
-      this.renderStudentsList();
-      this.renderStudentCards();
+        // Only call render methods if DOM elements exist
+        if (this.dom.studentsList) {
+            this.renderStudentsList();
+        }
+        if (this.dom.allStudentsCards) {
+            this.renderStudentCards();
+        }
     } catch (error) {
-      console.error("Error loading students:", error);
-      this.showToast("শিক্ষার্থী লোড করতে সমস্যা", "error");
+        console.error("Error loading students:", error);
+        // Ensure students is always an array even on error
+        this.state.students = this.state.students || [];
+        this.showToast("শিক্ষার্থী লোড করতে সমস্যা", "error");
     }
-  }
-
+}
   async loadTasks() {
     try {
       const cacheKey = "tasks_data";
@@ -2342,121 +2312,1643 @@ class SmartGroupEvaluator {
       )
       .join("");
   }
-  renderStudentsList() {
-    if (!this.dom.studentsList) return;
 
-    const filteredStudents = this.getFilteredStudents();
+  // Add this method to initialize members management page
+  renderMemberManagementAdd() {
+    if (!this.dom.membersAddContent) {
+      console.error("Members add content element not found");
+      return;
+    }
 
-    this.dom.studentsList.innerHTML = filteredStudents
+    // Ensure students data is loaded
+    if (!this.state.students || this.state.students.length === 0) {
+      this.dom.membersAddContent.innerHTML = `
+            <div class="text-center py-12">
+                <div class="text-gray-400 mb-4">
+                    <i class="fas fa-spinner fa-spin text-4xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">ডেটা লোড হচ্ছে...</h3>
+                <p class="text-gray-500 dark:text-gray-400">অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করুন</p>
+            </div>
+        `;
+      return;
+    }
+
+    this.dom.membersAddContent.innerHTML = `
+        <div class="space-y-6">
+            <!-- Header Section -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 border border-blue-100 dark:border-gray-700">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">শিক্ষার্থী ব্যবস্থাপনা</h2>
+                    <p class="text-gray-600 dark:text-gray-400">শিক্ষার্থী যোগ করুন, সম্পাদনা করুন এবং ব্যবস্থাপনা করুন</p>
+                </div>
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="memberSearchInput" 
+                            placeholder="নাম, রোল, বা গ্রুপ দিয়ে খুঁজুন..." 
+                            class="w-full px-4 py-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                        <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                    </div>
+                    
+                    <!-- Group Filter -->
+                    <div>
+                        <select 
+                            id="memberGroupFilter" 
+                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="">সকল গ্রুপ</option>
+                            ${(this.state.groups || [])
+                              .map(
+                                (group) =>
+                                  `<option value="${group.id}">${group.name}</option>`
+                              )
+                              .join("")}
+                        </select>
+                    </div>
+                    
+                    <!-- Academic Group Filter -->
+                    <div>
+                        <select 
+                            id="memberAcademicFilter" 
+                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="">সকল একাডেমিক গ্রুপ</option>
+                            ${[
+                              ...new Set(
+                                (this.state.students || [])
+                                  .map((s) => s.academicGroup)
+                                  .filter(Boolean)
+                              ),
+                            ]
+                              .map(
+                                (group) =>
+                                  `<option value="${group}">${group}</option>`
+                              )
+                              .join("")}
+                        </select>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex gap-2">
+                        <button 
+                            onclick="smartEvaluator.showStudentAddModal()"
+                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+                        >
+                            <i class="fas fa-plus"></i>
+                            নতুন শিক্ষার্থী
+                        </button>
+                        <button 
+                            onclick="smartEvaluator.exportMemberManagementData()"
+                            class="px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
+                            title="এক্সপোর্ট"
+                        >
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                        <div class="text-blue-600 dark:text-blue-400 font-semibold">মোট শিক্ষার্থী</div>
+                        <div class="text-2xl font-bold text-blue-700 dark:text-blue-300">${
+                          this.state.students.length
+                        }</div>
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                        <div class="text-green-600 dark:text-green-400 font-semibold">গ্রুপভুক্ত</div>
+                        <div class="text-2xl font-bold text-green-700 dark:text-green-300">${
+                          this.state.students.filter((s) => s.groupId).length
+                        }</div>
+                    </div>
+                    <div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
+                        <div class="text-purple-600 dark:text-purple-400 font-semibold">দায়িত্ব বাকি</div>
+                        <div class="text-2xl font-bold text-purple-700 dark:text-purple-300">${
+                          this.state.students.filter((s) => !s.role).length
+                        }</div>
+                    </div>
+                    <div class="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg">
+                        <div class="text-orange-600 dark:text-orange-400 font-semibold">একাডেমিক গ্রুপ</div>
+                        <div class="text-2xl font-bold text-orange-700 dark:text-orange-300">${
+                          new Set(
+                            this.state.students
+                              .map((s) => s.academicGroup)
+                              .filter(Boolean)
+                          ).size
+                        }</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students Table -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                                <th class="text-left p-4 text-sm font-medium text-gray-700 dark:text-gray-300">শিক্ষার্থী</th>
+                                <th class="text-left p-4 text-sm font-medium text-gray-700 dark:text-gray-300">রোল</th>
+                                <th class="text-left p-4 text-sm font-medium text-gray-700 dark:text-gray-300">গ্রুপ</th>
+                                <th class="text-left p-4 text-sm font-medium text-gray-700 dark:text-gray-300">একাডেমিক গ্রুপ</th>
+                                <th class="text-left p-4 text-sm font-medium text-gray-700 dark:text-gray-300">দায়িত্ব</th>
+                                <th class="text-left p-4 text-sm font-medium text-gray-700 dark:text-gray-300">কার্যক্রম</th>
+                            </tr>
+                        </thead>
+                        <tbody id="memberManagementTableBody" class="divide-y divide-gray-200 dark:divide-gray-600">
+                            <!-- Students will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="memberManagementEmptyState" class="hidden text-center py-12">
+                    <div class="text-gray-400 mb-4">
+                        <i class="fas fa-user-graduate text-4xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">কোন শিক্ষার্থী পাওয়া যায়নি</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">নতুন শিক্ষার্থী যোগ করুন অথবা সার্চ টার্ম পরিবর্তন করুন</p>
+                    <button 
+                        onclick="smartEvaluator.showStudentAddModal()"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+                    >
+                        <i class="fas fa-plus mr-2"></i>
+                        প্রথম শিক্ষার্থী যোগ করুন
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    this.renderMemberManagementTable();
+    this.setupMemberManagementEvents();
+  }
+
+  // Setup event listeners for search and filters
+  setupMemberManagementEvents() {
+    // Search functionality with debouncing
+    const searchInput = document.getElementById("memberSearchInput");
+    const groupFilter = document.getElementById("memberGroupFilter");
+    const academicFilter = document.getElementById("memberAcademicFilter");
+
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
+        this.searchDebouncer(() => this.handleMemberSearch(e.target.value));
+      });
+    }
+
+    if (groupFilter) {
+      groupFilter.addEventListener("change", (e) => {
+        this.handleMemberFilter();
+      });
+    }
+
+    if (academicFilter) {
+      academicFilter.addEventListener("change", (e) => {
+        this.handleMemberFilter();
+      });
+    }
+  }
+
+  // Handle search functionality
+  handleMemberSearch(value) {
+    this.filters.memberSearchTerm = value;
+    this.renderMemberManagementTable();
+  }
+
+  // Handle filter functionality
+  handleMemberFilter() {
+    const groupFilter = document.getElementById("memberGroupFilter");
+    const academicFilter = document.getElementById("memberAcademicFilter");
+
+    this.filters.memberGroupFilter = groupFilter ? groupFilter.value : "";
+    this.filters.memberAcademicFilter = academicFilter
+      ? academicFilter.value
+      : "";
+
+    this.renderMemberManagementTable();
+  }
+
+  // Render the students table with search and filter
+  renderMemberManagementTable() {
+    const tableBody = document.getElementById("memberManagementTableBody");
+    const emptyState = document.getElementById("memberManagementEmptyState");
+
+    if (!tableBody || !emptyState) return;
+
+    const filteredStudents = this.getFilteredMembers();
+
+    if (filteredStudents.length === 0) {
+      tableBody.innerHTML = "";
+      emptyState.classList.remove("hidden");
+      return;
+    }
+
+    emptyState.classList.add("hidden");
+
+    tableBody.innerHTML = filteredStudents
+      .map((student) => {
+        const group = (this.state.groups || []).find(
+          (g) => g.id === student.groupId
+        );
+        const roleBadge = student.role
+          ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                ${this.roleNames[student.role] || student.role}
+            </span>`
+          : `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                দায়িত্ব বাকি
+            </span>`;
+
+        return `
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" data-student-id="${
+              student.id
+            }">
+                <td class="p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-white">${
+                              student.name
+                            }</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                ${
+                                  student.gender === "ছেলে"
+                                    ? '<i class="fas fa-male text-blue-400 mr-1"></i>ছেলে'
+                                    : '<i class="fas fa-female text-pink-400 mr-1"></i>মেয়ে'
+                                }
+                                • সেশন: ${student.session || "নাই"}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td class="p-4">
+                    <div class="font-medium text-gray-900 dark:text-white">${
+                      student.roll
+                    }</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">${
+                      student.contact || "কোন যোগাযোগ নেই"
+                    }</div>
+                </td>
+                <td class="p-4">
+                    ${
+                      group
+                        ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            <i class="fas fa-users mr-1"></i>${group.name}
+                        </span>`
+                        : '<span class="text-gray-500 dark:text-gray-400 text-sm">গ্রুপবিহীন</span>'
+                    }
+                </td>
+                <td class="p-4">
+                    <span class="font-medium text-gray-900 dark:text-white">${
+                      student.academicGroup || "নাই"
+                    }</span>
+                </td>
+                <td class="p-4">
+                    ${roleBadge}
+                </td>
+                <td class="p-4">
+                    <div class="flex space-x-2">
+                        <button 
+                            onclick="smartEvaluator.editStudentInManagement('${
+                              student.id
+                            }')"
+                            class="inline-flex items-center px-3 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                        >
+                            <i class="fas fa-edit mr-2"></i>
+                            সম্পাদনা
+                        </button>
+                        <button 
+                            onclick="smartEvaluator.deleteStudentInManagement('${
+                              student.id
+                            }')"
+                            class="inline-flex items-center px-3 py-2 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg text-sm hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+                        >
+                            <i class="fas fa-trash mr-2"></i>
+                            ডিলিট
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+      })
+      .join("");
+  }
+
+  // Get filtered members based on search and filters
+  getFilteredMembers() {
+    let students = this.state.students || [];
+
+    // Apply search filter
+    if (this.filters.memberSearchTerm) {
+      const term = this.filters.memberSearchTerm.toLowerCase();
+      students = students.filter(
+        (student) =>
+          student.name.toLowerCase().includes(term) ||
+          student.roll.toLowerCase().includes(term) ||
+          (student.contact && student.contact.toLowerCase().includes(term)) ||
+          (student.academicGroup &&
+            student.academicGroup.toLowerCase().includes(term)) ||
+          (student.session && student.session.toLowerCase().includes(term))
+      );
+    }
+
+    // Apply group filter
+    if (this.filters.memberGroupFilter) {
+      students = students.filter(
+        (student) => student.groupId === this.filters.memberGroupFilter
+      );
+    }
+
+    // Apply academic group filter
+    if (this.filters.memberAcademicFilter) {
+      students = students.filter(
+        (student) => student.academicGroup === this.filters.memberAcademicFilter
+      );
+    }
+
+    return students;
+  }
+
+  // Enhanced student validation with duplicate checking
+  async validateStudentData(studentData, isEdit = false, excludeId = null) {
+    const errors = [];
+    const warnings = [];
+
+    // Required field validation
+    if (!studentData.name || studentData.name.trim() === "") {
+      errors.push("শিক্ষার্থীর নাম প্রয়োজন");
+    }
+
+    if (!studentData.roll || studentData.roll.trim() === "") {
+      errors.push("রোল নম্বর প্রয়োজন");
+    }
+
+    if (!studentData.gender || studentData.gender.trim() === "") {
+      errors.push("লিঙ্গ নির্বাচন করুন");
+    }
+
+    if (!studentData.academicGroup || studentData.academicGroup.trim() === "") {
+      errors.push("একাডেমিক গ্রুপ প্রয়োজন");
+    }
+
+    if (!studentData.session || studentData.session.trim() === "") {
+      errors.push("সেশন প্রয়োজন");
+    }
+
+    // Format validation
+    if (studentData.name && studentData.name.length > 100) {
+      errors.push("নাম ১০০ অক্ষরের বেশি হতে পারবে না");
+    }
+
+    if (studentData.roll && studentData.roll.length > 20) {
+      errors.push("রোল নম্বর ২০ অক্ষরের বেশি হতে পারবে না");
+    }
+
+    if (studentData.gender && !["ছেলে", "মেয়ে"].includes(studentData.gender)) {
+      errors.push('লিঙ্গ শুধুমাত্র "ছেলে" বা "মেয়ে" হতে পারে');
+    }
+
+    if (studentData.academicGroup && studentData.academicGroup.length > 50) {
+      errors.push("একাডেমিক গ্রুপ ৫০ অক্ষরের বেশি হতে পারবে না");
+    }
+
+    if (studentData.session && studentData.session.length > 20) {
+      errors.push("সেশন ২০ অক্ষরের বেশি হতে পারবে না");
+    }
+
+    if (studentData.contact && studentData.contact.length > 100) {
+      errors.push("যোগাযোগ তথ্য ১০০ অক্ষরের বেশি হতে পারবে না");
+    }
+
+    // Duplicate validation (only if we have required fields)
+    if (studentData.roll && studentData.academicGroup) {
+      try {
+        const isDuplicate = await this.checkStudentUniqueness(
+          studentData.roll,
+          studentData.academicGroup,
+          isEdit ? excludeId : null
+        );
+
+        if (isDuplicate) {
+          errors.push(
+            `রোল "${studentData.roll}" এবং একাডেমিক গ্রুপ "${studentData.academicGroup}" এর শিক্ষার্থী ইতিমধ্যে বিদ্যমান`
+          );
+        }
+      } catch (error) {
+        console.error("Duplicate check error:", error);
+        warnings.push("ডুপ্লিকেট চেক করতে সমস্যা, তবে ডেটা সংরক্ষণ করা হচ্ছে");
+      }
+    }
+
+    return { errors, warnings, isValid: errors.length === 0 };
+  }
+
+  // Show student add/edit modal
+  showStudentAddModal(student = null) {
+    // Use the existing admin modal for student form
+    this.dom.adminModalTitle.textContent = student
+      ? "শিক্ষার্থী সম্পাদনা"
+      : "নতুন শিক্ষার্থী যোগ করুন";
+
+    this.dom.adminModalContent.innerHTML = `
+        <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Name -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        নাম <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="modalStudentName" 
+                        value="${student ? student.name : ""}"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="শিক্ষার্থীর পূর্ণ নাম"
+                        maxlength="100"
+                        required
+                    >
+                </div>
+                
+                <!-- Roll -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        রোল নম্বর <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="modalStudentRoll" 
+                        value="${student ? student.roll : ""}"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="রোল নম্বর"
+                        maxlength="20"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Gender -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        লিঙ্গ <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="modalStudentGender" 
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                    >
+                        <option value="">লিঙ্গ নির্বাচন করুন</option>
+                        <option value="ছেলে" ${
+                          student && student.gender === "ছেলে" ? "selected" : ""
+                        }>ছেলে</option>
+                        <option value="মেয়ে" ${
+                          student && student.gender === "মেয়ে" ? "selected" : ""
+                        }>মেয়ে</option>
+                    </select>
+                </div>
+                
+                <!-- Group -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">গ্রুপ</label>
+                    <select 
+                        id="modalStudentGroup" 
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="">গ্রুপ নির্বাচন করুন</option>
+                        ${(this.state.groups || [])
+                          .map(
+                            (group) =>
+                              `<option value="${group.id}" ${
+                                student && student.groupId === group.id
+                                  ? "selected"
+                                  : ""
+                              }>
+                                ${group.name}
+                            </option>`
+                          )
+                          .join("")}
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Academic Group -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        একাডেমিক গ্রুপ <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="modalStudentAcademicGroup" 
+                        value="${student ? student.academicGroup : ""}"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="একাডেমিক গ্রুপ/বিভাগ"
+                        maxlength="50"
+                        required
+                    >
+                </div>
+                
+                <!-- Session -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        সেশন <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="modalStudentSession" 
+                        value="${student ? student.session : ""}"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="উদাহরণ: ২০২৩-২৪"
+                        maxlength="20"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Contact -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">যোগাযোগ</label>
+                    <input 
+                        type="text" 
+                        id="modalStudentContact" 
+                        value="${student ? student.contact || "" : ""}"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="ইমেইল বা ফোন নম্বর"
+                        maxlength="100"
+                    >
+                </div>
+                
+                <!-- Role -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">দায়িত্ব</label>
+                    <select 
+                        id="modalStudentRole" 
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="">দায়িত্ব নির্বাচন করুন</option>
+                        ${Object.entries(this.roleNames)
+                          .map(
+                            ([key, value]) =>
+                              `<option value="${key}" ${
+                                student && student.role === key
+                                  ? "selected"
+                                  : ""
+                              }>
+                                ${value}
+                            </option>`
+                          )
+                          .join("")}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Validation Messages -->
+            <div id="modalValidationMessages" class="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                    <span class="text-red-700 dark:text-red-300 font-medium" id="modalValidationText"></span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Set up save callback
+    this.currentEditingStudent = student;
+    this.editCallback = () => this.saveStudentFromModal();
+
+    this.showModal(this.dom.adminModal);
+  }
+
+  // Edit student in management
+  editStudentInManagement(studentId) {
+    const student = (this.state.students || []).find((s) => s.id === studentId);
+    if (student) {
+      this.showStudentAddModal(student);
+    }
+  }
+
+  // Delete student in management
+  deleteStudentInManagement(studentId) {
+    const student = (this.state.students || []).find((s) => s.id === studentId);
+    if (!student) return;
+
+    this.showDeleteModal(
+      `"${student.name}" (রোল: ${student.roll}) কে ডিলিট করবেন? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।`,
+      async () => {
+        this.showLoading("শিক্ষার্থী ডিলিট হচ্ছে...");
+        try {
+          await db.collection("students").doc(studentId).delete();
+
+          // Clear cache and reload data
+          this.cache.clear("students_data");
+          await this.loadStudents();
+
+          // Refresh the students list
+          this.renderStudentsList();
+
+          this.showToast("শিক্ষার্থী সফলভাবে ডিলিট করা হয়েছে", "success");
+        } catch (error) {
+          console.error("Error deleting student:", error);
+          this.showToast("ডিলিট ব্যর্থ: " + error.message, "error");
+        } finally {
+          this.hideLoading();
+        }
+      }
+    );
+  }
+  // Save student from modal with enhanced validation
+  async saveStudentFromModal() {
+    const studentData = {
+      name: document.getElementById("modalStudentName")?.value.trim() || "",
+      roll: document.getElementById("modalStudentRoll")?.value.trim() || "",
+      gender: document.getElementById("modalStudentGender")?.value || "",
+      groupId: document.getElementById("modalStudentGroup")?.value || "",
+      contact:
+        document.getElementById("modalStudentContact")?.value.trim() || "",
+      academicGroup:
+        document.getElementById("modalStudentAcademicGroup")?.value.trim() ||
+        "",
+      session:
+        document.getElementById("modalStudentSession")?.value.trim() || "",
+      role: document.getElementById("modalStudentRole")?.value || "",
+    };
+
+    // Validate data
+    const validation = await this.validateStudentData(
+      studentData,
+      !!this.currentEditingStudent,
+      this.currentEditingStudent?.id
+    );
+
+    // Show validation errors
+    const validationElement = document.getElementById(
+      "modalValidationMessages"
+    );
+    const validationText = document.getElementById("modalValidationText");
+
+    if (validation.errors.length > 0) {
+      if (validationElement && validationText) {
+        validationElement.classList.remove("hidden");
+        validationText.textContent = validation.errors.join(", ");
+      }
+      return;
+    }
+
+    // Show warnings but continue
+    if (validation.warnings.length > 0) {
+      console.warn("Validation warnings:", validation.warnings);
+    }
+
+    this.showLoading("শিক্ষার্থী সংরক্ষণ হচ্ছে...");
+
+    try {
+      if (this.currentEditingStudent) {
+        // Update existing student
+        await db
+          .collection("students")
+          .doc(this.currentEditingStudent.id)
+          .update({
+            ...studentData,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+        this.showToast("শিক্ষার্থী সফলভাবে আপডেট করা হয়েছে", "success");
+      } else {
+        // Add new student
+        await db.collection("students").add({
+          ...studentData,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        this.showToast("শিক্ষার্থী সফলভাবে যোগ করা হয়েছে", "success");
+      }
+
+      // Clear cache and reload data
+      this.cache.clear("students_data");
+      await this.loadStudents();
+
+      // Refresh the management table
+      this.renderMemberManagementTable();
+
+      // Hide modal
+      this.hideAdminModal();
+      this.currentEditingStudent = null;
+    } catch (error) {
+      console.error("Error saving student:", error);
+      this.showToast("সংরক্ষণ ব্যর্থ: " + error.message, "error");
+    } finally {
+      this.hideLoading();
+    }
+  }
+
+  // Edit student in management
+  editStudentInManagement(studentId) {
+    const student = (this.state.students || []).find((s) => s.id === studentId);
+    if (student) {
+      this.showStudentAddModal(student);
+    }
+  }
+
+  // Delete student in management
+  deleteStudentInManagement(studentId) {
+    const student = (this.state.students || []).find((s) => s.id === studentId);
+    if (!student) return;
+
+    this.showDeleteModal(
+      `"${student.name}" (রোল: ${student.roll}) কে ডিলিট করবেন? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।`,
+      async () => {
+        this.showLoading("শিক্ষার্থী ডিলিট হচ্ছে...");
+        try {
+          await db.collection("students").doc(studentId).delete();
+
+          // Clear cache and reload data
+          this.cache.clear("students_data");
+          await this.loadStudents();
+
+          // Refresh the management table
+          this.renderMemberManagementTable();
+
+          this.showToast("শিক্ষার্থী সফলভাবে ডিলিট করা হয়েছে", "success");
+        } catch (error) {
+          console.error("Error deleting student:", error);
+          this.showToast("ডিলিট ব্যর্থ: " + error.message, "error");
+        } finally {
+          this.hideLoading();
+        }
+      }
+    );
+  }
+
+  // Export member management data
+  async exportMemberManagementData() {
+    this.showLoading("ডেটা এক্সপোর্ট হচ্ছে...");
+
+    try {
+      const filteredStudents = this.getFilteredMembers();
+
+      const headers = [
+        "নাম",
+        "রোল",
+        "লিঙ্গ",
+        "গ্রুপ",
+        "যোগাযোগ",
+        "একাডেমিক গ্রুপ",
+        "সেশন",
+        "দায়িত্ব",
+      ];
+      const csvData = filteredStudents.map((student) => {
+        const group = (this.state.groups || []).find(
+          (g) => g.id === student.groupId
+        );
+        return [
+          student.name,
+          student.roll,
+          student.gender,
+          group?.name || "",
+          student.contact || "",
+          student.academicGroup || "",
+          student.session || "",
+          this.roleNames[student.role] || student.role || "",
+        ];
+      });
+
+      // Add BOM for UTF-8 support
+      const BOM = "\uFEFF";
+      const csvContent =
+        BOM +
+        [headers, ...csvData]
+          .map((row) => row.map((cell) => `"${cell}"`).join(","))
+          .join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      this.downloadBlob(
+        blob,
+        `শিক্ষার্থী_তালিকা_${new Date().toISOString().split("T")[0]}.csv`
+      );
+
+      this.showToast("ডেটা সফলভাবে এক্সপোর্ট করা হয়েছে", "success");
+    } catch (error) {
+      this.showToast("এক্সপোর্ট ব্যর্থ: " + error.message, "error");
+    } finally {
+      this.hideLoading();
+    }
+  }
+  // Setup event listeners for search and filters
+  setupMemberManagementEvents() {
+    const searchInput = document.getElementById("memberSearchInput");
+    const groupFilter = document.getElementById("memberGroupFilter");
+    const academicFilter = document.getElementById("memberAcademicFilter");
+
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
+        this.searchDebouncer(() => this.handleMemberSearch(e.target.value));
+      });
+    }
+
+    if (groupFilter) {
+      groupFilter.addEventListener("change", (e) => {
+        this.handleMemberFilter();
+      });
+    }
+
+    if (academicFilter) {
+      academicFilter.addEventListener("change", (e) => {
+        this.handleMemberFilter();
+      });
+    }
+  }
+  // Handle search functionality
+  handleMemberSearch(value) {
+    this.filters.memberSearchTerm = value.toLowerCase();
+    this.renderMemberManagementTable();
+  }
+
+  // Handle filter functionality
+  handleMemberFilter() {
+    const groupFilter = document.getElementById("memberGroupFilter");
+    const academicFilter = document.getElementById("memberAcademicFilter");
+
+    this.filters.memberGroupFilter = groupFilter ? groupFilter.value : "";
+    this.filters.memberAcademicFilter = academicFilter
+      ? academicFilter.value
+      : "";
+
+    this.renderMemberManagementTable();
+  }
+
+  // Render the students table with search and filter
+  renderMemberManagementTable() {
+    const tableBody = document.getElementById("memberManagementTableBody");
+    const emptyState = document.getElementById("memberManagementEmptyState");
+
+    if (!tableBody || !emptyState) return;
+
+    const filteredStudents = this.getFilteredMembers();
+
+    if (filteredStudents.length === 0) {
+      tableBody.innerHTML = "";
+      emptyState.classList.remove("hidden");
+      return;
+    }
+
+    emptyState.classList.add("hidden");
+
+    tableBody.innerHTML = filteredStudents
       .map((student) => {
         const group = this.state.groups.find((g) => g.id === student.groupId);
         const roleBadge = student.role
-          ? `<span class="member-role-badge ${student.role}">${
-              this.roleNames[student.role] || student.role
-            }</span>`
-          : "";
+          ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                ${this.roleNames[student.role] || student.role}
+            </span>`
+          : `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                দায়িত্ব বাকি
+            </span>`;
+
         return `
-                    <div class="flex justify-between items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" data-student-id="${
+              student.id
+            }">
+                <td class="p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-blue-600 dark:text-blue-400"></i>
+                        </div>
                         <div>
-                            <div class="font-medium">${
+                            <div class="font-medium text-gray-900 dark:text-white">${
                               student.name
-                            } ${roleBadge}</div>
-                            <div class="text-sm text-gray-500">রোল: ${
-                              student.roll
-                            } | জেন্ডার:${student.gender} | গ্রুপ: ${
-          group?.name || "নাই"
-        }</div>
-                        </div>
-                        <div class="flex gap-2">
-                            ${
-                              this.canEdit()
-                                ? `<button onclick="smartEvaluator.editStudent('${student.id}')" class="edit-student-btn px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-lg text-sm">সম্পাদনা</button>`
-                                : ""
-                            }
-                            ${
-                              this.canDelete()
-                                ? `<button onclick="smartEvaluator.deleteStudent('${student.id}')" class="delete-student-btn px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-lg text-sm">ডিলিট</button>`
-                                : ""
-                            }
-                            ${
-                              !this.canEdit() && !this.canDelete()
-                                ? '<span class="text-sm text-gray-500">এডিট/ডিলিট করার পারমিশন নেই</span>'
-                                : ""
-                            }
-                        </div>
-                    </div>
-                `;
-      })
-      .join("");
-  }
-  renderStudentCards() {
-    if (!this.dom.allStudentsCards) return;
-
-    const filteredStudents = this.getFilteredStudents("cards");
-
-    this.dom.allStudentsCards.innerHTML = filteredStudents
-      .map((student, index) => {
-        const group = this.state.groups.find((g) => g.id === student.groupId);
-
-        // Same group → same bg color class
-        const groupColorIndex = group
-          ? (this.state.groups.indexOf(group) % 6) + 1
-          : 1;
-        const bgClass = `student-group-color-${groupColorIndex}`;
-
-        const roleBadge = student.role
-          ? `<span class="member-role-badge ${student.role}">
-                            ${this.roleNames[student.role] || student.role}
-                       </span>`
-          : `<span class="px-2 py-1 text-xs rounded-md bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">দায়িত্ব বাকি</span>`;
-
-        return `
-                    <div class="student-card ${bgClass} relative rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 transition-transform hover:-translate-y-1 hover:shadow-xl">
-                        
-                        <!-- Serial Number -->
-                        <span class="serial-number absolute bottom-3 right-4 text-5xl font-extrabold text-gray-200 dark:text-gray-700 opacity-40 select-none">
-                            ${index + 1}
-                        </span>
-    
-                        <!-- Avatar + Name -->
-                        <div class="flex items-start mb-4 relative z-10">
-                            
-                            <div class="flex-1">
-                                <h3 class="font-bold text-lg text-gray-900 dark:text-gray-100 text-center">${
-                                  student.name
-                                }</h3>
-                                <div class="mt-1 text-center">${roleBadge}</div>
+                            }</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                ${
+                                  student.gender === "ছেলে"
+                                    ? '<i class="fas fa-male text-blue-400 mr-1"></i>ছেলে'
+                                    : '<i class="fas fa-female text-pink-400 mr-1"></i>মেয়ে'
+                                }
+                                • সেশন: ${student.session || "নাই"}
                             </div>
                         </div>
-    
-                        <!-- Info Section -->
-                        <div class="grid grid-cols-1 gap-2 text-sm text-gray-800 dark:text-gray-300 relative z-10">
-                            <p><i class="fas fa-id-card mr-2 text-indigo-500"></i> রোল: ${
-                              student.roll
-                            }</p>
-                            <p><i class="fas fa-venus-mars mr-2 text-pink-500"></i> জেন্ডার:${
-                              student.gender
-                            }</p>
-                            <p><i class="fas fa-users mr-2 text-green-500"></i> গ্রুপ: ${
-                              group?.name || "নাই"
-                            }</p>
-                            <p><i class="fas fa-book mr-2 text-orange-500"></i> একাডেমিক: ${
-                              student.academicGroup || "নাই"
-                            }</p>
-                            <p><i class="fas fa-calendar mr-2 text-blue-500"></i> সেশন: ${
-                              student.session || "নাই"
-                            }</p>
-                            ${
-                              student.contact
-                                ? `<p><i class="fas fa-envelope mr-2 text-red-500"></i> ${student.contact}</p>`
-                                : ""
-                            }
-                        </div>
                     </div>
-                `;
+                </td>
+                <td class="p-4">
+                    <div class="font-medium text-gray-900 dark:text-white">${
+                      student.roll
+                    }</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">${
+                      student.contact || "কোন যোগাযোগ নেই"
+                    }</div>
+                </td>
+                <td class="p-4">
+                    ${
+                      group
+                        ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            <i class="fas fa-users mr-1"></i>${group.name}
+                        </span>`
+                        : '<span class="text-gray-500 dark:text-gray-400 text-sm">গ্রুপবিহীন</span>'
+                    }
+                </td>
+                <td class="p-4">
+                    <span class="font-medium text-gray-900 dark:text-white">${
+                      student.academicGroup || "নাই"
+                    }</span>
+                </td>
+                <td class="p-4">
+                    ${roleBadge}
+                </td>
+                <td class="p-4">
+                    <div class="flex space-x-2">
+                        <button 
+                            onclick="smartEvaluator.editStudentInManagement('${
+                              student.id
+                            }')"
+                            class="inline-flex items-center px-3 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                        >
+                            <i class="fas fa-edit mr-2"></i>
+                            সম্পাদনা
+                        </button>
+                        <button 
+                            onclick="smartEvaluator.deleteStudentInManagement('${
+                              student.id
+                            }')"
+                            class="inline-flex items-center px-3 py-2 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg text-sm hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+                        >
+                            <i class="fas fa-trash mr-2"></i>
+                            ডিলিট
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
       })
       .join("");
   }
+
+  // Get filtered members based on search and filters
+  getFilteredMembers() {
+    let students = this.state.students;
+
+    // Apply search filter
+    if (this.filters.memberSearchTerm) {
+      const term = this.filters.memberSearchTerm.toLowerCase();
+      students = students.filter(
+        (student) =>
+          student.name.toLowerCase().includes(term) ||
+          student.roll.toLowerCase().includes(term) ||
+          (student.contact && student.contact.toLowerCase().includes(term)) ||
+          (student.academicGroup &&
+            student.academicGroup.toLowerCase().includes(term)) ||
+          (student.session && student.session.toLowerCase().includes(term))
+      );
+    }
+
+    // Apply group filter
+    if (this.filters.memberGroupFilter) {
+      students = students.filter(
+        (student) => student.groupId === this.filters.memberGroupFilter
+      );
+    }
+
+    // Apply academic group filter
+    if (this.filters.memberAcademicFilter) {
+      students = students.filter(
+        (student) => student.academicGroup === this.filters.memberAcademicFilter
+      );
+    }
+
+    return students;
+  }
+
+  // Show student add modal
+  showStudentAddModal(student = null) {
+    this.dom.adminModalTitle.textContent = student
+      ? "শিক্ষার্থী সম্পাদনা"
+      : "নতুন শিক্ষার্থী যোগ করুন";
+
+    this.dom.adminModalContent.innerHTML = `
+        <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Name -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        নাম <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="modalStudentName" 
+                        value="${student ? student.name : ""}"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="শিক্ষার্থীর পূর্ণ নাম"
+                        maxlength="100"
+                        required
+                    >
+                </div>
+                
+                <!-- Roll -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        রোল নম্বর <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="modalStudentRoll" 
+                        value="${student ? student.roll : ""}"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="রোল নম্বর"
+                        maxlength="20"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Gender -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        লিঙ্গ <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="modalStudentGender" 
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                    >
+                        <option value="">লিঙ্গ নির্বাচন করুন</option>
+                        <option value="ছেলে" ${
+                          student && student.gender === "ছেলে" ? "selected" : ""
+                        }>ছেলে</option>
+                        <option value="মেয়ে" ${
+                          student && student.gender === "মেয়ে" ? "selected" : ""
+                        }>মেয়ে</option>
+                    </select>
+                </div>
+                
+                <!-- Group -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">গ্রুপ</label>
+                    <select 
+                        id="modalStudentGroup" 
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="">গ্রুপ নির্বাচন করুন</option>
+                        ${this.state.groups
+                          .map(
+                            (group) =>
+                              `<option value="${group.id}" ${
+                                student && student.groupId === group.id
+                                  ? "selected"
+                                  : ""
+                              }>
+                                ${group.name}
+                            </option>`
+                          )
+                          .join("")}
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Academic Group -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        একাডেমিক গ্রুপ <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="modalStudentAcademicGroup" 
+                        value="${student ? student.academicGroup : ""}"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="একাডেমিক গ্রুপ/বিভাগ"
+                        maxlength="50"
+                        required
+                    >
+                </div>
+                
+                <!-- Session -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        সেশন <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="modalStudentSession" 
+                        value="${student ? student.session : ""}"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="উদাহরণ: ২০২৩-২৪"
+                        maxlength="20"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Contact -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">যোগাযোগ</label>
+                    <input 
+                        type="text" 
+                        id="modalStudentContact" 
+                        value="${student ? student.contact || "" : ""}"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="ইমেইল বা ফোন নম্বর"
+                        maxlength="100"
+                    >
+                </div>
+                
+                <!-- Role -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">দায়িত্ব</label>
+                    <select 
+                        id="modalStudentRole" 
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="">দায়িত্ব নির্বাচন করুন</option>
+                        ${Object.entries(this.roleNames)
+                          .map(
+                            ([key, value]) =>
+                              `<option value="${key}" ${
+                                student && student.role === key
+                                  ? "selected"
+                                  : ""
+                              }>
+                                ${value}
+                            </option>`
+                          )
+                          .join("")}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Validation Messages -->
+            <div id="modalValidationMessages" class="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                    <span class="text-red-700 dark:text-red-300 font-medium" id="modalValidationText"></span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Set up save callback
+    this.currentEditingStudent = student;
+    this.editCallback = () => this.saveStudentFromModal();
+
+    this.showModal(this.dom.adminModal);
+  }
+
+  // Enhanced student validation with duplicate checking
+  async validateStudentData(studentData, isEdit = false, excludeId = null) {
+    const errors = [];
+    const warnings = [];
+
+    // Required field validation
+    if (!studentData.name || studentData.name.trim() === "") {
+      errors.push("শিক্ষার্থীর নাম প্রয়োজন");
+    }
+
+    if (!studentData.roll || studentData.roll.trim() === "") {
+      errors.push("রোল নম্বর প্রয়োজন");
+    }
+
+    if (!studentData.gender || studentData.gender.trim() === "") {
+      errors.push("লিঙ্গ নির্বাচন করুন");
+    }
+
+    if (!studentData.academicGroup || studentData.academicGroup.trim() === "") {
+      errors.push("একাডেমিক গ্রুপ প্রয়োজন");
+    }
+
+    if (!studentData.session || studentData.session.trim() === "") {
+      errors.push("সেশন প্রয়োজন");
+    }
+
+    // Format validation
+    if (studentData.name && studentData.name.length > 100) {
+      errors.push("নাম ১০০ অক্ষরের বেশি হতে পারবে না");
+    }
+
+    if (studentData.roll && studentData.roll.length > 20) {
+      errors.push("রোল নম্বর ২০ অক্ষরের বেশি হতে পারবে না");
+    }
+
+    if (studentData.gender && !["ছেলে", "মেয়ে"].includes(studentData.gender)) {
+      errors.push('লিঙ্গ শুধুমাত্র "ছেলে" বা "মেয়ে" হতে পারে');
+    }
+
+    if (studentData.academicGroup && studentData.academicGroup.length > 50) {
+      errors.push("একাডেমিক গ্রুপ ৫০ অক্ষরের বেশি হতে পারবে না");
+    }
+
+    if (studentData.session && studentData.session.length > 20) {
+      errors.push("সেশন ২০ অক্ষরের বেশি হতে পারবে না");
+    }
+
+    if (studentData.contact && studentData.contact.length > 100) {
+      errors.push("যোগাযোগ তথ্য ১০০ অক্ষরের বেশি হতে পারবে না");
+    }
+
+    // Duplicate validation (only if we have required fields)
+    if (studentData.roll && studentData.academicGroup) {
+      try {
+        const isDuplicate = await this.checkStudentUniqueness(
+          studentData.roll,
+          studentData.academicGroup,
+          isEdit ? excludeId : null
+        );
+
+        if (isDuplicate) {
+          errors.push(
+            `রোল "${studentData.roll}" এবং একাডেমিক গ্রুপ "${studentData.academicGroup}" এর শিক্ষার্থী ইতিমধ্যে বিদ্যমান`
+          );
+        }
+      } catch (error) {
+        console.error("Duplicate check error:", error);
+        warnings.push("ডুপ্লিকেট চেক করতে সমস্যা, তবে ডেটা সংরক্ষণ করা হচ্ছে");
+      }
+    }
+
+    return { errors, warnings, isValid: errors.length === 0 };
+  }
+
+  // Save student from modal with enhanced validation
+  async saveStudentFromModal() {
+    const studentData = {
+      name: document.getElementById("modalStudentName")?.value.trim() || "",
+      roll: document.getElementById("modalStudentRoll")?.value.trim() || "",
+      gender: document.getElementById("modalStudentGender")?.value || "",
+      groupId: document.getElementById("modalStudentGroup")?.value || "",
+      contact:
+        document.getElementById("modalStudentContact")?.value.trim() || "",
+      academicGroup:
+        document.getElementById("modalStudentAcademicGroup")?.value.trim() ||
+        "",
+      session:
+        document.getElementById("modalStudentSession")?.value.trim() || "",
+      role: document.getElementById("modalStudentRole")?.value || "",
+    };
+
+    // Validate data
+    const validation = await this.validateStudentData(
+      studentData,
+      !!this.currentEditingStudent,
+      this.currentEditingStudent?.id
+    );
+
+    // Show validation errors
+    const validationElement = document.getElementById(
+      "modalValidationMessages"
+    );
+    const validationText = document.getElementById("modalValidationText");
+
+    if (validation.errors.length > 0) {
+      if (validationElement && validationText) {
+        validationElement.classList.remove("hidden");
+        validationText.textContent = validation.errors.join(", ");
+      }
+      return;
+    }
+
+    // Show warnings but continue
+    if (validation.warnings.length > 0) {
+      console.warn("Validation warnings:", validation.warnings);
+    }
+
+    this.showLoading("শিক্ষার্থী সংরক্ষণ হচ্ছে...");
+
+    try {
+      if (this.currentEditingStudent) {
+        // Update existing student
+        await db
+          .collection("students")
+          .doc(this.currentEditingStudent.id)
+          .update({
+            ...studentData,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+        this.showToast("শিক্ষার্থী সফলভাবে আপডেট করা হয়েছে", "success");
+      } else {
+        // Add new student
+        await db.collection("students").add({
+          ...studentData,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        this.showToast("শিক্ষার্থী সফলভাবে যোগ করা হয়েছে", "success");
+      }
+
+      // Clear cache and reload data
+      this.cache.clear("students_data");
+      await this.loadStudents();
+
+      // Refresh the management table
+      this.renderMemberManagementTable();
+
+      // Hide modal
+      this.hideAdminModal();
+      this.currentEditingStudent = null;
+    } catch (error) {
+      console.error("Error saving student:", error);
+      this.showToast("সংরক্ষণ ব্যর্থ: " + error.message, "error");
+    } finally {
+      this.hideLoading();
+    }
+  }
+
+  // Edit student in management
+  editStudentInManagement(studentId) {
+    const student = this.state.students.find((s) => s.id === studentId);
+    if (student) {
+      this.showStudentAddModal(student);
+    }
+  }
+
+  // Delete student in management
+  deleteStudentInManagement(studentId) {
+    const student = this.state.students.find((s) => s.id === studentId);
+    if (!student) return;
+
+    this.showDeleteModal(
+      `"${student.name}" (রোল: ${student.roll}) কে ডিলিট করবেন? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।`,
+      async () => {
+        this.showLoading("শিক্ষার্থী ডিলিট হচ্ছে...");
+        try {
+          await db.collection("students").doc(studentId).delete();
+
+          // Clear cache and reload data
+          this.cache.clear("students_data");
+          await this.loadStudents();
+
+          // Refresh the management table
+          this.renderMemberManagementTable();
+
+          this.showToast("শিক্ষার্থী সফলভাবে ডিলিট করা হয়েছে", "success");
+        } catch (error) {
+          console.error("Error deleting student:", error);
+          this.showToast("ডিলিট ব্যর্থ: " + error.message, "error");
+        } finally {
+          this.hideLoading();
+        }
+      }
+    );
+  }
+
+  // Export member management data
+  async exportMemberManagementData() {
+    this.showLoading("ডেটা এক্সপোর্ট হচ্ছে...");
+
+    try {
+      const filteredStudents = this.getFilteredMembers();
+
+      const headers = [
+        "নাম",
+        "রোল",
+        "লিঙ্গ",
+        "গ্রুপ",
+        "যোগাযোগ",
+        "একাডেমিক গ্রুপ",
+        "সেশন",
+        "দায়িত্ব",
+      ];
+      const csvData = filteredStudents.map((student) => {
+        const group = this.state.groups.find((g) => g.id === student.groupId);
+        return [
+          student.name,
+          student.roll,
+          student.gender,
+          group?.name || "",
+          student.contact || "",
+          student.academicGroup || "",
+          student.session || "",
+          this.roleNames[student.role] || student.role || "",
+        ];
+      });
+
+      // Add BOM for UTF-8 support
+      const BOM = "\uFEFF";
+      const csvContent =
+        BOM +
+        [headers, ...csvData]
+          .map((row) => row.map((cell) => `"${cell}"`).join(","))
+          .join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      this.downloadBlob(
+        blob,
+        `শিক্ষার্থী_তালিকা_${new Date().toISOString().split("T")[0]}.csv`
+      );
+
+      this.showToast("ডেটা সফলভাবে এক্সপোর্ট করা হয়েছে", "success");
+    } catch (error) {
+      this.showToast("এক্সপোর্ট ব্যর্থ: " + error.message, "error");
+    } finally {
+      this.hideLoading();
+    }
+  }
+
+  // Utility function to download blob
+  downloadBlob(blob, filename) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+
+
+  renderStudentsList() {
+    const studentsListElement = document.getElementById("studentsList");
+    if (!studentsListElement) {
+        console.log("studentsList element not found - page probably not loaded");
+        return;
+    }
+
+    // Safe check for students data
+    if (!this.state.students || !Array.isArray(this.state.students)) {
+        console.warn("Students data not available yet");
+        this.dom.studentsList.innerHTML = `
+            <div class="text-center py-8 bg-white dark:bg-gray-800 rounded-lg">
+                <i class="fas fa-spinner fa-spin text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500 dark:text-gray-400">ডেটা লোড হচ্ছে...</p>
+            </div>
+        `;
+        return;
+    }
+
+    const filteredStudents = this.getFilteredStudents("members-add");
+
+    if (filteredStudents.length === 0) {
+        this.dom.studentsList.innerHTML = `
+            <div class="text-center py-8 bg-white dark:bg-gray-800 rounded-lg">
+                <i class="fas fa-user-graduate text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500 dark:text-gray-400">কোন শিক্ষার্থী পাওয়া যায়নি</p>
+                ${this.filters.membersSearchTerm || this.filters.membersFilterGroupId ? 
+                    '<p class="text-sm text-gray-400 mt-2">সার্চ বা ফিল্টার সরিয়ে আবার চেষ্টা করুন</p>' : 
+                    ''
+                }
+            </div>
+        `;
+        return;
+    }
+
+    this.dom.studentsList.innerHTML = filteredStudents.map((student, index) => {
+        const group = this.state.groups.find(g => g.id === student.groupId);
+        
+        return `
+            <div class="student-item bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700 mb-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800 dark:text-white">${student.name || 'নাম নেই'}</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            রোল: ${student.roll || 'নেই'} | 
+                            গ্রুপ: ${group?.name || 'নাই'} |
+                            একাডেমিক: ${student.academicGroup || 'নাই'}
+                        </p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="smartEvaluator.editStudent('${student.id}')" 
+                                class="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-edit mr-1"></i>সম্পাদনা
+                        </button>
+                        <button onclick="smartEvaluator.deleteStudent('${student.id}')" 
+                                class="px-3 py-1 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors">
+                            <i class="fas fa-trash mr-1"></i>ডিলিট
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+  // Add this method to populate group selects
+  populateGroupSelects() {
+    // Populate student group input
+    if (this.dom.studentGroupInput) {
+      this.dom.studentGroupInput.innerHTML =
+        '<option value="">গ্রুপ নির্বাচন করুন</option>' +
+        (this.state.groups || [])
+          .map((group) => `<option value="${group.id}">${group.name}</option>`)
+          .join("");
+    }
+
+    // Populate members filter group
+    if (this.dom.membersFilterGroup) {
+      this.dom.membersFilterGroup.innerHTML =
+        '<option value="">সকল গ্রুপ</option>' +
+        (this.state.groups || [])
+          .map((group) => `<option value="${group.id}">${group.name}</option>`)
+          .join("");
+    }
+  }
+
+  renderStudentCards() {
+    if (!this.dom?.allStudentsCards) return;
+  
+    const filteredStudents = this.getFilteredStudents("cards") || [];
+    const groups = this.state?.groups || [];
+  
+    const royalColors = [
+      "bg-indigo-900/90",
+      "bg-purple-900/90",
+      "bg-blue-900/90",
+      "bg-slate-900/90",
+      "bg-fuchsia-900/90",
+      "bg-rose-900/90",
+      "bg-violet-900/90",
+      "bg-cyan-900/90",
+      "bg-emerald-900/90",
+      "bg-yellow-900/90",
+      "bg-pink-900/90",
+      "bg-red-900/90",
+      "bg-teal-900/90",
+    ];
+  
+    // 🎨 ভিন্ন ভিন্ন দায়িত্বের রং
+    const roleColors = {
+      "team-leader":
+        "bg-yellow-200 text-yellow-900 border border-yellow-400/50 dark:bg-yellow-900 dark:text-yellow-100 px-3 py-1 rounded-xl",
+      "time-keeper":
+        "bg-green-200 text-green-900 border border-green-400/50 dark:bg-green-900 dark:text-green-100 px-3 py-1 rounded-xl",
+      "resource-manager":
+        "bg-blue-200 text-blue-900 border border-blue-400/50 dark:bg-blue-900 dark:text-blue-100 px-3 py-1 rounded-xl",
+      "peace-maker":
+        "bg-purple-200 text-purple-900 border border-purple-400/50 dark:bg-purple-900 dark:text-purple-100 px-3 py-1 rounded-xl",
+      reporter:
+        "bg-pink-200 text-pink-900 border border-pink-400/50 dark:bg-pink-900 dark:text-pink-100 px-3 py-1 rounded-xl",
+    };
+  
+    const roleNames = {
+      "team-leader": "টিম লিডার",
+      "time-keeper": "টাইম কিপার",
+      "resource-manager": "রিসোর্স ম্যানেজার",
+      "peace-maker": "পিস মেকার",
+      reporter: "রিপোর্টার",
+    };
+  
+    this.dom.allStudentsCards.innerHTML = filteredStudents
+      .map((student, index) => {
+        const group = groups.find((g) => g.id === student.groupId);
+        const groupColorIndex = group ? groups.indexOf(group) % royalColors.length : 0;
+        const bgClass = royalColors[groupColorIndex];
+  
+        const roleKey = student.role ? student.role.toLowerCase() : "";
+        const roleClass = roleColors[roleKey] || "bg-gray-200 text-gray-700 px-3 py-1 rounded-xl";
+        const roleLabel = roleNames[roleKey] || "দায়িত্ব বাকি";
+  
+        return `
+          <div class="student-card ${bgClass} relative rounded-3xl p-6 border-2 border-amber-500/40 
+               shadow-lg hover:shadow-3xl backdrop-blur-md overflow-hidden 
+               transition-all duration-700 ease-out transform hover:-translate-y-3 hover:scale-[1.03]
+               animate-fadeIn hover:brightness-110 hover:contrast-125">
+  
+            <!-- Serial Number -->
+            <span class="serial-number absolute bottom-4 right-4 text-7xl font-extrabold text-white/40 select-none opacity-40">
+              ${index + 1}
+            </span>
+  
+            <!-- Name + Role -->
+            <div class="flex flex-col items-center mb-5 relative z-10">
+              <h3 class="font-extrabold text-xl md:text-2xl text-white/95 tracking-wider drop-shadow-md text-center">
+                ${student.name}
+              </h3>
+              <div class="mt-3">
+                <span class="member-role-badge ${roleClass} text-xs font-semibold shadow-sm transition-transform duration-300 hover:scale-110">
+                  ${roleLabel}
+                </span>
+              </div>
+            </div>
+  
+            <!-- Info Section -->
+            <div class="grid grid-cols-1 gap-2 text-sm text-gray-200/90 relative z-10">
+              <p><i class="fas fa-id-card mr-2 text-indigo-400"></i> রোল: ${student.roll}</p>
+              <p><i class="fas fa-venus-mars mr-2 text-pink-400"></i> জেন্ডার: ${student.gender}</p>
+              <p><i class="fas fa-users mr-2 text-green-400"></i> গ্রুপ: ${group?.name || "নাই"}</p>
+              <p><i class="fas fa-book mr-2 text-orange-400"></i> একাডেমিক: ${student.academicGroup || "নাই"}</p>
+              <p><i class="fas fa-calendar mr-2 text-blue-400"></i> সেশন: ${student.session || "নাই"}</p>
+              ${
+                student.contact
+                  ? `<p><i class="fas fa-envelope mr-2 text-red-400"></i> ${student.contact}</p>`
+                  : ""
+              }
+            </div>
+  
+            <!-- Glow Layer -->
+            <div class="absolute inset-0 rounded-3xl pointer-events-none bg-gradient-to-r 
+                        from-amber-400/10 via-yellow-300/5 to-orange-400/10 
+                        opacity-40 animate-glow"></div>
+          </div>
+        `;
+      })
+      .join("");
+  }
+  
+  
 
   renderTasks() {
     if (!this.dom.tasksList) return;
@@ -4093,50 +5585,54 @@ class SmartGroupEvaluator {
     return map;
   }
 
-  getFilteredStudents(type = "members") {
-    let students = this.state.students;
 
-    if (type === "members") {
-      // Apply group filter
-      if (this.filters.membersFilterGroupId) {
-        students = students.filter(
-          (s) => s.groupId === this.filters.membersFilterGroupId
-        );
-      }
 
-      // Apply search filter
-      if (this.filters.membersSearchTerm) {
-        const term = this.filters.membersSearchTerm.toLowerCase();
-        students = students.filter(
-          (s) =>
-            s.name.toLowerCase().includes(term) ||
-            s.roll.toLowerCase().includes(term) ||
-            (s.academicGroup && s.academicGroup.toLowerCase().includes(term))
-        );
-      }
+  getFilteredStudents(type = "members-add") {
+    // Ensure students is always an array
+    let students = this.state.students || [];
+
+    if (type === "members-add") {
+        // Apply group filter
+        if (this.filters.memberGroupFilter) {
+            students = students.filter(
+                (s) => s.groupId === this.filters.memberGroupFilter
+            );
+        }
+
+        // Apply search filter
+        if (this.filters.memberSearchTerm) {
+            const term = this.filters.memberSearchTerm.toLowerCase();
+            students = students.filter(
+                (s) =>
+                    (s.name && s.name.toLowerCase().includes(term)) ||
+                    (s.roll && s.roll.toLowerCase().includes(term)) ||
+                    (s.academicGroup && s.academicGroup.toLowerCase().includes(term)) ||
+                    (s.session && s.session.toLowerCase().includes(term)) ||
+                    (s.contact && s.contact.toLowerCase().includes(term))
+            );
+        }
     } else if (type === "cards") {
-      // Apply group filter
-      if (this.filters.cardsFilterGroupId) {
-        students = students.filter(
-          (s) => s.groupId === this.filters.cardsFilterGroupId
-        );
-      }
+        // Apply group filter
+        if (this.filters.cardsFilterGroupId) {
+            students = students.filter(
+                (s) => s.groupId === this.filters.cardsFilterGroupId
+            );
+        }
 
-      // Apply search filter
-      if (this.filters.cardsSearchTerm) {
-        const term = this.filters.cardsSearchTerm.toLowerCase();
-        students = students.filter(
-          (s) =>
-            s.name.toLowerCase().includes(term) ||
-            s.roll.toLowerCase().includes(term) ||
-            (s.academicGroup && s.academicGroup.toLowerCase().includes(term))
-        );
-      }
+        // Apply search filter
+        if (this.filters.cardsSearchTerm) {
+            const term = this.filters.cardsSearchTerm.toLowerCase();
+            students = students.filter(
+                (s) =>
+                    (s.name && s.name.toLowerCase().includes(term)) ||
+                    (s.roll && s.roll.toLowerCase().includes(term)) ||
+                    (s.academicGroup && s.academicGroup.toLowerCase().includes(term))
+            );
+        }
     }
 
     return students;
-  }
-
+}
   // ===============================
   // CRUD OPERATIONS
   // ===============================
@@ -4725,21 +6221,29 @@ class SmartGroupEvaluator {
   // ===============================
   // SEARCH AND FILTER HANDLERS
   // ===============================
-  handleStudentSearch(value) {
-    this.filters.membersSearchTerm = value.toLowerCase();
-    this.renderStudentsList();
+ // Handle search in members page
+handleStudentSearch(value) {
+  this.filters.memberSearchTerm = value;
+  // Add safety check before rendering
+  if (this.state.students && Array.isArray(this.state.students)) {
+      this.renderStudentsList();
   }
+}
 
+// Handle group filter in members page  
+handleMembersFilter(value) {
+  this.filters.memberGroupFilter = value;
+  // Add safety check before rendering
+  if (this.state.students && Array.isArray(this.state.students)) {
+      this.renderStudentsList();
+  }
+}
   handleAllStudentsSearch(value) {
     this.filters.cardsSearchTerm = value.toLowerCase();
     this.renderStudentCards();
   }
 
-  handleMembersFilter(value) {
-    this.filters.membersFilterGroupId = value;
-    this.renderStudentsList();
-  }
-
+  
   handleCardsFilter(value) {
     this.filters.cardsFilterGroupId = value;
     this.renderStudentCards();
@@ -4968,7 +6472,6 @@ class SmartGroupEvaluator {
                   </div>
                 </div>
               `;
-              
               })
               .join("")}
           </div>
@@ -5170,8 +6673,8 @@ class SmartGroupEvaluator {
                                           index === 0
                                             ? "🥇 চ্যাম্পিয়ন"
                                             : index === 1
-                                            ? "🥈 রানার আপ"
-                                            : "🥉 তৃতীয়"
+                                            ? "🥈 রানার্স আপ"
+                                            : "🥉 রানার্স আপ গ্রো"
                                         }
                                     </span>
                                     `
@@ -5929,7 +7432,7 @@ class SmartGroupEvaluator {
         const banglaRank =
           banglaRanks[index] || this.convertToBanglaRank(index + 1);
         const rankStyle = this.getCompactRankStyle(index + 1);
-        const performanceLevel = this.getStudentPerformanceLevel(
+        const performanceLevel = this.getStudentPerformanceLevel2(
           scoreData.averageScore
         );
         const performanceColor = this.getPerformanceColor(
@@ -6139,7 +7642,7 @@ class SmartGroupEvaluator {
     }
 
     const student = studentData.student;
-    const performanceLevel = this.getStudentPerformanceLevel(
+    const performanceLevel = this.getStudentPerformanceLevel1(
       studentData.averageScore
     );
     const performanceColor = this.getPerformanceColor(studentData.averageScore);
@@ -6770,14 +8273,14 @@ class SmartGroupEvaluator {
   /**
    * পারফরম্যান্স লেভেল টেক্সট
    */
-  getStudentPerformanceLevel(score) {
-    if (score >= 90) return "অসাধারণ 🏆";
-    if (score >= 80) return "অত্যন্ত ভালো ⭐";
-    if (score >= 70) return "ভালো 👍";
-    if (score >= 60) return "সন্তোষজনক ✅";
-    if (score >= 50) return "মধ্যম 📊";
-    if (score >= 40) return "সুযোগ আছে 💡";
-    return "অতিদুর্বল ❗";
+  getStudentPerformanceLevel2(score) {
+    if (score >= 90) return "ফলাফল অসাধারণ 🏆";
+    if (score >= 80) return "ফলাফল অত্যন্ত ভালো ⭐";
+    if (score >= 70) return "ফলাফল ভালো 👍";
+    if (score >= 60) return "ফলাফল সন্তোষজনক ✅";
+    if (score >= 50) return "ফলাফল মোটামুটি আরো চেষ্টা করতে হবে";
+    if (score >= 40) return "ফলাফল খুবই সাধারণ- তোমার চেষ্টা আরো বাড়াতে হবে 💡";
+    return "ফলাফল অতিদুর্বল (তুমি অমনযোগী মনে রেখো জীবনটা কিন্তু তোমার!) ❗";
   }
 
   /**
@@ -6842,15 +8345,18 @@ class SmartGroupEvaluator {
     return styles[rank] || styles.other;
   }
 
-  getStudentPerformanceLevel(score) {
-    if (score >= 90) return "অসাধারণ";
-    if (score >= 80) return "অত্যন্ত ভাল";
-    if (score >= 70) return "ভাল";
-    if (score >= 60) return "সন্তোষজনক";
-    if (score >= 50) return "মধ্যম";
-    if (score >= 40) return "গড়";
-    return "উন্নয়ন প্রয়োজন";
+
+
+  getStudentPerformanceLevel1(score) {
+    if (score >= 90) return "তোমাদের ফলাফল অসাধারণ 🏆";
+    if (score >= 80) return "তোমাদের ফলাফল অত্যন্ত ভালো ⭐";
+    if (score >= 70) return "তোমাদের ফলাফল ভালো 👍";
+    if (score >= 60) return "তোমাদের ফলাফল সন্তোষজনক ✅";
+    if (score >= 50) return "তোমাদের ফলাফল মোটামুটি আরো চেষ্টা করতে হবে";
+    if (score >= 40) return "তোমাদের ফলাফল খুবই সাধারণ- তোমার চেষ্টা আরো বাড়াতে হবে 💡";
+    return "তোমাদের ফলাফল অতিদুর্বল (টিম ওয়ার্কে সবকিছুই সহজ হবে ইনশা-আল্লাহ) ❗";
   }
+
 
   getPerformanceColor(score) {
     if (score >= 90) return "text-green-500";
@@ -8078,153 +9584,199 @@ class SmartGroupEvaluator {
   // ===============================
   // GROUP MEMBERS
   // ===============================
- // Add these methods inside your SmartGroupEvaluator class
+  // Add these methods inside your SmartGroupEvaluator class
 
-renderGroupMembers() {
+  renderGroupMembers() {
     if (!this.dom.groupMembersGroupSelect || !this.dom.groupMembersList) {
-        console.error("Required DOM elements not found");
-        return;
+      console.error("Required DOM elements not found");
+      return;
     }
 
     try {
-        // Calculate statistics
-        const totalStudents = this.state.students.length;
-        const totalGroups = this.state.groups.length;
-        const studentsWithoutRole = this.state.students.filter(s => !s.role).length;
-        const groupPerformance = this.calculateGroupPerformanceStats();
-        
-        // Render the interface
-        this.renderEnhancedGroupMembersInterface(totalStudents, totalGroups, studentsWithoutRole, groupPerformance);
-        
-        // Setup event listeners
-        this.setupGroupMembersEventListeners();
-        
+      // Calculate statistics
+      const totalStudents = this.state.students.length;
+      const totalGroups = this.state.groups.length;
+      const studentsWithoutRole = this.state.students.filter(
+        (s) => !s.role
+      ).length;
+      const groupPerformance = this.calculateGroupPerformanceStats();
+
+      // Render the interface
+      this.renderEnhancedGroupMembersInterface(
+        totalStudents,
+        totalGroups,
+        studentsWithoutRole,
+        groupPerformance
+      );
+
+      // Setup event listeners
+      this.setupGroupMembersEventListeners();
     } catch (error) {
-        console.error("Error in renderGroupMembers:", error);
-        this.showToast("গ্রুপ মেম্বারস লোড করতে সমস্যা", "error");
+      console.error("Error in renderGroupMembers:", error);
+      this.showToast("গ্রুপ মেম্বারস লোড করতে সমস্যা", "error");
     }
-}
+  }
 
-calculateGroupPerformanceStats() {
+  calculateGroupPerformanceStats() {
     const performance = {};
-    
-    this.state.groups.forEach(group => {
-        const groupStudents = this.getStudentsInGroup(group.id);
-        const groupEvaluations = this.state.evaluations.filter(e => e.groupId === group.id);
-        
-        let totalScore = 0;
-        let evaluationCount = 0;
 
-        groupEvaluations.forEach(evaluation => {
-            if (evaluation.scores) {
-                Object.values(evaluation.scores).forEach(score => {
-                    let additionalMarks = 0;
-                    if (score.optionMarks) {
-                        Object.values(score.optionMarks).forEach(option => {
-                            if (option.selected && option.optionId) {
-                                const optDef = this.evaluationOptions.find(o => o.id === option.optionId);
-                                if (optDef) additionalMarks += optDef.marks;
-                            }
-                        });
-                    }
-                    
-                    totalScore += (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
-                    evaluationCount++;
-                });
+    this.state.groups.forEach((group) => {
+      const groupStudents = this.getStudentsInGroup(group.id);
+      const groupEvaluations = this.state.evaluations.filter(
+        (e) => e.groupId === group.id
+      );
+
+      let totalScore = 0;
+      let evaluationCount = 0;
+
+      groupEvaluations.forEach((evaluation) => {
+        if (evaluation.scores) {
+          Object.values(evaluation.scores).forEach((score) => {
+            let additionalMarks = 0;
+            if (score.optionMarks) {
+              Object.values(score.optionMarks).forEach((option) => {
+                if (option.selected && option.optionId) {
+                  const optDef = this.evaluationOptions.find(
+                    (o) => o.id === option.optionId
+                  );
+                  if (optDef) additionalMarks += optDef.marks;
+                }
+              });
             }
-        });
 
-        const averageScore = evaluationCount > 0 ? totalScore / evaluationCount : 0;
-        const roleDistribution = this.calculateRoleDistribution(groupStudents);
+            totalScore +=
+              (score.taskScore || 0) +
+              (score.teamworkScore || 0) +
+              additionalMarks;
+            evaluationCount++;
+          });
+        }
+      });
 
-        performance[group.id] = {
-            averageScore: averageScore,
-            memberCount: groupStudents.length,
-            evaluationCount: evaluationCount,
-            roleDistribution: roleDistribution,
-            performanceLevel: this.getPerformanceLevel(averageScore)
-        };
+      const averageScore =
+        evaluationCount > 0 ? totalScore / evaluationCount : 0;
+      const roleDistribution = this.calculateRoleDistribution(groupStudents);
+
+      performance[group.id] = {
+        averageScore: averageScore,
+        memberCount: groupStudents.length,
+        evaluationCount: evaluationCount,
+        roleDistribution: roleDistribution,
+        performanceLevel: this.getPerformanceLevel(averageScore),
+      };
     });
 
     return performance;
-}
+  }
 
-calculateRoleDistribution(students) {
+  calculateRoleDistribution(students) {
     const distribution = {};
-    students.forEach(student => {
-        if (student.role) {
-            distribution[student.role] = (distribution[student.role] || 0) + 1;
-        }
+    students.forEach((student) => {
+      if (student.role) {
+        distribution[student.role] = (distribution[student.role] || 0) + 1;
+      }
     });
     return distribution;
-}
+  }
 
-getPerformanceLevel(score) {
-    if (score >= 80) return { level: 'অসাধারণ', color: 'text-green-600', bg: 'bg-green-100' };
-    if (score >= 60) return { level: 'ভাল', color: 'text-blue-600', bg: 'bg-blue-100' };
-    if (score >= 40) return { level: 'মধ্যম', color: 'text-yellow-600', bg: 'bg-yellow-100' };
-    return { level: 'সুযোগ প্রয়োজন', color: 'text-red-600', bg: 'bg-red-100' };
-}
+  getPerformanceLevel(score) {
+    if (score >= 80)
+      return { level: "অসাধারণ", color: "text-green-600", bg: "bg-green-100" };
+    if (score >= 60)
+      return { level: "ভাল", color: "text-blue-600", bg: "bg-blue-100" };
+    if (score >= 40)
+      return { level: "মধ্যম", color: "text-yellow-600", bg: "bg-yellow-100" };
+    return { level: "সুযোগ প্রয়োজন", color: "text-red-600", bg: "bg-red-100" };
+  }
 
-renderEnhancedGroupMembersInterface(totalStudents, totalGroups, studentsWithoutRole, groupPerformance) {
-    const academicGroups = [...new Set(this.state.students.map(s => s.academicGroup).filter(Boolean))];
-    
+  renderEnhancedGroupMembersInterface(
+    totalStudents,
+    totalGroups,
+    studentsWithoutRole,
+    groupPerformance
+  ) {
+    const academicGroups = [
+      ...new Set(
+        this.state.students.map((s) => s.academicGroup).filter(Boolean)
+      ),
+    ];
+
     this.dom.groupMembersList.innerHTML = `
         <div class="group-management-container space-y-6">
-            ${this.renderStatisticsSection(totalStudents, totalGroups, studentsWithoutRole, groupPerformance)}
+            ${this.renderStatisticsSection(
+              totalStudents,
+              totalGroups,
+              studentsWithoutRole,
+              groupPerformance
+            )}
             ${this.renderFilterSection(academicGroups)}
             <div id="groupsDisplayContainer" class="grid grid-cols-1 xl:grid-cols-2 gap-6"></div>
         </div>
     `;
 
     this.updateGroupsDisplay();
-}
+  }
 
-renderStatisticsSection(totalStudents, totalGroups, studentsWithoutRole, groupPerformance) {
-    const avgPerformance = Object.values(groupPerformance).length > 0 ? 
-        (Object.values(groupPerformance).reduce((sum, gp) => sum + gp.averageScore, 0) / Object.values(groupPerformance).length).toFixed(1) 
-        : '0.0';
+  renderStatisticsSection(
+    totalStudents,
+    totalGroups,
+    studentsWithoutRole,
+    groupPerformance
+  ) {
+    const avgPerformance =
+      Object.values(groupPerformance).length > 0
+        ? (
+            Object.values(groupPerformance).reduce(
+              (sum, gp) => sum + gp.averageScore,
+              0
+            ) / Object.values(groupPerformance).length
+          ).toFixed(1)
+        : "0.0";
 
     return `
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             ${this.renderStatCard(
-                'মোট শিক্ষার্থী', 
-                totalStudents, 
-                'fas fa-users', 
-                'from-blue-500 to-blue-600',
-                'সকল একাডেমিক গ্রুপ'
+              "মোট শিক্ষার্থী",
+              totalStudents,
+              "fas fa-users",
+              "from-blue-500 to-blue-600",
+              "সকল একাডেমিক গ্রুপ"
             )}
             ${this.renderStatCard(
-                'সক্রিয় গ্রুপ', 
-                totalGroups, 
-                'fas fa-layer-group', 
-                'from-green-500 to-green-600',
-                `${this.convertToBanglaNumber(Object.keys(groupPerformance).length)}টি সক্রিয়`
+              "সক্রিয় গ্রুপ",
+              totalGroups,
+              "fas fa-layer-group",
+              "from-green-500 to-green-600",
+              `${this.convertToBanglaNumber(
+                Object.keys(groupPerformance).length
+              )}টি সক্রিয়`
             )}
             ${this.renderStatCard(
-                'দায়িত্ব বাকি', 
-                studentsWithoutRole, 
-                'fas fa-user-clock', 
-                'from-amber-500 to-amber-600',
-                'অ্যাসাইনমেন্ট প্রয়োজন'
+              "দায়িত্ব বাকি",
+              studentsWithoutRole,
+              "fas fa-user-clock",
+              "from-amber-500 to-amber-600",
+              "অ্যাসাইনমেন্ট প্রয়োজন"
             )}
             ${this.renderStatCard(
-                'গড় পারফরম্যান্স', 
-                avgPerformance, 
-                'fas fa-chart-line', 
-                'from-purple-500 to-purple-600',
-                'সকল গ্রুপের গড়'
+              "গড় পারফরম্যান্স",
+              avgPerformance,
+              "fas fa-chart-line",
+              "from-purple-500 to-purple-600",
+              "সকল গ্রুপের গড়"
             )}
         </div>
     `;
-}
+  }
 
-renderStatCard(title, value, icon, gradient, subtitle) {
+  renderStatCard(title, value, icon, gradient, subtitle) {
     return `
         <div class="stat-card bg-gradient-to-br ${gradient} text-white rounded-2xl p-6 shadow-lg transition-all duration-300 hover:scale-105">
             <div class="flex items-center justify-between">
                 <div>
-                    <div class="text-2xl font-bold">${this.convertToBanglaNumber(value)}</div>
+                    <div class="text-2xl font-bold">${this.convertToBanglaNumber(
+                      value
+                    )}</div>
                     <div class="text-sm opacity-90">${title}</div>
                 </div>
                 <div class="text-3xl opacity-80">
@@ -8236,134 +9788,179 @@ renderStatCard(title, value, icon, gradient, subtitle) {
             </div>
         </div>
     `;
-}
+  }
 
-renderFilterSection(academicGroups) {
+  renderFilterSection(academicGroups) {
     return `
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-            <div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
-                <div class="flex-1 w-full">
-                    <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-                        <i class="fas fa-filter mr-2"></i>ফিল্টার নির্বাচন
-                    </label>
-                    <select id="groupMembersGroupSelect" 
-                            class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
-                        ${this.renderFilterOptions(academicGroups)}
-                    </select>
-                </div>
-                
-                <div class="flex gap-3">
-                    <button onclick="smartEvaluator.handleAutoAssignRoles()" 
-                            class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl flex items-center">
-                        <i class="fas fa-robot mr-2"></i>
-                        অটো অ্যাসাইন
-                    </button>
-                    
-                    <button onclick="smartEvaluator.handleRefreshGroupData()" 
-                            class="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl flex items-center">
-                        <i class="fas fa-sync-alt mr-2"></i>
-                        রিফ্রেশ
-                    </button>
-                </div>
-            </div>
-
-            ${this.renderQuickStats()}
+    <div class="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-xl dark:shadow-gray-800 border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+      
+      <div class="flex flex-col lg:flex-row gap-4 items-center justify-between mb-6">
+        
+        <!-- Filter -->
+        <div class="flex-1 w-full">
+          <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+            <i class="fas fa-filter mr-2"></i>ফিল্টার নির্বাচন
+          </label>
+          <select id="groupMembersGroupSelect" 
+                  class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-700 transition-all duration-200">
+            ${this.renderFilterOptions(academicGroups)}
+          </select>
         </div>
-    `;
-}
+  
+        <!-- Action Buttons -->
+        <div class="flex gap-3 mt-3 lg:mt-0">
+          <button onclick="smartEvaluator.handleAutoAssignRoles()" 
+                  class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-5 py-3 rounded-xl font-semibold transition-transform transform hover:-translate-y-0.5 shadow-md hover:shadow-lg flex items-center">
+            <i class="fas fa-robot mr-2"></i>
+            অটো অ্যাসাইন
+          </button>
+  
+          <button onclick="smartEvaluator.handleRefreshGroupData()" 
+                  class="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white px-5 py-3 rounded-xl font-semibold transition-transform transform hover:-translate-y-0.5 shadow-md hover:shadow-lg flex items-center">
+            <i class="fas fa-sync-alt mr-2"></i>
+            রিফ্রেশ
+          </button>
+        </div>
+  
+      </div>
+  
+      <!-- Quick Stats Section -->
+      <div class="mt-4">
+        ${this.renderQuickStats()}
+      </div>
+  
+    </div>
+  `;
+  }
 
-renderFilterOptions(academicGroups) {
+  renderFilterOptions(academicGroups) {
     return `
         <option value="all">সকল গ্রুপ</option>
         <option value="ungrouped">গ্রুপবিহীন শিক্ষার্থী</option>
         <optgroup label="একাডেমিক গ্রুপ">
-            ${academicGroups.map(group => 
-                `<option value="academic_${group}">${group}</option>`
-            ).join('')}
+            ${academicGroups
+              .map(
+                (group) => `<option value="academic_${group}">${group}</option>`
+              )
+              .join("")}
         </optgroup>
         <optgroup label="গ্রুপ ভিত্তিক">
             ${this.state.groups
-                .map((g) => `<option value="${g.id}">${g.name}</option>`)
-                .join("")}
+              .map((g) => `<option value="${g.id}">${g.name}</option>`)
+              .join("")}
         </optgroup>
     `;
-}
+  }
 
-renderQuickStats() {
+  renderQuickStats() {
     const roleStats = {
-        'team-leader': this.state.students.filter(s => s.role === 'team-leader').length,
-        'reporter': this.state.students.filter(s => s.role === 'reporter').length,
-        'time-keeper': this.state.students.filter(s => s.role === 'time-keeper').length,
-        'resource-manager': this.state.students.filter(s => s.role === 'resource-manager').length
+      "team-leader": this.state.students.filter((s) => s.role === "team-leader")
+        .length,
+      reporter: this.state.students.filter((s) => s.role === "reporter").length,
+      "time-keeper": this.state.students.filter((s) => s.role === "time-keeper")
+        .length,
+      "resource-manager": this.state.students.filter(
+        (s) => s.role === "resource-manager"
+      ).length,
     };
 
     return `
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
-            ${Object.entries(roleStats).map(([role, count]) => `
+            ${Object.entries(roleStats)
+              .map(
+                ([role, count]) => `
                 <div class="text-center">
-                    <div class="text-lg font-bold text-gray-800 dark:text-white">${this.convertToBanglaNumber(count)}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">${this.roleNames[role]}</div>
+                    <div class="text-lg font-bold text-gray-800 dark:text-white">${this.convertToBanglaNumber(
+                      count
+                    )}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">${
+                      this.roleNames[role]
+                    }</div>
                 </div>
-            `).join('')}
+            `
+              )
+              .join("")}
         </div>
     `;
-}
+  }
 
-setupGroupMembersEventListeners() {
-    const selectElement = document.getElementById('groupMembersGroupSelect');
+  setupGroupMembersEventListeners() {
+    const selectElement = document.getElementById("groupMembersGroupSelect");
     if (selectElement) {
-        // Remove existing event listeners to prevent duplicates
-        selectElement.replaceWith(selectElement.cloneNode(true));
-        
-        const newSelect = document.getElementById('groupMembersGroupSelect');
-        newSelect.addEventListener('change', (e) => {
-            this.filters.groupMembersFilterGroupId = e.target.value;
-            this.updateGroupsDisplay();
-        });
+      // Remove existing event listeners to prevent duplicates
+      selectElement.replaceWith(selectElement.cloneNode(true));
 
-        if (this.filters.groupMembersFilterGroupId) {
-            newSelect.value = this.filters.groupMembersFilterGroupId;
-        }
+      const newSelect = document.getElementById("groupMembersGroupSelect");
+      newSelect.addEventListener("change", (e) => {
+        this.filters.groupMembersFilterGroupId = e.target.value;
+        this.updateGroupsDisplay();
+      });
+
+      if (this.filters.groupMembersFilterGroupId) {
+        newSelect.value = this.filters.groupMembersFilterGroupId;
+      }
     }
-}
+  }
 
-updateGroupsDisplay() {
-    const container = document.getElementById('groupsDisplayContainer');
+  updateGroupsDisplay() {
+    const container = document.getElementById("groupsDisplayContainer");
     if (!container) return;
 
-    const filter = this.filters.groupMembersFilterGroupId || 'all';
+    const filter = this.filters.groupMembersFilterGroupId || "all";
     const groupsToShow = this.getFilteredGroups(filter);
 
     if (groupsToShow.length === 0) {
-        container.innerHTML = this.renderEmptyState();
-        return;
+      container.innerHTML = this.renderEmptyState();
+      return;
     }
 
-    container.innerHTML = groupsToShow.map((group, index) => 
-        this.renderGroupCard(group, index)
-    ).join('');
-}
+    container.innerHTML = groupsToShow
+      .map((group, index) => this.renderGroupCard(group, index))
+      .join("");
+  }
 
-getFilteredGroups(filter) {
-    if (filter === 'all') {
-        return this.state.groups;
-    } else if (filter === 'ungrouped') {
-        const ungroupedStudents = this.state.students.filter(s => !s.groupId);
-        return ungroupedStudents.length > 0 ? [{ id: 'ungrouped', name: 'গ্রুপবিহীন শিক্ষার্থী', isUngrouped: true }] : [];
-    } else if (filter.startsWith('academic_')) {
-        const academicGroup = filter.replace('academic_', '');
-        const academicStudents = this.state.students.filter(s => s.academicGroup === academicGroup);
-        const academicGroups = [...new Set(academicStudents.map(s => s.groupId).filter(Boolean))];
-        
-        const groups = this.state.groups.filter(g => academicGroups.includes(g.id));
-        return groups.length > 0 ? groups : [{ id: filter, name: `${academicGroup} - একাডেমিক গ্রুপ`, isAcademic: true }];
+  getFilteredGroups(filter) {
+    if (filter === "all") {
+      return this.state.groups;
+    } else if (filter === "ungrouped") {
+      const ungroupedStudents = this.state.students.filter((s) => !s.groupId);
+      return ungroupedStudents.length > 0
+        ? [
+            {
+              id: "ungrouped",
+              name: "গ্রুপবিহীন শিক্ষার্থী",
+              isUngrouped: true,
+            },
+          ]
+        : [];
+    } else if (filter.startsWith("academic_")) {
+      const academicGroup = filter.replace("academic_", "");
+      const academicStudents = this.state.students.filter(
+        (s) => s.academicGroup === academicGroup
+      );
+      const academicGroups = [
+        ...new Set(academicStudents.map((s) => s.groupId).filter(Boolean)),
+      ];
+
+      const groups = this.state.groups.filter((g) =>
+        academicGroups.includes(g.id)
+      );
+      return groups.length > 0
+        ? groups
+        : [
+            {
+              id: filter,
+              name: `${academicGroup} - একাডেমিক গ্রুপ`,
+              isAcademic: true,
+            },
+          ];
     } else {
-        const specificGroup = this.state.groups.find(g => g.id === filter);
-        return specificGroup ? [specificGroup] : [];
+      const specificGroup = this.state.groups.find((g) => g.id === filter);
+      return specificGroup ? [specificGroup] : [];
     }
-}
+  }
 
-renderEmptyState() {
+  renderEmptyState() {
     return `
         <div class="col-span-2 text-center py-12">
             <div class="text-gray-400 text-6xl mb-4">
@@ -8373,40 +9970,138 @@ renderEmptyState() {
             <p class="text-gray-500 dark:text-gray-500">বর্তমান ফিল্টারে কোনো গ্রুপ বা শিক্ষার্থী নেই</p>
         </div>
     `;
-}
+  }
 
-renderGroupCard(group, index) {
-    const isUngrouped = group.isUngrouped;
-    const isAcademic = group.isAcademic;
-    const groupStudents = this.getGroupStudents(group, isUngrouped, isAcademic);
-    const performance = this.calculateGroupPerformanceStats()[group.id] || {};
-    const colorClass = this.getGroupColorClass(index);
-    const roleDistribution = this.calculateRoleDistribution(groupStudents);
+  renderGroupCard(group, index) {
+    const groupStudents = this.getGroupStudents(group);
+
+    // ===============================
+    // 1️⃣ ইউনিক গ্রুপ কালার (ডার্ক, subtle)
+    // ===============================
+    const groupColors = [
+      "bg-indigo-900",
+      "bg-purple-900",
+      "bg-blue-900",
+      "bg-teal-900",
+      "bg-emerald-900",
+      "bg-fuchsia-900",
+      "bg-pink-900",
+      "bg-violet-900",
+      "bg-cyan-900",
+      "bg-rose-900",
+    ];
+    const groupColor = groupColors[index % groupColors.length];
+
+    // ===============================
+    // 2️⃣ রোল অনুযায়ী ব্যাজ কালার
+    // ===============================
+    const roleColors = {
+      "টিম লিডার": "bg-red-500",
+      "টাইম কিপার": "bg-blue-500",
+      রিপোর্টার: "bg-green-500",
+      "রিসোর্স ম্যানেজার": "bg-pink-500",
+      "পিস মেকার": "bg-teal-500",
+      default: "bg-gray-500",
+    };
 
     return `
-        <div class="group-card ${colorClass} rounded-2xl p-6 shadow-xl border-2 border-white dark:border-gray-700 transition-all duration-300 hover:shadow-2xl">
-            ${this.renderGroupHeader(group, isUngrouped, isAcademic, groupStudents, performance)}
-            ${Object.keys(roleDistribution).length > 0 ? this.renderRoleDistribution(roleDistribution) : ''}
-            ${this.renderStudentsList(groupStudents)}
+    <div class="group-container rounded-2xl p-4 shadow-lg border border-white/20 dark:border-gray-700 ${groupColor} transition-all hover:shadow-2xl">
+
+        <!-- Group Header -->
+        <div class="group-header flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
+            <h3 class="text-2xl font-bold text-white">${group.name}</h3>
+            <p class="text-sm text-white/80">${
+              groupStudents.length
+            } জন শিক্ষার্থী</p>
         </div>
+
+        <!-- Students List -->
+        <div class="students-list flex flex-col gap-3">
+            ${groupStudents
+              .map((student) => {
+                const badgeColor =
+                  roleColors[student.role] || roleColors.default;
+
+                return `
+                <div class="student-row flex flex-col md:flex-row md:items-center justify-between p-3 rounded-xl bg-white/90 dark:bg-gray-800 hover:bg-white/95 dark:hover:bg-gray-700 transition-all shadow-sm">
+                    
+                    <!-- Name + Info -->
+                    <div class="flex items-center gap-3 flex-1">
+                        <i class="fas fa-user-circle text-2xl text-gray-400 dark:text-gray-300"></i>
+                        <div>
+                            <div class="font-semibold text-gray-900 dark:text-white">${
+                              student.name
+                            }</div>
+                            <div class="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                                রোল: ${student.roll || "নাই"} | জেন্ডার: ${
+                  student.gender
+                } | একাডেমিক: ${student.academicGroup || "নাই"} | সেশন: ${
+                  student.session || "নাই"
+                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Role Badge + Update -->
+                    <div class="flex items-center gap-3 mt-2 md:mt-0">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold text-white ${badgeColor} shadow">
+                            ${student.role || "দায়িত্ব বাকি"}
+                        </span>
+
+                        <select class="role-select text-xs rounded-lg border border-gray-300 dark:border-gray-600 px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                                data-student-id="${student.id}">
+                            ${[
+                              "টিম লিডার",
+                              "টাইম কিপার",
+                              "রিপোর্টার",
+                              "রিসোর্স ম্যানেজার",
+                              "পিস মেকার",
+                            ]
+                              .map(
+                                (roleName) => `
+                                    <option value="${roleName}" ${
+                                  student.role === roleName ? "selected" : ""
+                                }>
+                                        ${roleName}
+                                    </option>`
+                              )
+                              .join("")}
+                        </select>
+                    </div>
+                </div>
+                `;
+              })
+              .join("")}
+        </div>
+    </div>
     `;
-}
+  }
 
-getGroupStudents(group, isUngrouped, isAcademic) {
+  getGroupStudents(group, isUngrouped, isAcademic) {
     if (isUngrouped) {
-        return this.state.students.filter(s => !s.groupId);
+      return this.state.students.filter((s) => !s.groupId);
     } else if (isAcademic) {
-        const academicGroup = group.name.split(' - ')[0];
-        return this.state.students.filter(s => s.academicGroup === academicGroup);
+      const academicGroup = group.name.split(" - ")[0];
+      return this.state.students.filter(
+        (s) => s.academicGroup === academicGroup
+      );
     } else {
-        return this.state.students.filter(s => s.groupId === group.id);
+      return this.state.students.filter((s) => s.groupId === group.id);
     }
-}
+  }
 
-renderGroupHeader(group, isUngrouped, isAcademic, groupStudents, performance) {
-    const icon = isUngrouped ? 'fa-users-slash text-amber-500' : 
-                 isAcademic ? 'fa-graduation-cap text-purple-500' : 
-                 'fa-users text-blue-500';
+  renderGroupHeader(
+    group,
+    isUngrouped,
+    isAcademic,
+    groupStudents,
+    performance
+  ) {
+    const icon = isUngrouped
+      ? "fa-users-slash text-amber-500"
+      : isAcademic
+      ? "fa-graduation-cap text-purple-500"
+      : "fa-users text-blue-500";
 
     return `
         <div class="flex justify-between items-start mb-4">
@@ -8417,73 +10112,108 @@ renderGroupHeader(group, isUngrouped, isAcademic, groupStudents, performance) {
                 </h3>
                 <div class="flex flex-wrap gap-2 text-sm">
                     <span class="bg-white/80 dark:bg-gray-700/80 px-3 py-1 rounded-full text-gray-700 dark:text-gray-300 font-medium">
-                        <i class="fas fa-user mr-1"></i>${this.convertToBanglaNumber(groupStudents.length)} সদস্য
+                        <i class="fas fa-user mr-1"></i>${this.convertToBanglaNumber(
+                          groupStudents.length
+                        )} সদস্য
                     </span>
-                    ${!isUngrouped && !isAcademic && performance.averageScore ? `
+                    ${
+                      !isUngrouped && !isAcademic && performance.averageScore
+                        ? `
                         <span class="bg-white/80 dark:bg-gray-700/80 px-3 py-1 rounded-full text-gray-700 dark:text-gray-300 font-medium">
-                            <i class="fas fa-chart-line mr-1"></i>গড়: ${performance.averageScore.toFixed(1)}
+                            <i class="fas fa-chart-line mr-1"></i>গড়: ${performance.averageScore.toFixed(
+                              1
+                            )}
                         </span>
-                    ` : ''}
+                    `
+                        : ""
+                    }
                 </div>
             </div>
             
-            ${!isUngrouped && !isAcademic ? this.renderPerformanceScore(performance) : ''}
+            ${
+              !isUngrouped && !isAcademic
+                ? this.renderPerformanceScore(performance)
+                : ""
+            }
         </div>
     `;
-}
+  }
 
-renderPerformanceScore(performance) {
+  renderPerformanceScore(performance) {
     return `
         <div class="text-right">
-            <div class="text-2xl font-bold ${performance.performanceLevel?.color || 'text-gray-500'}">
-                ${performance.averageScore ? performance.averageScore.toFixed(1) : '০.০'}
+            <div class="text-2xl font-bold ${
+              performance.performanceLevel?.color || "text-gray-500"
+            }">
+                ${
+                  performance.averageScore
+                    ? performance.averageScore.toFixed(1)
+                    : "০.০"
+                }
             </div>
-            <div class="text-xs ${performance.performanceLevel?.color || 'text-gray-500'} font-medium">
-                ${performance.performanceLevel?.level || 'ডেটা নেই'}
+            <div class="text-xs ${
+              performance.performanceLevel?.color || "text-gray-500"
+            } font-medium">
+                ${performance.performanceLevel?.level || "ডেটা নেই"}
             </div>
         </div>
     `;
-}
+  }
 
-renderRoleDistribution(roleDistribution) {
+  renderRoleDistribution(roleDistribution) {
     return `
-        <div class="mb-4">
-            <div class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">দায়িত্ব বণ্টন:</div>
-            <div class="flex flex-wrap gap-1">
-                ${Object.entries(roleDistribution).map(([role, count]) => `
-                    <span class="role-badge ${role} px-2 py-1 rounded-lg text-xs font-medium text-white">
-                        ${this.roleNames[role]}: ${this.convertToBanglaNumber(count)}
-                    </span>
-                `).join('')}
-            </div>
-        </div>
-    `;
-}
+    <div class="mb-4">
+      <div class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        দায়িত্ব বণ্টন:
+      </div>
+      <div class="flex flex-wrap gap-2">
+        ${Object.entries(roleDistribution)
+          .map(
+            ([role, count]) => `
+            <span class="role-badge ${role} px-3 py-1 rounded-lg text-xs font-medium transition-colors
+                             bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 shadow-sm
+                             hover:bg-gray-300 dark:hover:bg-gray-600">
+              ${this.roleNames[role]}: ${this.convertToBanglaNumber(count)}
+            </span>
+          `
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+  }
 
-renderStudentsList(groupStudents) {
+  renderStudentsList(groupStudents) {
     if (groupStudents.length === 0) {
-        return this.renderEmptyStudentsState();
+      return this.renderEmptyStudentsState();
     }
 
     return `
         <div class="space-y-3 max-h-80 overflow-y-auto pr-2">
-            ${groupStudents.map(student => this.renderStudentCard(student)).join('')}
+            ${groupStudents
+              .map((student) => this.renderStudentCard(student))
+              .join("")}
         </div>
     `;
-}
+  }
 
-renderEmptyStudentsState() {
+  renderEmptyStudentsState() {
     return `
         <div class="text-center py-8 text-gray-500 dark:text-gray-400">
             <i class="fas fa-user-slash text-4xl mb-3 opacity-50"></i>
             <p>কোনো শিক্ষার্থী নেই</p>
         </div>
     `;
-}
+  }
 
-renderStudentCard(student) {
-    const studentEvaluations = this.state.evaluations.filter(e => e.scores && e.scores[student.id]);
-    const averageScore = this.calculateStudentAverageScore(studentEvaluations, student.id);
+  renderStudentCard(student) {
+    const studentEvaluations = this.state.evaluations.filter(
+      (e) => e.scores && e.scores[student.id]
+    );
+    const averageScore = this.calculateStudentAverageScore(
+      studentEvaluations,
+      student.id
+    );
     const performanceLevel = this.getPerformanceLevel(averageScore);
 
     return `
@@ -8491,56 +10221,71 @@ renderStudentCard(student) {
             <div class="flex items-center justify-between">
                 <div class="flex-1">
                     ${this.renderStudentInfo(student)}
-                    ${this.renderStudentPerformance(studentEvaluations, averageScore, performanceLevel)}
+                    ${this.renderStudentPerformance(
+                      studentEvaluations,
+                      averageScore,
+                      performanceLevel
+                    )}
                 </div>
                 ${this.renderRoleSelector(student)}
             </div>
             ${this.renderStudentAdditionalInfo(student)}
         </div>
     `;
-}
+  }
 
-calculateStudentAverageScore(evaluations, studentId) {
+  calculateStudentAverageScore(evaluations, studentId) {
     if (evaluations.length === 0) return 0;
 
     const totalScore = evaluations.reduce((sum, evaluation) => {
-        const score = evaluation.scores[studentId];
-        let additionalMarks = 0;
-        
-        if (score.optionMarks) {
-            Object.values(score.optionMarks).forEach(option => {
-                if (option.selected && option.optionId) {
-                    const optDef = this.evaluationOptions.find(o => o.id === option.optionId);
-                    if (optDef) additionalMarks += optDef.marks;
-                }
-            });
-        }
-        
-        return sum + (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
+      const score = evaluation.scores[studentId];
+      let additionalMarks = 0;
+
+      if (score.optionMarks) {
+        Object.values(score.optionMarks).forEach((option) => {
+          if (option.selected && option.optionId) {
+            const optDef = this.evaluationOptions.find(
+              (o) => o.id === option.optionId
+            );
+            if (optDef) additionalMarks += optDef.marks;
+          }
+        });
+      }
+
+      return (
+        sum +
+        (score.taskScore || 0) +
+        (score.teamworkScore || 0) +
+        additionalMarks
+      );
     }, 0);
 
     return totalScore / evaluations.length;
-}
+  }
 
-renderStudentInfo(student) {
+  renderStudentInfo(student) {
     return `
         <div class="flex items-center gap-3 mb-2">
             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
                 ${student.name.charAt(0)}
             </div>
             <div class="flex-1">
-                <div class="font-semibold text-gray-800 dark:text-white">${student.name}</div>
+                <div class="font-semibold text-gray-800 dark:text-white">${
+                  student.name
+                }</div>
                 <div class="text-xs text-gray-600 dark:text-gray-400">
-                    রোল: ${student.roll} | ${student.academicGroup || 'একাডেমিক গ্রুপ নেই'}
+                    রোল: ${student.roll} | ${
+      student.academicGroup || "একাডেমিক গ্রুপ নেই"
+    }
                 </div>
             </div>
         </div>
     `;
-}
+  }
 
-renderStudentPerformance(evaluations, averageScore, performanceLevel) {
+  renderStudentPerformance(evaluations, averageScore, performanceLevel) {
     if (evaluations.length === 0) {
-        return `
+      return `
             <div class="text-xs text-amber-600 font-medium">
                 <i class="fas fa-clock mr-1"></i>মূল্যায়ন প্রয়োজন
             </div>
@@ -8550,153 +10295,191 @@ renderStudentPerformance(evaluations, averageScore, performanceLevel) {
     return `
         <div class="flex items-center gap-2 text-xs">
             <div class="flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full ${performanceLevel.bg}"></span>
-                <span class="${performanceLevel.color} font-medium">${averageScore.toFixed(1)} স্কোর</span>
+                <span class="w-2 h-2 rounded-full ${
+                  performanceLevel.bg
+                }"></span>
+                <span class="${
+                  performanceLevel.color
+                } font-medium">${averageScore.toFixed(1)} স্কোর</span>
             </div>
             <span class="text-gray-400">•</span>
-            <span class="text-gray-500">${this.convertToBanglaNumber(evaluations.length)} মূল্যায়ন</span>
+            <span class="text-gray-500">${this.convertToBanglaNumber(
+              evaluations.length
+            )} মূল্যায়ন</span>
         </div>
     `;
-}
+  }
 
-renderRoleSelector(student) {
+  renderRoleSelector(student) {
     return `
         <div class="ml-4">
             <select class="role-selector border-2 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                    onchange="smartEvaluator.updateStudentRole('${student.id}', this.value)"
+                    onchange="smartEvaluator.updateStudentRole('${
+                      student.id
+                    }', this.value)"
                     data-student-id="${student.id}">
                 <option value="">দায়িত্ব নির্বাচন</option>
-                ${Object.entries(this.roleNames).map(([key, value]) => `
-                    <option value="${key}" ${student.role === key ? 'selected' : ''}>${value}</option>
-                `).join('')}
+                ${Object.entries(this.roleNames)
+                  .map(
+                    ([key, value]) => `
+                    <option value="${key}" ${
+                      student.role === key ? "selected" : ""
+                    }>${value}</option>
+                `
+                  )
+                  .join("")}
             </select>
         </div>
     `;
-}
+  }
 
-renderStudentAdditionalInfo(student) {
+  renderStudentAdditionalInfo(student) {
     return `
         <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600 flex justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>${student.gender === 'ছেলে' ? '👦 ছেলে' : '👧 মেয়ে'}</span>
-            <span>${student.session || 'সেশন নেই'}</span>
-            ${student.contact ? `<span>📧 ${student.contact}</span>` : ''}
+            <span>${student.gender === "ছেলে" ? "👦 ছেলে" : "👧 মেয়ে"}</span>
+            <span>${student.session || "সেশন নেই"}</span>
+            ${student.contact ? `<span>📧 ${student.contact}</span>` : ""}
         </div>
     `;
-}
+  }
 
-getGroupColorClass(index) {
+  getGroupColorClass(index) {
     const colors = [
-        'bg-gradient-to-br from-blue-50 to-cyan-100 dark:from-blue-900/20 dark:to-cyan-900/20',
-        'bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20',
-        'bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20',
-        'bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20',
-        'bg-gradient-to-br from-cyan-50 to-blue-100 dark:from-cyan-900/20 dark:to-blue-900/20',
-        'bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20'
+      "bg-gradient-to-br from-blue-50 to-cyan-100 dark:from-blue-900/20 dark:to-cyan-900/20",
+      "bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20",
+      "bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20",
+      "bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20",
+      "bg-gradient-to-br from-cyan-50 to-blue-100 dark:from-cyan-900/20 dark:to-blue-900/20",
+      "bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20",
     ];
     return colors[index % colors.length];
-}
+  }
 
-// Event handler methods
-handleAutoAssignRoles() {
-    const studentsWithoutRoles = this.state.students.filter(s => !s.role && s.groupId);
-    
+  // Event handler methods
+  handleAutoAssignRoles() {
+    const studentsWithoutRoles = this.state.students.filter(
+      (s) => !s.role && s.groupId
+    );
+
     if (studentsWithoutRoles.length === 0) {
-        this.showToast("সকল শিক্ষার্থীর দায়িত্ব ইতিমধ্যে অ্যাসাইন করা আছে", "info");
-        return;
+      this.showToast(
+        "সকল শিক্ষার্থীর দায়িত্ব ইতিমধ্যে অ্যাসাইন করা আছে",
+        "info"
+      );
+      return;
     }
 
-    this.showLoading(`অটো অ্যাসাইনমেন্ট চলছে... (${studentsWithoutRoles.length} শিক্ষার্থী)`);
+    this.showLoading(
+      `অটো অ্যাসাইনমেন্ট চলছে... (${studentsWithoutRoles.length} শিক্ষার্থী)`
+    );
 
     // Use existing autoAssignRoles logic but ensure it follows class structure
     this.autoAssignRoles(studentsWithoutRoles);
-}
+  }
 
-handleRefreshGroupData() {
+  handleRefreshGroupData() {
     this.showLoading("ডেটা রিফ্রেশ হচ্ছে...");
-    this.loadStudents().then(() => {
+    this.loadStudents()
+      .then(() => {
         this.renderGroupMembers();
         this.showToast("ডেটা সফলভাবে রিফ্রেশ হয়েছে", "success");
-    }).catch(error => {
+      })
+      .catch((error) => {
         this.showToast("রিফ্রেশ করতে সমস্যা", "error");
-    });
-}
+      });
+  }
 
-// Make sure these methods exist in your class
-async updateStudentRole(studentId, newRole) {
+  // Make sure these methods exist in your class
+  async updateStudentRole(studentId, newRole) {
     try {
-        this.showLoading("দায়িত্ব আপডেট হচ্ছে...");
-        
-        await db.collection("students").doc(studentId).update({
-            role: newRole || null,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      this.showLoading("দায়িত্ব আপডেট হচ্ছে...");
+
+      await db
+        .collection("students")
+        .doc(studentId)
+        .update({
+          role: newRole || null,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+      // Update local state
+      const studentIndex = this.state.students.findIndex(
+        (s) => s.id === studentId
+      );
+      if (studentIndex !== -1) {
+        this.state.students[studentIndex].role = newRole || null;
+      }
+
+      // Clear cache and refresh display
+      this.cache.clear("students_data");
+      this.updateGroupsDisplay();
+
+      this.showToast("দায়িত্ব সফলভাবে আপডেট হয়েছে", "success");
+    } catch (error) {
+      console.error("Error updating student role:", error);
+      this.showToast("দায়িত্ব আপডেট করতে সমস্যা: " + error.message, "error");
+
+      // Revert the select value
+      const select = document.querySelector(`[data-student-id="${studentId}"]`);
+      if (select) {
+        const student = this.state.students.find((s) => s.id === studentId);
+        select.value = student?.role || "";
+      }
+    } finally {
+      this.hideLoading();
+    }
+  }
+
+  async autoAssignRoles(studentsWithoutRoles) {
+    try {
+      const roleKeys = Object.keys(this.roleNames);
+      let assignedCount = 0;
+
+      for (const student of studentsWithoutRoles) {
+        const randomRole =
+          roleKeys[Math.floor(Math.random() * roleKeys.length)];
+
+        await db.collection("students").doc(student.id).update({
+          role: randomRole,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
 
         // Update local state
-        const studentIndex = this.state.students.findIndex(s => s.id === studentId);
+        const studentIndex = this.state.students.findIndex(
+          (s) => s.id === student.id
+        );
         if (studentIndex !== -1) {
-            this.state.students[studentIndex].role = newRole || null;
+          this.state.students[studentIndex].role = randomRole;
         }
 
-        // Clear cache and refresh display
-        this.cache.clear("students_data");
-        this.updateGroupsDisplay();
-        
-        this.showToast("দায়িত্ব সফলভাবে আপডেট হয়েছে", "success");
+        assignedCount++;
+      }
+
+      // Clear cache and refresh
+      this.cache.clear("students_data");
+      this.updateGroupsDisplay();
+
+      this.showToast(
+        `${this.convertToBanglaNumber(
+          assignedCount
+        )} জন শিক্ষার্থীর দায়িত্ব অটো অ্যাসাইন হয়েছে`,
+        "success"
+      );
     } catch (error) {
-        console.error("Error updating student role:", error);
-        this.showToast("দায়িত্ব আপডেট করতে সমস্যা: " + error.message, "error");
-        
-        // Revert the select value
-        const select = document.querySelector(`[data-student-id="${studentId}"]`);
-        if (select) {
-            const student = this.state.students.find(s => s.id === studentId);
-            select.value = student?.role || '';
-        }
+      console.error("Error in auto-assign roles:", error);
+      this.showToast("অটো অ্যাসাইনমেন্ট ব্যর্থ: " + error.message, "error");
     } finally {
-        this.hideLoading();
+      this.hideLoading();
     }
-}
+  }
 
-async autoAssignRoles(studentsWithoutRoles) {
-    try {
-        const roleKeys = Object.keys(this.roleNames);
-        let assignedCount = 0;
-
-        for (const student of studentsWithoutRoles) {
-            const randomRole = roleKeys[Math.floor(Math.random() * roleKeys.length)];
-            
-            await db.collection("students").doc(student.id).update({
-                role: randomRole,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-            // Update local state
-            const studentIndex = this.state.students.findIndex(s => s.id === student.id);
-            if (studentIndex !== -1) {
-                this.state.students[studentIndex].role = randomRole;
-            }
-
-            assignedCount++;
-        }
-
-        // Clear cache and refresh
-        this.cache.clear("students_data");
-        this.updateGroupsDisplay();
-        
-        this.showToast(`${this.convertToBanglaNumber(assignedCount)} জন শিক্ষার্থীর দায়িত্ব অটো অ্যাসাইন হয়েছে`, "success");
-    } catch (error) {
-        console.error("Error in auto-assign roles:", error);
-        this.showToast("অটো অ্যাসাইনমেন্ট ব্যর্থ: " + error.message, "error");
-    } finally {
-        this.hideLoading();
-    }
-}
-
-// Utility method that should exist in your class
-convertToBanglaNumber(number) {
-    const banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
-    return number.toString().replace(/\d/g, digit => banglaDigits[parseInt(digit)]);
-}
+  // Utility method that should exist in your class
+  convertToBanglaNumber(number) {
+    const banglaDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+    return number
+      .toString()
+      .replace(/\d/g, (digit) => banglaDigits[parseInt(digit)]);
+  }
 
   updateGroupMembersList() {
     const groupId = this.filters.groupMembersFilterGroupId;
@@ -11606,7 +13389,7 @@ convertToBanglaNumber(number) {
 }
 
 // ===============================
-// GRAPH ANALYSIS SYSTEM - COMPLETE & WORKING GOOD BY Mustafa 
+// GRAPH ANALYSIS SYSTEM - COMPLETE & WORKING GOOD BY Mustafa
 // ===============================
 
 // class GraphAnalysisSystem {
@@ -11666,11 +13449,11 @@ convertToBanglaNumber(number) {
 //                         </div>
 
 //                         <div class="flex gap-2">
-//                             <button onclick="smartEvaluator.graphAnalysis.refreshGraphs()" 
+//                             <button onclick="smartEvaluator.graphAnalysis.refreshGraphs()"
 //                                     class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition-colors">
 //                                 <i class="fas fa-refresh mr-2"></i>রিফ্রেশ
 //                             </button>
-//                             <button onclick="smartEvaluator.graphAnalysis.exportGraph()" 
+//                             <button onclick="smartEvaluator.graphAnalysis.exportGraph()"
 //                                     class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm transition-colors">
 //                                 <i class="fas fa-download mr-2"></i>এক্সপোর্ট
 //                             </button>
@@ -12412,62 +14195,50 @@ convertToBanglaNumber(number) {
 //   }
 // }
 
-
-
-
-
-
-
-
-
 //new graph design added start:
 
 class GraphAnalysisSystem {
-    constructor(smartEvaluator) {
-        this.smartEvaluator = smartEvaluator;
-        this.barChart = null;
-        this.pieChart = null;
-        this.lineChart = null;
-        this.currentAnalysis = null;
-    }
+  constructor(smartEvaluator) {
+    this.smartEvaluator = smartEvaluator;
+    this.barChart = null;
+    this.pieChart = null;
+    this.lineChart = null;
+    this.currentAnalysis = null;
+  }
 
-    // Minimal working version
-    analyzeStudentProgress(evaluations, students) {
-        console.log("Analyzing student progress...");
-        
-        const studentProgress = {};
-        
-        // Basic implementation
-        students.forEach((student) => {
-            studentProgress[student.id] = {
-                name: student.name,
-                group: 'Test Group',
-                evaluations: [],
-                averageScore: 0,
-                trend: 'stable'
-            };
-        });
-        
-        return {
-            type: 'student_progress',
-            data: studentProgress,
-            summary: []
-        };
-    }
+  // Minimal working version
+  analyzeStudentProgress(evaluations, students) {
+    console.log("Analyzing student progress...");
 
-    // Add other methods one by one...
-    renderGraphAnalysis() {
-        console.log("Graph analysis rendered");
-    }
-    
-    // ... other methods
+    const studentProgress = {};
+
+    // Basic implementation
+    students.forEach((student) => {
+      studentProgress[student.id] = {
+        name: student.name,
+        group: "Test Group",
+        evaluations: [],
+        averageScore: 0,
+        trend: "stable",
+      };
+    });
+
+    return {
+      type: "student_progress",
+      data: studentProgress,
+      summary: [],
+    };
+  }
+
+  // Add other methods one by one...
+  renderGraphAnalysis() {
+    console.log("Graph analysis rendered");
+  }
+
+  // ... other methods
 }
 
 //new graph design added end:
-
-
-
-
 
 let smartEvaluator;
 
