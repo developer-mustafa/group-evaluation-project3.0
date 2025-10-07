@@ -30,41 +30,6 @@ class CacheManager {
     });
   }
 
-  // Update the init method to call this validation
-  async init() {
-    this.setupDOMReferences();
-    await this.initializeFirebase();
-    this.setupEventListeners();
-    this.setupAuthStateListener();
-    this.applySavedTheme();
-
-    // Validate DOM pages
-    this.validateDOMPages();
-
-    // DOM elements check করুন
-    console.log("DOM Elements Check:", {
-      headerLoginBtn: !!this.dom.headerLoginBtn,
-      logoutBtn: !!this.dom.logoutBtn,
-      userInfo: !!this.dom.userInfo,
-      appContainer: !!this.dom.appContainer,
-      authModal: !!this.dom.authModal,
-    });
-
-    // Initially set to public view
-    this.updateUserInterface(null);
-    this.enableAllNavigation(false);
-
-    // Public data load করুন
-    await this.loadPublicData();
-
-    this.isInitialized = true;
-    console.log("Smart Evaluator initialized successfully");
-
-    // Debug info
-    setTimeout(() => {
-      this.debugAuthState();
-    }, 2000);
-  }
 
   // Update the showPage method with better error handling
   showPage(pageId) {
@@ -6001,63 +5966,54 @@ class SmartGroupEvaluator {
   async editTask(id) {
     const task = this.state.tasks.find((t) => t.id === id);
     if (!task) return;
-
+  
     const dateStr = task.date?.seconds
       ? new Date(task.date.seconds * 1000).toISOString().split("T")[0]
       : "";
-
+  
     this.dom.editModalTitle.textContent = "টাস্ক সম্পাদনা";
     this.dom.editModalContent.innerHTML = `
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">টাস্ক নাম</label>
-                        <input id="editTaskName" type="text" value="${
-                          task.name
-                        }" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="100">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">বিবরণ</label>
-                        <textarea id="editTaskDescription" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="500">${
-                          task.description || ""
-                        }</textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">সর্বোচ্চ স্কোর</label>
-                        <input id="editTaskMaxScore" type="number" value="${
-                          task.maxScore
-                        }" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" min="1" max="1000">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">তারিখ</label>
-                        <input id="editTaskDate" type="date" value="${dateStr}" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
-                    </div>
-                </div>
-            `;
-
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">টাস্ক নাম</label>
+          <input id="editTaskName" type="text" value="${task.name}" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="100">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">বিবরণ</label>
+          <textarea id="editTaskDescription" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" maxlength="500">${task.description || ""}</textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">সর্বোচ্চ স্কোর</label>
+          <input id="editTaskMaxScore" type="number" value="${task.maxScore}" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white" min="1" max="1000">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">তারিখ</label>
+          <input id="editTaskDate" type="date" value="${dateStr}" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white">
+        </div>
+      </div>
+    `;
+  
     this.editCallback = async () => {
       const name = document.getElementById("editTaskName").value.trim();
-      const description = document
-        .getElementById("editTaskDescription")
-        .value.trim();
-      const maxScore = parseInt(
-        document.getElementById("editTaskMaxScore").value
-      );
+      const description = document.getElementById("editTaskDescription").value.trim();
+      const maxScore = parseInt(document.getElementById("editTaskMaxScore").value);
       const dateStr = document.getElementById("editTaskDate").value;
-
+  
       if (!name || !description || isNaN(maxScore) || !dateStr) {
         this.showToast("সমস্ত তথ্য পূরণ করুন", "error");
         return;
       }
-
-      const date = new Date(dateStr);
-
+  
       this.showLoading();
       try {
-        await db
-          .collection("tasks")
-          .doc(id)
-          .update({ name, description, maxScore, date });
-        // Clear cache and reload data
+        await db.collection("tasks").doc(id).update({
+          name,
+          description,
+          maxScore,
+          date: new Date(dateStr),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        
         this.cache.clear("tasks_data");
         await this.loadTasks();
         this.showToast("টাস্ক সফলভাবে আপডেট করা হয়েছে", "success");
@@ -6067,7 +6023,7 @@ class SmartGroupEvaluator {
         this.hideLoading();
       }
     };
-
+  
     this.showEditModal();
   }
 
@@ -7295,7 +7251,7 @@ handleMembersFilter(value) {
   // }
 
   // ===============================
-  // STUDENT RANKING SYSTEM - FIXED (NO EVAL ERROR)
+  // STUDENT RANKING SYSTEM - FIXED (NO evalsERROR)
   // ===============================
 
   /**
@@ -7624,631 +7580,678 @@ handleMembersFilter(value) {
   }
 
   /**
-   * শিক্ষার্থীর বিস্তারিত মোডাল দেখায়
-   */
+ * শিক্ষার্থীর বিস্তারিত মোডাল দেখায় - প্রিমিয়াম ডিজাইন (সম্পূর্ণ ফিক্সড)
+ */
+showStudentDetailsModal(studentId) {
+  const rankedStudents = this.calculateStudentRankings();
+  const studentData = rankedStudents.find(s => s.student.id === studentId);
 
-  /**
-   * শিক্ষার্থীর বিস্তারিত মোডাল দেখায় - প্রিমিয়াম ডিজাইন (সম্পূর্ণ ফিক্সড)
-   */
-  showStudentDetailsModal(studentId) {
-    const rankedStudents = this.calculateStudentRankings();
-    const studentData = rankedStudents.find(function (s) {
-      return s.student.id === studentId;
-    });
-
-    if (!studentData) {
+  if (!studentData) {
       this.showToast("শিক্ষার্থীর তথ্য পাওয়া যায়নি", "error");
       return;
-    }
+  }
 
-    const student = studentData.student;
-    const performanceLevel = this.getStudentPerformanceLevel1(
-      studentData.averageScore
-    );
-    const performanceColor = this.getPerformanceColor(studentData.averageScore);
-    const performanceBgColor = this.getPerformanceBgColor(
-      studentData.averageScore
-    );
+  const student = studentData.student;
+  const performanceLevel = this.getStudentPerformanceLevel1(studentData.averageScore);
+  
+  // বাংলা তারিখ
+  const banglaMonths = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
+  const currentDate = new Date();
+  const banglaDate = `${currentDate.getDate()} ${banglaMonths[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
 
-    // বাংলা মাসের নাম
-    const banglaMonths = [
-      "জানুয়ারি",
-      "ফেব্রুয়ারি",
-      "মার্চ",
-      "এপ্রিল",
-      "মে",
-      "জুন",
-      "জুলাই",
-      "আগস্ট",
-      "সেপ্টেম্বর",
-      "অক্টোবর",
-      "নভেম্বর",
-      "ডিসেম্বর",
-    ];
-
-    const currentDate = new Date();
-    const banglaDate =
-      currentDate.getDate() +
-      " " +
-      banglaMonths[currentDate.getMonth()] +
-      " " +
-      currentDate.getFullYear();
-
-    // সমস্ত মূল্যায়ন সংগ্রহ (সঠিকভাবে)
-    let allEvaluations = [];
-
-    // সকল টাস্ক থেকে শিক্ষার্থীর মূল্যায়ন সংগ্রহ
-    this.state.evaluations.forEach(
-      function (evaluation) {
-        if (evaluation.scores && evaluation.scores[studentId]) {
+  // সমস্ত মূল্যায়ন সংগ্রহ
+  let allEvaluations = [];
+  this.state.evaluations.forEach(evaluation => {
+      if (evaluation.scores && evaluation.scores[studentId]) {
           const score = evaluation.scores[studentId];
-          const task = this.state.tasks.find(function (t) {
-            return t.id === evaluation.taskId;
-          });
-          const group = this.state.groups.find(function (g) {
-            return g.id === evaluation.groupId;
-          });
+          const task = this.state.tasks.find(t => t.id === evaluation.taskId);
+          const group = this.state.groups.find(g => g.id === evaluation.groupId);
 
           let additionalMarks = 0;
           let optionDetails = [];
 
           if (score.optionMarks) {
-            Object.values(score.optionMarks).forEach(
-              function (opt) {
-                if (opt.selected) {
-                  const optDef = this.evaluationOptions.find(function (o) {
-                    return o.id === opt.optionId;
-                  });
-                  if (optDef) {
-                    additionalMarks += optDef.marks;
-                    optionDetails.push(optDef.text);
+              Object.values(score.optionMarks).forEach(opt => {
+                  if (opt.selected) {
+                      const optDef = this.evaluationOptions.find(o => o.id === opt.optionId);
+                      if (optDef) {
+                          additionalMarks += optDef.marks;
+                          optionDetails.push(optDef.text);
+                      }
                   }
-                }
-              }.bind(this)
-            );
+              });
           }
 
-          const totalScore =
-            (score.taskScore || 0) +
-            (score.teamworkScore || 0) +
-            additionalMarks;
+          const totalScore = (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
           let dateStr = "তারিখ নেই";
 
-          if (evaluation.updatedAt && evaluation.updatedAt.seconds) {
-            dateStr = new Date(
-              evaluation.updatedAt.seconds * 1000
-            ).toLocaleDateString("bn-BD");
-          } else if (evaluation.createdAt && evaluation.createdAt.seconds) {
-            dateStr = new Date(
-              evaluation.createdAt.seconds * 1000
-            ).toLocaleDateString("bn-BD");
+          if (evaluation.updatedAt?.seconds) {
+              dateStr = new Date(evaluation.updatedAt.seconds * 1000).toLocaleDateString("bn-BD");
+          } else if (evaluation.createdAt?.seconds) {
+              dateStr = new Date(evaluation.createdAt.seconds * 1000).toLocaleDateString("bn-BD");
           }
 
           allEvaluations.push({
-            taskName: task ? task.name : "অজানা টাস্ক",
-            taskDescription: task ? task.description : "",
-            groupName: group ? group.name : "অজানা গ্রুপ",
-            taskScore: score.taskScore || 0,
-            teamworkScore: score.teamworkScore || 0,
-            additionalMarks: additionalMarks,
-            totalScore: totalScore,
-            comments: score.comments || "",
-            evaluationDate: dateStr,
-            optionDetails: optionDetails,
-            maxScore: task ? task.maxScore : 100,
+              taskName: task?.name || "অজানা টাস্ক",
+              taskDescription: task?.description || "",
+              groupName: group?.name || "অজানা গ্রুপ",
+              taskScore: score.taskScore || 0,
+              teamworkScore: score.teamworkScore || 0,
+              additionalMarks: additionalMarks,
+              totalScore: totalScore,
+              comments: score.comments || "",
+              evaluationDate: dateStr,
+              optionDetails: optionDetails,
+              maxScore: task?.maxScore || 100,
           });
-        }
-      }.bind(this)
-    );
+      }
+  });
 
-    // তারিখ অনুসারে সাজানো
-    allEvaluations.sort(function (a, b) {
-      return new Date(b.evaluationDate) - new Date(a.evaluationDate);
-    });
+  // তারিখ অনুসারে সাজানো
+  allEvaluations.sort((a, b) => new Date(b.evaluationDate) - new Date(a.evaluationDate));
 
-    let tableRowsHTML = "";
-    if (allEvaluations.length > 0) {
-      allEvaluations.forEach(function (evalItem, index) {
-        const scorePercentage = (
-          (evalItem.totalScore / evalItem.maxScore) *
-          100
-        ).toFixed(1);
-        const scoreColor =
-          scorePercentage >= 80
-            ? "text-green-600"
-            : scorePercentage >= 60
-            ? "text-blue-600"
-            : scorePercentage >= 40
-            ? "text-orange-600"
-            : "text-red-600";
-        const scoreBgColor =
-          scorePercentage >= 80
-            ? "bg-green-500"
-            : scorePercentage >= 60
-            ? "bg-blue-500"
-            : scorePercentage >= 40
-            ? "bg-orange-500"
-            : "bg-red-500";
+  // পারফরম্যান্স স্ট্যাটিস্টিক্স
+  const totalTasks = allEvaluations.length;
+  let averageScore = 0;
+  let maxScore = 0;
+  let minScore = 0;
+  let totalScoreSum = 0;
 
-        tableRowsHTML += `
-                <tr class="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-300 group border-b border-gray-100 dark:border-gray-700">
-                    <td class="p-4 text-center">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm group-hover:scale-110 transition-transform shadow-lg">
-                            ${index + 1}
-                        </div>
-                    </td>
-                    <td class="p-4">
-                        <div class="flex items-start space-x-3 min-w-0">
-                            <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-md">
-                                <i class="fas fa-tasks text-sm"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="font-semibold text-gray-800 dark:text-white text-sm mb-1 truncate">${
-                                  evalItem.taskName
-                                }</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${
-                                  evalItem.groupName
-                                }</div>
-                                ${
-                                  evalItem.taskDescription
-                                    ? `
-                                <div class="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">${evalItem.taskDescription}</div>
-                                `
-                                    : ""
-                                }
-                                <div class="flex items-center space-x-2 mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                    <i class="fas fa-calendar text-blue-500"></i>
-                                    <span>${evalItem.evaluationDate}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="p-4 text-center">
-                        <div class="flex flex-col items-center space-y-2">
-                            <div class="text-lg font-bold text-gray-700 dark:text-gray-300">${
-                              evalItem.taskScore
-                            }</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">টাস্ক</div>
-                        </div>
-                    </td>
-                    <td class="p-4 text-center">
-                        <div class="flex flex-col items-center space-y-2">
-                            <div class="text-lg font-bold text-gray-700 dark:text-gray-300">${
-                              evalItem.teamworkScore
-                            }</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">টিমওয়ার্ক</div>
-                        </div>
-                    </td>
-                    <td class="p-4 text-center">
-                        <div class="flex flex-col items-center space-y-2">
-                            <div class="text-lg font-bold text-gray-700 dark:text-gray-300 ${
-                              evalItem.additionalMarks > 0
-                                ? "text-green-600"
-                                : "text-gray-400"
-                            }">
-                                ${
-                                  evalItem.additionalMarks > 0
-                                    ? "+" + evalItem.additionalMarks
-                                    : evalItem.additionalMarks
-                                }
-                            </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">অতিরিক্ত</div>
-                        </div>
-                    </td>
-                    <td class="p-4 text-center">
-                        <div class="flex flex-col items-center space-y-2">
-                            <div class="text-xl font-bold ${scoreColor} mb-1">${
-          evalItem.totalScore
-        }</div>
-                            <div class="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                                <div class="h-2 rounded-full ${scoreBgColor} transition-all duration-1000" 
-                                     style="width: ${Math.min(
-                                       scorePercentage,
-                                       100
-                                     )}%"></div>
-                            </div>
-                            <div class="text-xs ${scoreColor} font-semibold">${scorePercentage}%</div>
-                        </div>
-                    </td>
-                </tr>
-            `;
-      });
-    } else {
-      tableRowsHTML = `
-            <tr>
-                <td colspan="6" class="p-8 text-center">
-                    <div class="flex flex-col items-center space-y-4 text-gray-400 dark:text-gray-500">
-                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                            <i class="fas fa-clipboard-list text-2xl"></i>
-                        </div>
-                        <div>
-                            <div class="font-semibold text-lg mb-1">কোন মূল্যায়ন ডেটা পাওয়া যায়নি</div>
-                            <div class="text-sm">এই শিক্ষার্থীর এখনও কোন মূল্যায়ন সম্পন্ন হয়নি</div>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }
-
-    // পারফরম্যান্স স্ট্যাটিস্টিক্স
-    const totalTasks = allEvaluations.length;
-    let averageScore = 0;
-    let maxScore = 0;
-    let minScore = 0;
-
-    if (totalTasks > 0) {
-      const totalScoreSum = allEvaluations.reduce(function (sum, evalItem) {
-        return sum + evalItem.totalScore;
-      }, 0);
+  if (totalTasks > 0) {
+      totalScoreSum = allEvaluations.reduce((sum, evalItem) => sum + evalItem.totalScore, 0);
       averageScore = totalScoreSum / totalTasks;
 
-      const scores = allEvaluations.map(function (evalItem) {
-        return evalItem.totalScore;
-      });
-      maxScore = Math.max.apply(Math, scores);
-      minScore = Math.min.apply(Math, scores);
-    }
-
-    const modalHTML = `
-        <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm" id="studentDetailsModal">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-7xl w-full max-h-[95vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
-                <!-- Header with Gradient -->
-                <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 p-6 relative overflow-hidden flex-shrink-0">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-10 rounded-full -translate-y-16 translate-x-16"></div>
-                    <div class="absolute bottom-0 left-0 w-24 h-24 bg-white bg-opacity-10 rounded-full translate-y-12 -translate-x-12"></div>
-                    
-                    <div class="flex justify-between items-start relative z-10">
-                        <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-white mb-2">শিক্ষার্থীর বিস্তারিত ফলাফল</h3>
-                            <p class="text-blue-100">সম্পূর্ণ একাডেমিক পারফরম্যান্স রিপোর্ট</p>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button onclick="smartEvaluator.downloadStudentReport('${
-                              student.id
-                            }')" 
-                                    class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 backdrop-blur-sm border border-white border-opacity-30 hover:scale-105">
-                                <i class="fas fa-download"></i>
-                                <span>ডাউনলোড</span>
-                            </button>
-                            <button onclick="smartEvaluator.printStudentReport('${
-                              student.id
-                            }')" 
-                                    class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 backdrop-blur-sm border border-white border-opacity-30 hover:scale-105">
-                                <i class="fas fa-print"></i>
-                                <span>প্রিন্ট</span>
-                            </button>
-                            <button onclick="this.closest('.fixed').remove()" 
-                                    class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white w-10 h-10 rounded-lg transition-all duration-300 flex items-center justify-center backdrop-blur-sm border border-white border-opacity-30 hover:scale-105">
-                                <i class="fas fa-times text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Scrollable Content -->
-                <div class="flex-1 overflow-auto">
-                    <!-- Student Profile Section -->
-                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-                            <!-- Student Basic Info -->
-                            <div class="xl:col-span-2">
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg border-4 border-white dark:border-gray-800">
-                                        ${student.name.charAt(0)}
-                                    </div>
-                                    <div class="flex-1">
-                                        <h4 class="text-xl font-bold text-gray-800 dark:text-white mb-1">${
-                                          student.name
-                                        }</h4>
-                                        <div class="flex flex-wrap gap-2 text-sm">
-                                            <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full flex items-center space-x-1">
-                                                <i class="fas fa-id-card"></i>
-                                                <span>রোল: ${
-                                                  student.roll
-                                                }</span>
-                                            </span>
-                                            <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full flex items-center space-x-1">
-                                                <i class="fas ${
-                                                  student.gender === "ছেলে"
-                                                    ? "fa-male"
-                                                    : "fa-female"
-                                                }"></i>
-                                                <span>${student.gender}</span>
-                                            </span>
-                                            ${
-                                              student.role
-                                                ? `
-                                            <span class="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded-full flex items-center space-x-1">
-                                                <i class="fas fa-user-tag"></i>
-                                                <span>${
-                                                  this.roleNames[
-                                                    student.role
-                                                  ] || student.role
-                                                }</span>
-                                            </span>
-                                            `
-                                                : ""
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Academic Info -->
-                            <div class="space-y-2">
-                                <div class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white shadow-md">
-                                        <i class="fas fa-graduation-cap"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">একাডেমিক গ্রুপ</div>
-                                        <div class="font-semibold text-gray-800 dark:text-white">${
-                                          studentData.academicGroup
-                                        }</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                                    <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center text-white shadow-md">
-                                        <i class="fas fa-calendar-alt"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">সেশন</div>
-                                        <div class="font-semibold text-gray-800 dark:text-white">${
-                                          studentData.session
-                                        }</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Performance Stats -->
-                            <div class="space-y-3">
-                                <div class="bg-gradient-to-br ${performanceBgColor} p-4 rounded-xl text-center text-white shadow-lg hover:scale-105 transition-transform">
-                                    <div class="text-2xl font-bold mb-1">${averageScore.toFixed(
-                                      1
-                                    )}</div>
-                                    <div class="text-sm opacity-90">গড় স্কোর</div>
-                                </div>
-                                <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                                    <div class="text-lg font-bold text-gray-800 dark:text-white ${performanceColor}">${performanceLevel}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">পারফরম্যান্স</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Statistics Cards -->
-                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="bg-gradient-to-br from-blue-500 to-cyan-600 p-4 rounded-xl text-white text-center shadow-lg">
-                                <div class="text-2xl font-bold">${totalTasks}</div>
-                                <div class="text-sm opacity-90">মোট টাস্ক</div>
-                            </div>
-                            <div class="bg-gradient-to-br from-green-500 to-emerald-600 p-4 rounded-xl text-white text-center shadow-lg">
-                                <div class="text-2xl font-bold">${maxScore}</div>
-                                <div class="text-sm opacity-90">সর্বোচ্চ স্কোর</div>
-                            </div>
-                            <div class="bg-gradient-to-br from-orange-500 to-amber-600 p-4 rounded-xl text-white text-center shadow-lg">
-                                <div class="text-2xl font-bold">${minScore}</div>
-                                <div class="text-sm opacity-90">ন্যূনতম স্কোর</div>
-                            </div>
-                            <div class="bg-gradient-to-br from-purple-500 to-pink-600 p-4 rounded-xl text-white text-center shadow-lg">
-                                <div class="text-2xl font-bold">${
-                                  studentData.evaluationCount
-                                }</div>
-                                <div class="text-sm opacity-90">মূল্যায়ন সংখ্যা</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Evaluation History -->
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h4 class="text-xl font-bold text-gray-800 dark:text-white flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white shadow-md">
-                                    <i class="fas fa-history"></i>
-                                </div>
-                                <span>মূল্যায়ন ইতিহাস</span>
-                            </h4>
-                            <div class="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
-                                মোট ${this.convertToBanglaNumber(
-                                  totalTasks
-                                )} টি মূল্যায়ন
-                            </div>
-                        </div>
-                        
-                        <div class="overflow-auto rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                            <table class="w-full min-w-[800px]">
-                                <thead>
-                                    <tr class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200 dark:border-gray-600">
-                                        <th class="p-4 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">ক্রমিক</th>
-                                        <th class="p-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[250px]">টাস্ক বিবরণ</th>
-                                        <th class="p-4 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">টাস্ক স্কোর</th>
-                                        <th class="p-4 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">টিমওয়ার্ক</th>
-                                        <th class="p-4 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">অতিরিক্ত</th>
-                                        <th class="p-4 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">মোট স্কোর</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${tableRowsHTML}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="bg-gray-50 dark:bg-gray-700 p-4 border-t border-gray-200 dark:border-gray-600 flex-shrink-0">
-                    <div class="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
-                        <div class="flex items-center space-x-2">
-                            <i class="fas fa-calendar text-blue-500"></i>
-                            <span>রিপোর্ট তৈরি: ${banglaDate}</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <i class="fas fa-school text-purple-500"></i>
-                            <span>স্মার্ট ইভ্যালুয়েটর সিস্টেম</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    const modal = document.createElement("div");
-    modal.innerHTML = modalHTML;
-    document.body.appendChild(modal);
-
-    // CSS for line clamping
-    this.addStudentModalStyles();
+      const scores = allEvaluations.map(evalItem => evalItem.totalScore);
+      maxScore = Math.max(...scores);
+      minScore = Math.min(...scores);
   }
 
-  /**
-   * স্টাইলস যোগ করুন
-   */
-  addStudentModalStyles() {
-    if (document.getElementById("student-modal-styles")) return;
+  // রেঙ্কিং ডেটা
+  const studentRank = rankedStudents.findIndex(s => s.student.id === studentId) + 1;
+  const totalStudents = rankedStudents.length;
 
-    const styles = `
-        <style id="student-modal-styles">
-            .line-clamp-2 {
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-            }
-            .student-ranking-card {
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-            .student-ranking-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            }
-            @media (max-width: 768px) {
-                #studentDetailsModal .grid {
-                    grid-template-columns: 1fr;
-                }
-                #studentDetailsModal .flex {
-                    flex-direction: column;
-                }
-            }
-        </style>
-    `;
+  // চার্ট ডেটা প্রস্তুত
+  const chartLabels = allEvaluations.map(evals=> evals.taskName);
+  const chartScores = allEvaluations.map(evals=> evals.totalScore);
+  const chartAverageScores = allEvaluations.map(evals=> (evals.totalScore / evals.maxScore) * 100);
 
-    document.head.insertAdjacentHTML("beforeend", styles);
+  const modalHTML = `
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-2 sm:p-4" id="studentDetailsModal">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-7xl w-full max-h-[95vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 transform transition-all duration-300 scale-95 hover:scale-100">
+          
+          <!-- Enhanced Header -->
+          <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-6 rounded-t-2xl text-white relative overflow-hidden">
+              <div class="absolute inset-0 opacity-10">
+                  <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
+                  <div class="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12"></div>
+              </div>
+              
+              <div class="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div class="flex-1">
+                      <h3 class="text-2xl font-bold mb-2 flex items-center gap-3">
+                          <i class="fas fa-user-graduate text-yellow-300"></i>
+                          শিক্ষার্থীর বিস্তারিত ফলাফল বিশ্লেষণ
+                      </h3>
+                      <div class="flex flex-wrap gap-4 text-sm opacity-90">
+                          <div class="flex items-center gap-2">
+                              <i class="fas fa-id-card text-blue-200"></i>
+                              <span>রোল: ${student.roll}</span>
+                          </div>
+                          <div class="flex items-center gap-2">
+                              <i class="fas fa-user text-blue-200"></i>
+                              <span>${student.gender}</span>
+                          </div>
+                          ${student.role ? `
+                          <div class="flex items-center gap-2">
+                              <i class="fas fa-star text-yellow-200"></i>
+                              <span>${this.roleNames[student.role] || student.role}</span>
+                          </div>
+                          ` : ''}
+                      </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                      <!-- Action Buttons -->
+                      <button onclick="smartEvaluator.downloadStudentReport('${student.id}')" 
+                              class="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl transition-all duration-300 transform hover:scale-105">
+                          <i class="fas fa-download"></i>
+                          <span class="hidden sm:inline">ডাউনলোড</span>
+                      </button>
+                      <button onclick="smartEvaluator.printStudentReport('${student.id}')" 
+                              class="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl transition-all duration-300 transform hover:scale-105">
+                          <i class="fas fa-print"></i>
+                          <span class="hidden sm:inline">প্রিন্ট</span>
+                      </button>
+                      <button onclick="this.closest('#studentDetailsModal').remove()" 
+                              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 transition-all duration-300 hover:scale-110">
+                          <i class="fas fa-times text-lg"></i>
+                      </button>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Main Content -->
+          <div class="p-4 sm:p-6 space-y-6 overflow-auto max-h-[75vh]">
+              
+              <!-- Student Summary Section -->
+              <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                  <!-- Student Profile -->
+                  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-800">
+                      <div class="flex items-center gap-3 mb-3">
+                          <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center text-white text-lg shadow-lg">
+                              <i class="fas fa-user"></i>
+                          </div>
+                          <div>
+                              <h4 class="font-bold text-gray-800 dark:text-white text-sm">${student.name}</h4>
+                              <p class="text-xs text-gray-600 dark:text-gray-300">${student.roll}</p>
+                          </div>
+                      </div>
+                      <div class="space-y-2 text-xs">
+                          <div class="flex justify-between">
+                              <span class="text-gray-600 dark:text-gray-300">গ্রুপ</span>
+                              <span class="font-medium">${studentData.academicGroup}</span>
+                          </div>
+                          <div class="flex justify-between">
+                              <span class="text-gray-600 dark:text-gray-300">সেশন</span>
+                              <span class="font-medium">${studentData.session}</span>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- Performance Stats -->
+                  <div class="bg-white dark:bg-gray-700 p-4 rounded-2xl border border-gray-200 dark:border-gray-600">
+                      <div class="text-center">
+                          <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">${averageScore.toFixed(1)}</div>
+                          <div class="text-xs text-gray-500 dark:text-gray-400">গড় স্কোর</div>
+                          <div class="mt-2  rounded-full text-xs font-bold ${performanceLevel === 'Excellent' ? 'text-green-500 text-white' : performanceLevel === 'Good' ? 'text-blue-500 text-white' : performanceLevel === 'Average' ? 'text-yellow-500 text-white' : 'text-red-500'}">
+                              ${performanceLevel}
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- Rank Position -->
+                  <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-2xl border border-green-100 dark:border-green-800">
+                      <div class="text-center">
+                          <div class="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">${studentRank}</div>
+                          <div class="text-xs text-gray-500 dark:text-gray-400">র‌্যাঙ্ক পজিশন</div>
+                          <div class="mt-2 text-xs text-gray-600 dark:text-gray-300">মোট ${totalStudents} জন</div>
+                      </div>
+                  </div>
+
+                  <!-- Evaluation Count -->
+                  <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-2xl border border-purple-100 dark:border-purple-800">
+                      <div class="text-center">
+                          <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">${studentData.evaluationCount}</div>
+                          <div class="text-xs text-gray-500 dark:text-gray-400">মূল্যায়ন সংখ্যা</div>
+                          <div class="mt-2 text-xs text-gray-600 dark:text-gray-300">${totalTasks} টি টাস্ক</div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Assignment History Table -->
+              <div class="bg-white dark:bg-gray-700 rounded-2xl border border-gray-200 dark:border-gray-600 overflow-hidden">
+                  <div class="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-600 dark:to-blue-900/20 p-4 border-b border-gray-200 dark:border-gray-600">
+                      <h4 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                          <i class="fas fa-history text-blue-500"></i>
+                          সকল এসাইনমেন্টের ইতিহাস
+                      </h4>
+                  </div>
+                  <div class="overflow-x-auto">
+                      <table class="w-full">
+                          <thead>
+                              <tr class="bg-gray-50 dark:bg-gray-600">
+                                  <th class="p-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">ক্রমিক</th>
+                                  <th class="p-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">এসাইনমেন্ট</th>
+                                  <th class="p-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">টাস্ক স্কোর</th>
+                                  <th class="p-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">টিমওয়ার্ক</th>
+                                  <th class="p-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">অতিরিক্ত</th>
+                                  <th class="p-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">মোট স্কোর</th>
+                                  <th class="p-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">গড় %</th>
+                                  <th class="p-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">মন্তব্য</th>
+                              </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                              ${allEvaluations.length > 0 ? allEvaluations.map((evalItem, index) => {
+                                  const scorePercentage = ((evalItem.totalScore / evalItem.maxScore) * 100).toFixed(1);
+                                  const scoreColor = scorePercentage >= 80 ? 'text-green-600' : 
+                                                   scorePercentage >= 60 ? 'text-blue-600' : 
+                                                   scorePercentage >= 40 ? 'text-orange-600' : 'text-red-600';
+                                  const scoreBgColor = scorePercentage >= 80 ? 'bg-green-500' : 
+                                                     scorePercentage >= 60 ? 'bg-blue-500' : 
+                                                     scorePercentage >= 40 ? 'bg-orange-500' : 'bg-red-500';
+                              
+                                  return `
+                                  <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                      <td class="p-3 text-center">
+                                          <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                                              ${index + 1}
+                                          </div>
+                                      </td>
+                                      <td class="p-3">
+                                          <div class="flex items-start space-x-2">
+                                              <div class="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                                                  <i class="fas fa-tasks text-xs"></i>
+                                              </div>
+                                              <div class="min-w-0 flex-1">
+                                                  <div class="font-semibold text-gray-800 dark:text-white text-sm mb-1 truncate">${evalItem.taskName}</div>
+                                                  <div class="text-xs text-gray-500 dark:text-gray-400">${evalItem.groupName}</div>
+                                                  <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                                      <i class="fas fa-calendar text-blue-500 mr-1"></i>${evalItem.evaluationDate}
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </td>
+                                      <td class="p-3 text-center">
+                                          <div class="text-sm font-bold text-gray-700 dark:text-gray-300">${evalItem.taskScore}</div>
+                                      </td>
+                                      <td class="p-3 text-center">
+                                          <div class="text-sm font-bold text-gray-700 dark:text-gray-300">${evalItem.teamworkScore}</div>
+                                      </td>
+                                      <td class="p-3 text-center">
+                                          <div class="text-sm font-bold ${evalItem.additionalMarks > 0 ? 'text-green-600' : 'text-gray-400'}">
+                                              ${evalItem.additionalMarks > 0 ? '+' + evalItem.additionalMarks : evalItem.additionalMarks}
+                                          </div>
+                                      </td>
+                                      <td class="p-3 text-center">
+                                          <div class="text-lg font-bold ${scoreColor}">${evalItem.totalScore}</div>
+                                      </td>
+                                      <td class="p-3 text-center">
+                                          <div class="flex flex-col items-center space-y-1">
+                                              <div class="text-sm font-bold ${scoreColor}">${scorePercentage}%</div>
+                                              <div class="w-16 bg-gray-200 dark:bg-gray-500 rounded-full h-2 overflow-hidden">
+                                                  <div class="h-2 rounded-full ${scoreBgColor}" style="width: ${Math.min(scorePercentage, 100)}%"></div>
+                                              </div>
+                                          </div>
+                                      </td>
+                                      <td class="p-3">
+                                          <div class="text-xs text-gray-600 dark:text-gray-400 max-w-xs truncate" title="${evalItem.comments}">
+                                              ${evalItem.comments || 'কোন মন্তব্য নেই'}
+                                          </div>
+                                      </td>
+                                  </tr>
+                                  `;
+                              }).join('') : `
+                              <tr>
+                                  <td colspan="8" class="p-8 text-center">
+                                      <div class="flex flex-col items-center space-y-3 text-gray-400 dark:text-gray-500">
+                                          <div class="w-12 h-12 bg-gray-100 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                                              <i class="fas fa-clipboard-list text-xl"></i>
+                                          </div>
+                                          <div>
+                                              <div class="font-semibold text-sm mb-1">কোন মূল্যায়ন ডেটা পাওয়া যায়নি</div>
+                                              <div class="text-xs">এই শিক্ষার্থীর এখনও কোন মূল্যায়ন সম্পন্ন হয়নি</div>
+                                          </div>
+                                      </div>
+                                  </td>
+                              </tr>
+                              `}
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+
+              <!-- Bar Chart Section -->
+              ${allEvaluations.length > 0 ? `
+              <div class="bg-white dark:bg-gray-700 rounded-2xl border border-gray-200 dark:border-gray-600 p-4">
+                  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                      <h4 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                          <i class="fas fa-chart-bar text-purple-500"></i>
+                          এসাইনমেন্ট স্কোর বিশ্লেষণ
+                      </h4>
+                      <div class="flex gap-2">
+                          <button onclick="smartEvaluator.toggleChartView('score')" 
+                                  class="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm transition-colors">
+                              স্কোর ভিউ
+                          </button>
+                          <button onclick="smartEvaluator.toggleChartView('percentage')" 
+                                  class="px-3 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm transition-colors">
+                              পার্সেন্টেজ ভিউ
+                          </button>
+                      </div>
+                  </div>
+                  <div class="chart-container" style="height: 300px;">
+                      <canvas id="assignmentScoreChart"></canvas>
+                  </div>
+              </div>
+              ` : ''}
+          </div>
+
+          <!-- Footer -->
+          <div class="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-700 dark:to-blue-900/20 p-4 border-t border-gray-200 dark:border-gray-600">
+              <div class="flex flex-col sm:flex-row justify-between items-center gap-3 text-sm">
+                  <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                      <i class="fas fa-calendar-alt text-blue-500"></i>
+                      <span>রিপোর্ট তৈরি: ${banglaDate}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                      <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                          <i class="fas fa-graduation-cap text-indigo-500"></i>
+                          <span class="font-semibold">স্মার্ট ইভ্যালুয়েটর সিস্টেম</span>
+                      </div>
+                      <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+  `;
+
+  const modal = document.createElement("div");
+  modal.innerHTML = modalHTML;
+  document.body.appendChild(modal);
+
+  // চার্ট তৈরি করুন (যদি ডেটা থাকে)
+  if (allEvaluations.length > 0) {
+      setTimeout(() => {
+          this.createAssignmentChart(chartLabels, chartScores, chartAverageScores);
+      }, 100);
   }
 
-  /**
-   * শিক্ষার্থীর রিপোর্ট ডাউনলোড (ইমেজ/PDF)
-   */
-  downloadStudentReport(studentId) {
-    this.showLoading("রিপোর্ট তৈরি হচ্ছে...");
+  this.addStudentModalStyles();
+}
 
-    setTimeout(() => {
+/**
+* এসাইনমেন্ট চার্ট তৈরি করুন
+*/
+createAssignmentChart(labels, scores, percentages) {
+  const ctx = document.getElementById('assignmentScoreChart');
+  if (!ctx) return;
+
+  // বিদ্যমান চার্ট ধ্বংস করুন
+  if (this.assignmentChart) {
+      this.assignmentChart.destroy();
+  }
+
+  this.assignmentChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels: labels,
+          datasets: [{
+              label: 'স্কোর',
+              data: scores,
+              backgroundColor: 'rgba(59, 130, 246, 0.7)',
+              borderColor: 'rgba(59, 130, 246, 1)',
+              borderWidth: 1,
+              yAxisID: 'y'
+          }, {
+              label: 'গড় %',
+              data: percentages,
+              backgroundColor: 'rgba(139, 92, 246, 0.7)',
+              borderColor: 'rgba(139, 92, 246, 1)',
+              borderWidth: 1,
+              type: 'line',
+              yAxisID: 'y1'
+          }]
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+              mode: 'index',
+              intersect: false,
+          },
+          scales: {
+              x: {
+                  ticks: {
+                      maxRotation: 45,
+                      minRotation: 45
+                  }
+              },
+              y: {
+                  type: 'linear',
+                  display: true,
+                  position: 'left',
+                  title: {
+                      display: true,
+                      text: 'স্কোর'
+                  }
+              },
+              y1: {
+                  type: 'linear',
+                  display: true,
+                  position: 'right',
+                  title: {
+                      display: true,
+                      text: 'গড় %'
+                  },
+                  grid: {
+                      drawOnChartArea: false,
+                  },
+                  max: 100
+              }
+          },
+          plugins: {
+              legend: {
+                  position: 'top',
+              },
+              tooltip: {
+                  callbacks: {
+                      label: function(context) {
+                          let label = context.dataset.label || '';
+                          if (label) {
+                              label += ': ';
+                          }
+                          if (context.parsed.y !== null) {
+                              if (context.dataset.label === 'গড় %') {
+                                  label += context.parsed.y.toFixed(1) + '%';
+                              } else {
+                                  label += context.parsed.y.toFixed(1);
+                              }
+                          }
+                          return label;
+                      }
+                  }
+              }
+          }
+      }
+  });
+}
+
+/**
+* চার্ট ভিউ টগল করুন
+*/
+toggleChartView(type) {
+  if (!this.assignmentChart) return;
+
+  if (type === 'percentage') {
+      this.assignmentChart.data.datasets[0].yAxisID = 'y1';
+      this.assignmentChart.options.scales.y.display = false;
+      this.assignmentChart.options.scales.y1.display = true;
+  } else {
+      this.assignmentChart.data.datasets[0].yAxisID = 'y';
+      this.assignmentChart.options.scales.y.display = true;
+      this.assignmentChart.options.scales.y1.display = true;
+  }
+
+  this.assignmentChart.update();
+}
+
+/**
+* স্টাইলস যোগ করুন
+*/
+addStudentModalStyles() {
+  if (document.getElementById("student-modal-styles")) return;
+
+  const styles = `
+      <style id="student-modal-styles">
+          .line-clamp-2 {
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+          }
+          .chart-container {
+              position: relative;
+              width: 100%;
+          }
+          @media (max-width: 768px) {
+              #studentDetailsModal .grid {
+                  grid-template-columns: 1fr;
+              }
+              #studentDetailsModal table {
+                  font-size: 0.75rem;
+              }
+              #studentDetailsModal .text-2xl {
+                  font-size: 1.5rem;
+              }
+          }
+          @media print {
+              body * {
+                  visibility: hidden;
+              }
+              #studentDetailsModal, #studentDetailsModal * {
+                  visibility: visible;
+              }
+              #studentDetailsModal {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  width: 100%;
+                  max-width: 100%;
+                  margin: 0;
+                  padding: 0;
+                  box-shadow: none;
+              }
+              .bg-gradient-to-r {
+                  background: linear-gradient(135deg, #1e40af, #7c3aed) !important;
+                  -webkit-print-color-adjust: exact;
+              }
+              button {
+                  display: none !important;
+              }
+          }
+      </style>
+  `;
+
+  document.head.insertAdjacentHTML("beforeend", styles);
+}
+
+/**
+* শিক্ষার্থীর রিপোর্ট ডাউনলোড (ইমেজ/PDF)
+*/
+downloadStudentReport(studentId) {
+  this.showLoading("রিপোর্ট তৈরি হচ্ছে...");
+
+  setTimeout(() => {
       const modal = document.getElementById("studentDetailsModal");
       if (!modal) {
-        this.hideLoading();
-        return;
+          this.hideLoading();
+          return;
       }
 
-      // html2canvas ব্যবহার করে ইমেজ তৈরি
-      html2canvas(modal, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-      })
-        .then((canvas) => {
-          // ক্যানভাস থেকে ইমেজ URL তৈরি
-          const imgData = canvas.toDataURL("image/png");
+      // Temporarily hide action buttons for clean screenshot
+      const buttons = modal.querySelectorAll('button');
+      buttons.forEach(btn => btn.style.display = 'none');
 
-          // ডাউনলোড লিঙ্ক তৈরি
+      html2canvas(modal, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: "#ffffff",
+          windowWidth: modal.scrollWidth,
+          windowHeight: modal.scrollHeight
+      }).then((canvas) => {
+          // Restore buttons
+          buttons.forEach(btn => btn.style.display = '');
+
+          const imgData = canvas.toDataURL("image/png");
           const link = document.createElement("a");
-          const studentName =
-            this.state.students.find((s) => s.id === studentId)?.name ||
-            "student";
-          link.download = `student_report_${studentName}_${
-            new Date().toISOString().split("T")[0]
-          }.png`;
+          const studentName = this.state.students.find(s => s.id === studentId)?.name || "student";
+          link.download = `student_report_${studentName}_${new Date().toISOString().split("T")[0]}.png`;
           link.href = imgData;
 
-          // ডাউনলোড শুরু
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
 
           this.hideLoading();
           this.showToast("রিপোর্ট সফলভাবে ডাউনলোড হয়েছে", "success");
-        })
-        .catch((error) => {
+      }).catch((error) => {
           console.error("Error generating report:", error);
+          buttons.forEach(btn => btn.style.display = '');
           this.hideLoading();
           this.showToast("রিপোর্ট ডাউনলোড করতে সমস্যা", "error");
-        });
-    }, 1000);
-  }
+      });
+  }, 1000);
+}
 
-  /**
-   * শিক্ষার্থীর রিপোর্ট প্রিন্ট
-   */
-  printStudentReport(studentId) {
-    const modal = document.getElementById("studentDetailsModal");
-    if (!modal) return;
+/**
+* শিক্ষার্থীর রিপোর্ট প্রিন্ট
+*/
+printStudentReport(studentId) {
+  const modal = document.getElementById("studentDetailsModal");
+  if (!modal) return;
 
-    // প্রিন্ট স্টাইল তৈরি
-    const printStyles = `
-        <style>
-            @media print {
-                body * {
-                    visibility: hidden;
-                }
-                #studentDetailsModal, #studentDetailsModal * {
-                    visibility: visible;
-                }
-                #studentDetailsModal {
-                    position: absolute;
-                    left: 0;
-                    top: 0;
-                    width: 100%;
-                    max-width: 100%;
-                    margin: 0;
-                    padding: 0;
-                    box-shadow: none;
-                }
-                .bg-gradient-to-r {
-                    background: linear-gradient(135deg, #1e40af, #7c3aed, #4f46e5) !important;
-                }
-                button {
-                    display: none !important;
-                }
-            }
-        </style>
-    `;
+  const printWindow = window.open("", "_blank");
+  const studentName = this.state.students.find(s => s.id === studentId)?.name || "Student";
+  
+  printWindow.document.write(`
+      <html>
+          <head>
+              <title>শিক্ষার্থীর রিপোর্ট - ${studentName}</title>
+              <style>
+                  body { 
+                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                      margin: 0;
+                      padding: 20px;
+                      background: white;
+                  }
+                  .print-header {
+                      background: linear-gradient(135deg, #1e40af, #7c3aed);
+                      color: white;
+                      padding: 20px;
+                      border-radius: 10px;
+                      margin-bottom: 20px;
+                  }
+                  .stats-grid {
+                      display: grid;
+                      grid-template-columns: repeat(4, 1fr);
+                      gap: 15px;
+                      margin-bottom: 20px;
+                  }
+                  .stat-card {
+                      padding: 15px;
+                      border-radius: 10px;
+                      border: 1px solid #e5e7eb;
+                  }
+                  table {
+                      width: 100%;
+                      border-collapse: collapse;
+                      margin-bottom: 20px;
+                  }
+                  th, td {
+                      padding: 12px;
+                      text-align: left;
+                      border-bottom: 1px solid #e5e7eb;
+                  }
+                  th {
+                      background-color: #f8fafc;
+                      font-weight: 600;
+                  }
+                  .chart-container {
+                      height: 300px;
+                      margin-bottom: 20px;
+                  }
+                  @media print {
+                      body { margin: 0; }
+                      .print-header { background: #1e40af !important; }
+                  }
+              </style>
+          </head>
+          <body>
+              ${modal.innerHTML}
+          </body>
+      </html>
+  `);
 
-    // প্রিন্ট উইন্ডো খুলুন
-    const printWindow = window.open("", "_blank");
-    printWindow.document.write(`
-        <html>
-            <head>
-                <title>শিক্ষার্থীর রিপোর্ট - ${
-                  this.state.students.find((s) => s.id === studentId)?.name ||
-                  "Student"
-                }</title>
-                ${printStyles}
-            </head>
-            <body>
-                ${modal.innerHTML}
-            </body>
-        </html>
-    `);
+  printWindow.document.close();
+  printWindow.focus();
 
-    printWindow.document.close();
-    printWindow.focus();
-
-    setTimeout(() => {
+  setTimeout(() => {
       printWindow.print();
-      printWindow.close();
-    }, 500);
-  }
+      // printWindow.close(); // User can choose to close manually
+  }, 1000);
+}
+
 
   /**
    * পারফরম্যান্স লেভেল অনুযায়ী ব্যাকগ্রাউন্ড কালার
@@ -9417,170 +9420,109 @@ handleMembersFilter(value) {
     }
   }
 
-  calculateGroupComprehensiveStats(groupId, students, evaluations) {
+  calculateGroupComprehensiveStats(groupId, groupStudents, groupEvaluations) {
     const stats = {
-      memberCount: students.length,
-      evaluationCount: evaluations.length,
-      overallAverage: 0,
-      maxScore: 0,
-      minScore: Infinity,
-      taskPerformance: [],
-      rolePerformance: [],
-      studentPerformance: [],
+        memberCount: groupStudents.length,
+        evaluationCount: groupEvaluations.length,
+        overallAverage: 0,
+        maxScore: 0,
+        minScore: Infinity,
+        studentPerformance: [],
+        taskPerformance: [],
+        rolePerformance: []
     };
 
-    // Calculate student averages
-    const studentAverages = {};
-    students.forEach((student) => {
-      let totalScore = 0;
-      let evalCount = 0;
+    let totalScore = 0;
+    let scoreCount = 0;
 
-      evaluations.forEach((evalItem) => {
-        const score = evalItem.scores?.[student.id];
-        if (score) {
-          let additionalMarks = 0;
-          if (score.optionMarks) {
-            Object.values(score.optionMarks).forEach((opt) => {
-              if (opt.selected) {
-                const optDef = this.evaluationOptions.find(
-                  (o) => o.id === opt.optionId
-                );
-                if (optDef) additionalMarks += optDef.marks;
-              }
-            });
-          }
+    // Calculate student performance
+    const studentScores = {};
+    
+    groupEvaluations.forEach(evaluation => {
+        if (!evaluation.scores) return;
+        
+        Object.entries(evaluation.scores).forEach(([studentId, score]) => {
+            if (!studentScores[studentId]) {
+                studentScores[studentId] = {
+                    total: 0,
+                    count: 0
+                };
+            }
 
-          const studentScore =
-            (score.taskScore || 0) +
-            (score.teamworkScore || 0) +
-            additionalMarks;
-          totalScore += studentScore;
-          evalCount++;
+            let additionalMarks = 0;
+            if (score.optionMarks) {
+                Object.values(score.optionMarks).forEach(opt => {
+                    if (opt.selected) {
+                        const optDef = this.evaluationOptions.find(o => o.id === opt.optionId);
+                        if (optDef) additionalMarks += optDef.marks;
+                    }
+                });
+            }
 
-          // Update overall max/min
-          stats.maxScore = Math.max(stats.maxScore, studentScore);
-          stats.minScore = Math.min(stats.minScore, studentScore);
-        }
-      });
-
-      if (evalCount > 0) {
-        studentAverages[student.id] = {
-          average: totalScore / evalCount,
-          count: evalCount,
-        };
-      }
+            const studentTotal = (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
+            
+            studentScores[studentId].total += studentTotal;
+            studentScores[studentId].count++;
+            
+            totalScore += studentTotal;
+            scoreCount++;
+            
+            stats.maxScore = Math.max(stats.maxScore, studentTotal);
+            stats.minScore = Math.min(stats.minScore, studentTotal);
+        });
     });
 
-    // Calculate overall average
-    const validAverages = Object.values(studentAverages).filter(
-      (s) => s.count >= 2
-    );
-    if (validAverages.length > 0) {
-      stats.overallAverage =
-        validAverages.reduce((sum, s) => sum + s.average, 0) /
-        validAverages.length;
-    }
+    stats.overallAverage = scoreCount > 0 ? totalScore / scoreCount : 0;
+    stats.minScore = stats.minScore === Infinity ? 0 : stats.minScore;
 
-    // Calculate task performance
-    const taskStats = {};
-    evaluations.forEach((evalItem) => {
-      const task = this.state.tasks.find((t) => t.id === evalItem.taskId);
-      if (!task) return;
-
-      if (!taskStats[task.id]) {
-        taskStats[task.id] = {
-          taskName: task.name,
-          scores: [],
+    // Prepare student performance data
+    stats.studentPerformance = groupStudents.map(student => {
+        const scoreData = studentScores[student.id] || { total: 0, count: 0 };
+        const averageScore = scoreData.count > 0 ? scoreData.total / scoreData.count : 0;
+        
+        return {
+            id: student.id,
+            name: student.name,
+            roll: student.roll,
+            role: student.role,
+            roleName: this.roleNames[student.role] || 'দায়িত্ব বাকি',
+            averageScore: averageScore,
+            evaluationCount: scoreData.count,
+            totalScore: scoreData.total
         };
-      }
-
-      students.forEach((student) => {
-        const score = evalItem.scores?.[student.id];
-        if (score) {
-          let additionalMarks = 0;
-          if (score.optionMarks) {
-            Object.values(score.optionMarks).forEach((opt) => {
-              if (opt.selected) {
-                const optDef = this.evaluationOptions.find(
-                  (o) => o.id === opt.optionId
-                );
-                if (optDef) additionalMarks += optDef.marks;
-              }
-            });
-          }
-
-          const totalScore =
-            (score.taskScore || 0) +
-            (score.teamworkScore || 0) +
-            additionalMarks;
-          taskStats[task.id].scores.push(totalScore);
-        }
-      });
-    });
-
-    stats.taskPerformance = Object.values(taskStats).map((task) => ({
-      taskName: task.taskName,
-      averageScore:
-        task.scores.length > 0
-          ? task.scores.reduce((a, b) => a + b, 0) / task.scores.length
-          : 0,
-      maxScore: task.scores.length > 0 ? Math.max(...task.scores) : 0,
-      minScore: task.scores.length > 0 ? Math.min(...task.scores) : 0,
-      participants: task.scores.length,
-    }));
+    }).sort((a, b) => b.averageScore - a.averageScore);
 
     // Calculate role performance
     const roleStats = {};
-    students.forEach((student) => {
-      const role = student.role || "no-role";
-      const roleName = this.roleNames[role] || "দায়িত্ব নেই";
-      const studentAvg = studentAverages[student.id];
-
-      if (!roleStats[role]) {
-        roleStats[role] = {
-          roleName,
-          scores: [],
-          count: 0,
-        };
-      }
-
-      if (studentAvg && studentAvg.count >= 2) {
-        roleStats[role].scores.push(studentAvg.average);
-        roleStats[role].count++;
-      }
+    groupStudents.forEach(student => {
+        if (student.role) {
+            if (!roleStats[student.role]) {
+                roleStats[student.role] = {
+                    totalScore: 0,
+                    count: 0,
+                    studentCount: 0
+                };
+            }
+            roleStats[student.role].studentCount++;
+        }
     });
 
-    stats.rolePerformance = Object.values(roleStats)
-      .map((role) => ({
-        roleName: role.roleName,
-        averageScore:
-          role.scores.length > 0
-            ? role.scores.reduce((a, b) => a + b, 0) / role.scores.length
-            : 0,
-        count: role.count,
-      }))
-      .filter((role) => role.count > 0);
+    stats.studentPerformance.forEach(student => {
+        if (student.role && roleStats[student.role]) {
+            roleStats[student.role].totalScore += student.totalScore;
+            roleStats[student.role].count += student.evaluationCount;
+        }
+    });
 
-    // Student performance
-    stats.studentPerformance = students
-      .map((student) => {
-        const studentAvg = studentAverages[student.id];
-        return {
-          name: student.name,
-          roleName: this.roleNames[student.role] || "দায়িত্ব নেই",
-          averageScore:
-            studentAvg && studentAvg.count >= 2 ? studentAvg.average : 0,
-          evaluationCount: studentAvg ? studentAvg.count : 0,
-        };
-      })
-      .filter((student) => student.evaluationCount >= 2)
-      .sort((a, b) => b.averageScore - a.averageScore);
-
-    stats.minScore = stats.minScore === Infinity ? 0 : stats.minScore;
+    stats.rolePerformance = Object.entries(roleStats).map(([role, data]) => ({
+        roleName: this.roleNames[role] || role,
+        averageScore: data.count > 0 ? data.totalScore / data.count : 0,
+        count: data.studentCount,
+        totalEvaluations: data.count
+    }));
 
     return stats;
-  }
-
+}
   // ===============================
   // GROUP MEMBERS
   // ===============================
@@ -11785,80 +11727,71 @@ handleMembersFilter(value) {
     }
   }
 
-  async exportEvaluationsCSV() {
-    this.showLoading("মূল্যায়ন ডেটা CSV তৈরি হচ্ছে...");
-    try {
-      const headers = [
-        "টাস্ক নাম",
-        "গ্রুপ",
-        "শিক্ষার্থী",
-        "টাস্ক স্কোর",
-        "টিমওয়ার্ক স্কোর",
-        "মোট স্কোর",
-        "তারিখ",
-      ];
+  calculateStudentDetailedStats() {
+    const studentStats = {};
+    
+    // Initialize all students
+    this.state.students.forEach(student => {
+        studentStats[student.id] = {
+            totalScore: 0,
+            evaluationCount: 0,
+            averageScore: 0,
+            percentage: 0
+        };
+    });
 
-      const csvData = [];
-      this.state.evaluations.forEach((evaluation) => {
-        const task = this.state.tasks.find((t) => t.id === evaluation.taskId);
-        const group = this.state.groups.find(
-          (g) => g.id === evaluation.groupId
-        );
+    // Calculate total scores and count for each student
+    this.state.evaluations.forEach(evaluation => {
+        const task = this.state.tasks.find(t => t.id === evaluation.taskId);
+        const maxPossibleScore = (task?.maxScore || 100) + 10 + 15; // task + teamwork + additional
 
-        if (evaluation.scores) {
-          Object.entries(evaluation.scores).forEach(([studentId, score]) => {
-            const student = this.state.students.find((s) => s.id === studentId);
-            if (student) {
-              let additionalMarks = 0;
-              if (score.optionMarks) {
-                Object.values(score.optionMarks).forEach((opt) => {
-                  if (opt.selected) {
-                    const optDef = this.evaluationOptions.find(
-                      (o) => o.id === opt.optionId
-                    );
-                    if (optDef) additionalMarks += optDef.marks;
-                  }
-                });
-              }
-
-              const totalScore =
-                (score.taskScore || 0) +
-                (score.teamworkScore || 0) +
-                additionalMarks;
-              const dateStr = evaluation.updatedAt?.seconds
-                ? new Date(
-                    evaluation.updatedAt.seconds * 1000
-                  ).toLocaleDateString("bn-BD")
-                : "তারিখ নেই";
-
-              csvData.push([
-                `"${task?.name || "অজানা টাস্ক"}"`,
-                `"${group?.name || "অজানা গ্রুপ"}"`,
-                `"${student.name}"`,
-                `"${score.taskScore || 0}"`,
-                `"${score.teamworkScore || 0}"`,
-                `"${totalScore}"`,
-                `"${dateStr}"`,
-              ]);
+        if (!evaluation.scores) return;
+        
+        Object.entries(evaluation.scores).forEach(([studentId, score]) => {
+            if (!studentStats[studentId]) {
+                studentStats[studentId] = {
+                    totalScore: 0,
+                    evaluationCount: 0,
+                    averageScore: 0,
+                    percentage: 0
+                };
             }
-          });
-        }
-      });
 
-      const BOM = "\uFEFF";
-      const csvContent =
-        BOM + [headers, ...csvData].map((row) => row.join(",")).join("\n");
+            let additionalMarks = 0;
+            if (score.optionMarks) {
+                Object.values(score.optionMarks).forEach(opt => {
+                    if (opt.selected) {
+                        const optDef = this.evaluationOptions.find(o => o.id === opt.optionId);
+                        if (optDef) additionalMarks += optDef.marks;
+                    }
+                });
+            }
 
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      this.downloadBlob(blob, "মূল্যায়ন_তালিকা.csv");
+            const studentTotal = (score.taskScore || 0) + (score.teamworkScore || 0) + additionalMarks;
+            
+            studentStats[studentId].totalScore += studentTotal;
+            studentStats[studentId].evaluationCount++;
 
-      this.showToast("মূল্যায়ন ডেটা CSV হিসেবে এক্সপোর্ট成功", "success");
-    } catch (error) {
-      this.showToast("এক্সপোর্ট ব্যর্থ: " + error.message, "error");
-    } finally {
-      this.hideLoading();
-    }
-  }
+            // Calculate percentage for this evaluation
+            const percentage = maxPossibleScore > 0 ? (studentTotal / maxPossibleScore * 100) : 0;
+            studentStats[studentId].percentage = percentage;
+        });
+    });
+
+    // Calculate final averages and percentages
+    Object.entries(studentStats).forEach(([studentId, data]) => {
+        studentStats[studentId].averageScore = data.evaluationCount > 0 
+            ? data.totalScore / data.evaluationCount 
+            : 0;
+        
+        // Calculate overall percentage based on average score
+        studentStats[studentId].percentage = data.evaluationCount > 0 
+            ? (data.averageScore / 125 * 100).toFixed(2) // Assuming max 125 points per evaluation
+            : 0;
+    });
+
+    return studentStats;
+}
 
   // Enhanced PDF Export functionality
   async exportAnalysisPDF() {
