@@ -1539,19 +1539,20 @@
 
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAkw1kL7AU73Y9FWrPZ-ERv5xFvXGGILBA",
-            authDomain: "claritybudget-6lnmd.firebaseapp.com",
-            projectId: "claritybudget-6lnmd",
-            storageBucket: "claritybudget-6lnmd.firebasestorage.app",
-            messagingSenderId: "40318182466",
-            appId: "1:40318182466:web:c2ce0637f8f23afa95b9db",
-        };
+        // Firebase Config & Initialization
+    const firebaseConfig = {
+        apiKey: "AIzaSyAkw1kL7AU73Y9FWrPZ-ERv5xFvXGGILBA",
+        authDomain: "claritybudget-6lnmd.firebaseapp.com",
+        projectId: "claritybudget-6lnmd",
+        storageBucket: "claritybudget-6lnmd.firebasestorage.app",
+        messagingSenderId: "40318182466",
+        appId: "1:40318182466:web:c2ce0637f8f23afa95b9db",
+    };
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const googleProvider = new firebase.auth.GoogleAuthProvider();
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
 
 
         // Developer Modal Functions
